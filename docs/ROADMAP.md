@@ -9,6 +9,11 @@
 
 ## Phase 1: Core Platform
 
+- Expo React Native app shell with EAS development builds and `expo-dev-client`.
+- Mobile navigation shell, English i18n resources, and light/dark theme tokens.
+- Next.js admin shell with protected-route placeholders and operational routes.
+- Firebase Functions placeholder exports for deferred workflows.
+- Shared TypeScript domain contracts.
 - Firebase project setup.
 - Authentication.
 - User profile model.

@@ -13,6 +13,7 @@ GRWM is a global, privacy-first fashion styling platform that helps users decide
 
 ## MVP Scope
 
+- Expo React Native mobile app built for EAS development builds.
 - Account creation and sign-in through Firebase Authentication.
 - Wardrobe item capture and metadata management.
 - Daily styling context collection for weather and occasion.
@@ -26,6 +27,7 @@ GRWM is a global, privacy-first fashion styling platform that helps users decide
 - Virtual try-on.
 - Payments and premium plan enforcement.
 - Shopping and affiliate recommendation flows.
+- Expo Go support.
 
 ## Success Criteria
 

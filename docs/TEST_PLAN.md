@@ -3,8 +3,20 @@
 ## Foundation Test Gates
 
 - `pnpm typecheck`: validates TypeScript contracts and placeholder package code.
-- `pnpm lint`: validates TypeScript linting rules across workspace packages.
+- `pnpm lint`: validates TypeScript and TSX linting rules across workspace packages.
 - `pnpm test`: runs unit tests for shared, mobile, admin, and functions placeholders.
+- `pnpm --filter mobile typecheck`: validates the Expo React Native shell.
+- `pnpm --filter admin typecheck`: validates the Next.js admin shell.
+- `pnpm --filter functions typecheck`: validates Firebase Functions placeholder exports.
+
+## Phase 1 Shell Coverage
+
+- Mobile route registry includes all entry, onboarding, and main placeholder screens.
+- Mobile i18n starts with English resources and theme tokens.
+- Admin route registry includes protected operational pages.
+- Admin protected-route placeholder allows shell development before Firebase custom claims.
+- Shared schemas validate required model fields without external validation dependencies.
+- Functions tests assert placeholder exports remain inactive and explicit.
 
 ## MVP Test Areas
 

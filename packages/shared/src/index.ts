@@ -10,21 +10,42 @@ export const FIREBASE_SERVICES = [
   "cloud-functions"
 ] as const;
 
-export type SupportedLocale = typeof DEFAULT_LOCALE;
-export type PlanTier = "free" | "premium";
 export type FirebaseService = (typeof FIREBASE_SERVICES)[number];
-
-export interface GrwmUserProfile {
-  id: string;
-  displayName: string;
-  locale: SupportedLocale;
-  planTier: PlanTier;
-  privacyConsentVersion: string;
-  createdAtIso: string;
-}
 
 export interface WardrobeImagePolicy {
   storageProvider: "firebase-storage";
   requiresAuthenticatedOwner: true;
   allowPublicAccess: false;
 }
+
+export type {
+  AdminRole,
+  AvatarProfile,
+  AvatarProfileStatus,
+  GrwmUserProfile,
+  OutfitRecommendation,
+  OutfitRecommendationStatus,
+  PlanTier,
+  StyleProfile,
+  SubscriptionPlan,
+  SubscriptionPlanId,
+  SupportedLocale,
+  UserProfile,
+  WardrobeCategory,
+  WardrobeItem,
+  WardrobeVisibility
+} from "./types.ts";
+
+export {
+  avatarProfileSchema,
+  hasRequiredFields,
+  isSubscriptionPlanId,
+  outfitRecommendationSchema,
+  styleProfileSchema,
+  subscriptionPlanSchema,
+  userProfileSchema,
+  validationSchemas,
+  wardrobeItemSchema
+} from "./validation.ts";
+
+export type { FieldRule, ValidationSchema } from "./validation.ts";

@@ -8,3 +8,6 @@ export const adminFoundation = {
   authProvider: "firebase-authentication",
   plannedRoles: ["admin", "stylist-ops", "support"] as const
 };
+
+export { adminRoutes } from "./lib/admin-routes.ts";
+export { canAccessAdminRoute, getAdminSessionPlaceholder } from "./lib/auth.ts";

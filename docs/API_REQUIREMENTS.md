@@ -4,6 +4,18 @@
 
 The foundation does not expose production APIs yet. Firebase Cloud Functions will host trusted server-side endpoints when the data model is ready.
 
+## Phase 1 Function Placeholders
+
+- `wardrobeAnalysis`: reserved for future wardrobe image and metadata analysis.
+- `dailyOutfitRecommendation`: reserved for future weather-aware daily styling.
+- `occasionOutfitRecommendation`: reserved for future occasion-based styling.
+- `avatarGenerationRequest`: reserved for future avatar workflow requests.
+- `userDataDeletion`: reserved for authenticated privacy deletion workflows.
+- `affiliateClickTracking`: reserved for future affiliate attribution.
+- `subscriptionWebhook`: reserved for future payment provider webhook handling.
+
+All placeholders must return or emit explicit not-implemented responses and must not call external APIs in Phase 1.
+
 ## Future API Areas
 
 - Authentication-aware user profile APIs.
@@ -11,6 +23,8 @@ The foundation does not expose production APIs yet. Firebase Cloud Functions wil
 - Image upload coordination with Firebase Storage.
 - Styling context APIs for weather, occasion, and preferences.
 - Admin dashboard APIs with role-based access.
+- User data deletion and export APIs.
+- Admin audit and moderation APIs.
 
 ## API Principles
 

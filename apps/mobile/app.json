@@ -5,6 +5,7 @@
     "scheme": "grwm",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "plugins": ["expo-dev-client"],
     "extra": {
       "usesDevelopmentBuilds": true,
       "expoGoSupported": false

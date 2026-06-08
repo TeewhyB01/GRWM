@@ -10,7 +10,7 @@ This foundation includes workspace wiring, TypeScript configuration, placeholder
 
 ```text
 apps/
-  mobile/     React Native mobile app placeholder
+  mobile/     Expo React Native app using EAS development builds
   admin/      Next.js admin dashboard placeholder
 functions/   Firebase Cloud Functions placeholder
 packages/
@@ -24,7 +24,8 @@ firebase/     Firestore and Storage rule placeholders
 - Use pnpm only.
 - Do not use npm.
 - Do not rely on Expo Go.
-- Mobile development should use Expo development builds/EAS Build or a React Native setup that does not require Expo Go.
+- Mobile development uses Expo React Native with EAS development builds.
+- Expo Go is not a supported runtime for this project.
 - Use TypeScript throughout.
 - Use Firebase Authentication, Cloud Firestore, Firebase Storage, and Firebase Cloud Functions.
 - Keep the product privacy-first.
@@ -40,7 +41,7 @@ pnpm test
 
 ## Next Engineering Milestones
 
-1. Choose the exact React Native setup for `apps/mobile`.
+1. Scaffold the Expo React Native mobile app with a development-client workflow.
 2. Scaffold the Next.js admin dashboard in `apps/admin`.
 3. Configure Firebase projects and local emulator workflows.
 4. Add authentication, data models, and privacy controls before any AI features.
