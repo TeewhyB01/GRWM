@@ -4,7 +4,7 @@ GRWM stands for Get Ready With Me. This repository is the monorepo foundation fo
 
 ## Current Scope
 
-This foundation includes workspace wiring, TypeScript configuration, placeholder app packages, Firebase rule placeholders, and planning documents. It does not implement AI recommendations, avatars, payments, affiliate shopping, or production Firebase logic yet.
+This foundation includes workspace wiring, TypeScript configuration, Expo and Next.js app shells, Firebase Auth/data-model placeholders, Firebase rule foundations, and planning documents. It does not implement AI recommendations, avatars, payments, affiliate shopping, or production Firebase logic yet.
 
 ## Project Structure
 
@@ -44,4 +44,4 @@ pnpm test
 1. Scaffold the Expo React Native mobile app with a development-client workflow.
 2. Scaffold the Next.js admin dashboard in `apps/admin`.
 3. Configure Firebase projects and local emulator workflows.
-4. Add authentication, data models, and privacy controls before any AI features.
+4. Add emulator rule tests and seed the first admin owner before production data.

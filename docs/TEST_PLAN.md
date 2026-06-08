@@ -18,6 +18,22 @@
 - Shared schemas validate required model fields without external validation dependencies.
 - Functions tests assert placeholder exports remain inactive and explicit.
 
+## Firebase Auth And Privacy/Data Model Coverage
+
+- Shared tests validate Firestore collection constants, model schemas, privacy consent defaults, admin roles, and Storage path helpers.
+- Mobile tests validate Firebase client env detection, Auth user mapping, and protected route helpers.
+- Admin tests validate Firebase client env detection, placeholder login, and route role checks.
+- Functions tests validate runtime config helpers and auth/privacy placeholder registration.
+
+## Firebase Emulator Tests Needed Next
+
+- Firestore owner access for each user-owned collection.
+- Firestore denial across users.
+- Admin collection access through `adminUsers` role records.
+- Storage owner access for each private path.
+- Storage denial across users and public requests.
+- User deletion request creation and status transition rules.
+
 ## MVP Test Areas
 
 - Authentication flows.

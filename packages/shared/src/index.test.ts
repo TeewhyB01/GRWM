@@ -2,11 +2,21 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  ADMIN_ROLES,
   DEFAULT_LOCALE,
   FIREBASE_SERVICES,
+  PRIVACY_CONSENT_PURPOSES,
+  PRIVACY_CONSENT_VERSION,
   PRIVACY_FIRST_PRODUCT_PRINCIPLE,
+  canAccessAdminConsole,
+  createDefaultPrivacyConsent,
+  firestoreCollections,
   hasRequiredFields,
+  isAdminRole,
   isSubscriptionPlanId,
+  privacyConsentSchema,
+  storagePaths,
+  userDeletionRequestSchema,
   userProfileSchema,
   validationSchemas
 } from "./index.ts";
@@ -28,6 +38,8 @@ test("@grwm/shared keeps privacy first in the shared foundation", () => {
 
 test("@grwm/shared exposes Phase 1 validation schema metadata", () => {
   assert.equal(validationSchemas.userProfile, userProfileSchema);
+  assert.equal(validationSchemas.privacyConsent, privacyConsentSchema);
+  assert.equal(validationSchemas.userDeletionRequest, userDeletionRequestSchema);
   assert.equal(isSubscriptionPlanId("premium"), true);
   assert.equal(isSubscriptionPlanId("enterprise"), false);
 });
@@ -37,6 +49,7 @@ test("@grwm/shared validates required profile fields without external dependenci
     hasRequiredFields(
       {
         id: "user_1",
+        userId: "user_1",
         displayName: "Ari",
         locale: "en",
         countryCode: "GB",
@@ -47,4 +60,57 @@ test("@grwm/shared validates required profile fields without external dependenci
     ),
     true
   );
+});
+
+test("@grwm/shared defines the Firestore collection contract", () => {
+  assert.deepEqual(Object.values(firestoreCollections), [
+    "users",
+    "userProfiles",
+    "privacyConsents",
+    "wardrobeItems",
+    "styleProfiles",
+    "outfitRecommendations",
+    "avatarProfiles",
+    "subscriptions",
+    "adminUsers",
+    "adminAuditLogs",
+    "userDeletionRequests"
+  ]);
+});
+
+test("@grwm/shared defines private Firebase Storage paths", () => {
+  assert.equal(storagePaths.wardrobeOriginal("user_1", "item_1").path, "users/user_1/wardrobe/item_1/original");
+  assert.equal(storagePaths.stylePhotoOriginal("user_1", "photo_1").path, "users/user_1/style-photos/photo_1/original");
+  assert.equal(storagePaths.avatarSourceOriginal("user_1", "photo_1").path, "users/user_1/avatar/source/photo_1/original");
+  assert.equal(storagePaths.avatarGenerated("user_1", "generation_1").path, "users/user_1/avatar/generated/generation_1");
+  assert.equal(storagePaths.outfit("user_1", "outfit_1").path, "users/user_1/outfits/outfit_1");
+  assert.throws(() => storagePaths.outfit("user_1", "../bad"));
+});
+
+test("@grwm/shared models privacy consent purposes as opt-in defaults", () => {
+  const consent = createDefaultPrivacyConsent({
+    id: "consent_1",
+    userId: "user_1",
+    createdAtIso: "2026-06-08T00:00:00.000Z"
+  });
+
+  assert.equal(consent.version, PRIVACY_CONSENT_VERSION);
+  assert.deepEqual(PRIVACY_CONSENT_PURPOSES, [
+    "wardrobePhotoAnalysis",
+    "stylePhotoAnalysis",
+    "avatarCreation",
+    "locationWeatherUse",
+    "aiRecommendationUse",
+    "marketingEmails",
+    "analytics"
+  ]);
+  assert.equal(consent.wardrobePhotoAnalysis, false);
+  assert.equal(consent.avatarCreation, false);
+});
+
+test("@grwm/shared defines admin roles and console entitlement helpers", () => {
+  assert.deepEqual(ADMIN_ROLES, ["owner", "admin", "moderator", "support", "analyst"]);
+  assert.equal(isAdminRole("moderator"), true);
+  assert.equal(isAdminRole("stylist-ops"), false);
+  assert.equal(canAccessAdminConsole(["support"]), true);
 });

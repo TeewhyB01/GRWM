@@ -6,7 +6,7 @@ export default function LoginPage() {
       <section className="login-panel">
         <span className="status-pill">Protected admin placeholder</span>
         <h1>Admin login</h1>
-        <p>Firebase Authentication and admin role checks will replace this placeholder form.</p>
+        <p>Firebase Authentication and custom-claim role checks will replace this placeholder form.</p>
         <div className="field">
           <label htmlFor="email">Email</label>
           <input id="email" name="email" placeholder="admin@grwm.local" type="email" />
@@ -18,6 +18,10 @@ export default function LoginPage() {
         <Link className="button-link" href="/dashboard">
           Continue to dashboard
         </Link>
+        <p>
+          Google and Apple sign-in are intentionally not implemented. Admin access starts with email/password
+          Firebase Auth plus role checks.
+        </p>
       </section>
     </main>
   );

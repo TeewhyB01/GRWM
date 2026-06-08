@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { functionsFoundation } from "./foundation.ts";
+import { functionsEnvKeys, getFunctionsRuntimeConfig } from "./config.ts";
 import { createPlaceholderResponse, functionPlaceholders } from "./placeholders/registry.ts";
 
 test("@grwm/functions targets Firebase Cloud Functions", () => {
@@ -22,7 +23,12 @@ test("@grwm/functions registers the Phase 1 placeholder functions", () => {
       "avatarGenerationRequest",
       "userDataDeletion",
       "affiliateClickTracking",
-      "subscriptionWebhook"
+      "subscriptionWebhook",
+      "createUserProfileOnSignup",
+      "requestUserDataDeletion",
+      "logAdminAction",
+      "recordPrivacyConsent",
+      "validateAdminRole"
     ]
   );
 });
@@ -35,4 +41,9 @@ test("@grwm/functions keeps placeholder responses explicit", () => {
     authenticatedUserId: "user_1",
     message: "This Firebase Function is reserved for a future implementation phase."
   });
+});
+
+test("@grwm/functions defines environment-backed runtime config", () => {
+  assert.ok(functionsEnvKeys.includes("FIREBASE_PROJECT_ID"));
+  assert.equal(getFunctionsRuntimeConfig().region, "us-central1");
 });

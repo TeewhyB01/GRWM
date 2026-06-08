@@ -5,7 +5,12 @@ export type FunctionPlaceholderId =
   | "avatar-generation-request"
   | "user-data-deletion"
   | "affiliate-click-tracking"
-  | "subscription-webhook";
+  | "subscription-webhook"
+  | "create-user-profile-on-signup"
+  | "request-user-data-deletion"
+  | "log-admin-action"
+  | "record-privacy-consent"
+  | "validate-admin-role";
 
 export interface FunctionPlaceholder {
   id: FunctionPlaceholderId;
@@ -64,6 +69,36 @@ export const functionPlaceholders: readonly FunctionPlaceholder[] = [
   {
     id: "subscription-webhook",
     exportedName: "subscriptionWebhook",
+    externalCallsEnabled: false,
+    phase: "phase-1-shell"
+  },
+  {
+    id: "create-user-profile-on-signup",
+    exportedName: "createUserProfileOnSignup",
+    externalCallsEnabled: false,
+    phase: "phase-1-shell"
+  },
+  {
+    id: "request-user-data-deletion",
+    exportedName: "requestUserDataDeletion",
+    externalCallsEnabled: false,
+    phase: "phase-1-shell"
+  },
+  {
+    id: "log-admin-action",
+    exportedName: "logAdminAction",
+    externalCallsEnabled: false,
+    phase: "phase-1-shell"
+  },
+  {
+    id: "record-privacy-consent",
+    exportedName: "recordPrivacyConsent",
+    externalCallsEnabled: false,
+    phase: "phase-1-shell"
+  },
+  {
+    id: "validate-admin-role",
+    exportedName: "validateAdminRole",
     externalCallsEnabled: false,
     phase: "phase-1-shell"
   }

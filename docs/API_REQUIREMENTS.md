@@ -13,6 +13,11 @@ The foundation does not expose production APIs yet. Firebase Cloud Functions wil
 - `userDataDeletion`: reserved for authenticated privacy deletion workflows.
 - `affiliateClickTracking`: reserved for future affiliate attribution.
 - `subscriptionWebhook`: reserved for future payment provider webhook handling.
+- `createUserProfileOnSignup`: reserved for creating default user/profile/consent records after Auth sign-up.
+- `requestUserDataDeletion`: reserved for authenticated account deletion requests.
+- `logAdminAction`: reserved for admin audit logging.
+- `recordPrivacyConsent`: reserved for versioned consent writes.
+- `validateAdminRole`: reserved for trusted admin role validation.
 
 All placeholders must return or emit explicit not-implemented responses and must not call external APIs in Phase 1.
 
@@ -33,3 +38,4 @@ All placeholders must return or emit explicit not-implemented responses and must
 - Keep server responses minimal.
 - Do not expose private Storage paths without authorization.
 - Log operational metadata only, never raw personal styling inputs or image contents.
+- Keep consent and deletion endpoints idempotent where practical.

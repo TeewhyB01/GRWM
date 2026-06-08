@@ -1,8 +1,13 @@
 export { functionsFoundation } from "./foundation";
 export { affiliateClickTracking } from "./placeholders/affiliateClickTracking";
 export { avatarGenerationRequest } from "./placeholders/avatarGenerationRequest";
+export { createUserProfileOnSignup } from "./placeholders/createUserProfileOnSignup";
 export { dailyOutfitRecommendation } from "./placeholders/dailyOutfitRecommendation";
+export { logAdminAction } from "./placeholders/logAdminAction";
 export { occasionOutfitRecommendation } from "./placeholders/occasionOutfitRecommendation";
+export { recordPrivacyConsent } from "./placeholders/recordPrivacyConsent";
+export { requestUserDataDeletion } from "./placeholders/requestUserDataDeletion";
 export { subscriptionWebhook } from "./placeholders/subscriptionWebhook";
 export { userDataDeletion } from "./placeholders/userDataDeletion";
+export { validateAdminRole } from "./placeholders/validateAdminRole";
 export { wardrobeAnalysis } from "./placeholders/wardrobeAnalysis";

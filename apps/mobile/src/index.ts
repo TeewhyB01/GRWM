@@ -12,5 +12,18 @@ export const mobileFoundation = {
 } as const;
 
 export { getMessages, supportedLocales } from "./i18n/index.ts";
+export {
+  canAccessMobileRoute,
+  createPlaceholderSignedInAuthState,
+  createSignedOutAuthState
+} from "./auth/authState.ts";
+export {
+  isMobileFirebaseConfigured,
+  mobileFirebaseEnvKeys
+} from "./firebase/config.ts";
+export {
+  mapFirebaseAuthUser,
+  socialLoginTodos
+} from "./auth/authService.ts";
 export { mobileRoutes } from "./navigation/routes.ts";
 export { themes } from "./theme/index.ts";

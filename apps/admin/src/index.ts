@@ -6,8 +6,18 @@ export const adminFoundation = {
   language: "typescript",
   defaultLocale: DEFAULT_LOCALE,
   authProvider: "firebase-authentication",
-  plannedRoles: ["admin", "stylist-ops", "support"] as const
+  plannedRoles: ["owner", "admin", "moderator", "support", "analyst"] as const
 };
 
 export { adminRoutes } from "./lib/admin-routes.ts";
-export { canAccessAdminRoute, getAdminSessionPlaceholder } from "./lib/auth.ts";
+export {
+  adminRoleOptions,
+  canAccessAdminRoute,
+  getAdminSessionPlaceholder,
+  loginAdminPlaceholder,
+  validateAdminRole
+} from "./lib/auth.ts";
+export {
+  adminFirebaseEnvKeys,
+  isAdminFirebaseConfigured
+} from "./lib/firebase/config.ts";

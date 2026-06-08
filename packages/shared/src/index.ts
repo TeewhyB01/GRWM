@@ -19,17 +19,25 @@ export interface WardrobeImagePolicy {
 }
 
 export type {
+  AdminAuditLog,
   AdminRole,
+  AdminUser,
+  AuthProvider,
   AvatarProfile,
   AvatarProfileStatus,
   GrwmUserProfile,
   OutfitRecommendation,
   OutfitRecommendationStatus,
   PlanTier,
+  PrivacyConsent,
+  PrivacyConsentPurpose,
   StyleProfile,
   SubscriptionPlan,
   SubscriptionPlanId,
   SupportedLocale,
+  User,
+  UserDeletionRequest,
+  UserDeletionRequestStatus,
   UserProfile,
   WardrobeCategory,
   WardrobeItem,
@@ -37,13 +45,49 @@ export type {
 } from "./types.ts";
 
 export {
+  ADMIN_ROLES,
+  canAccessAdminConsole,
+  hasAdminRole,
+  isAdminRole
+} from "./admin.ts";
+
+export {
+  firestoreCollections,
+  userOwnedCollectionNames,
+  userScopedDocumentPath
+} from "./firestore.ts";
+
+export type { FirestoreCollectionKey, FirestoreCollectionName } from "./firestore.ts";
+
+export {
+  PRIVACY_CONSENT_PURPOSES,
+  PRIVACY_CONSENT_VERSION,
+  createDefaultPrivacyConsent,
+  privacyConsentCopy
+} from "./privacy.ts";
+
+export {
+  storagePaths
+} from "./storagePaths.ts";
+
+export type {
+  StoragePathDefinition,
+  StoragePathKind
+} from "./storagePaths.ts";
+
+export {
+  adminAuditLogSchema,
+  adminUserSchema,
   avatarProfileSchema,
   hasRequiredFields,
   isSubscriptionPlanId,
   outfitRecommendationSchema,
+  privacyConsentSchema,
   styleProfileSchema,
   subscriptionPlanSchema,
+  userDeletionRequestSchema,
   userProfileSchema,
+  userSchema,
   validationSchemas,
   wardrobeItemSchema
 } from "./validation.ts";

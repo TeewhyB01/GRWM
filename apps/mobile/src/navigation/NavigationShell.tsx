@@ -1,8 +1,15 @@
 import { StatusBar } from "expo-status-bar";
-import { type ReactElement, useMemo, useState } from "react";
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import { getMessages } from "../i18n";
+import {
+  canAccessMobileRoute,
+  createPlaceholderSignedInAuthState,
+  createSignedOutAuthState,
+  toMobileAuthState
+} from "../auth/authState";
+import { listenToAuthState } from "../auth/authService";
 import { CountrySelectionScreen } from "../screens/CountrySelectionScreen";
 import { LanguageSelectionScreen } from "../screens/LanguageSelectionScreen";
 import { LoginScreen } from "../screens/LoginScreen";
@@ -35,10 +42,31 @@ export function NavigationShell() {
   const theme = colorScheme === "dark" ? darkTheme : lightTheme;
   const messages = getMessages();
   const [activeRoute, setActiveRoute] = useState<MobileRouteId>(initialMobileRoute);
+  const [authState, setAuthState] = useState(createSignedOutAuthState);
   const ActiveScreen = screenComponents[activeRoute];
+
+  useEffect(() => listenToAuthState((user) => setAuthState(toMobileAuthState(user))), []);
+
+  const navigate = useCallback(
+    (routeId: MobileRouteId) => {
+      setActiveRoute(canAccessMobileRoute(routeId, authState) ? routeId : "login");
+    },
+    [authState]
+  );
+
+  const completeAuthPlaceholder = useCallback((routeId: MobileRouteId = "wardrobe") => {
+    setAuthState(createPlaceholderSignedInAuthState());
+    setActiveRoute(routeId);
+  }, []);
+
+  const logoutPlaceholder = useCallback(() => {
+    setAuthState(createSignedOutAuthState());
+    setActiveRoute("login");
+  }, []);
+
   const screenProps = useMemo(
-    () => ({ messages, navigate: setActiveRoute, theme }),
-    [messages, theme]
+    () => ({ authState, completeAuthPlaceholder, logoutPlaceholder, messages, navigate, theme }),
+    [authState, completeAuthPlaceholder, logoutPlaceholder, messages, navigate, theme]
   );
 
   return (
@@ -59,7 +87,7 @@ export function NavigationShell() {
             <Pressable
               accessibilityRole="button"
               key={route.id}
-              onPress={() => setActiveRoute(route.id)}
+              onPress={() => navigate(route.id)}
               style={[
                 styles.navButton,
                 {

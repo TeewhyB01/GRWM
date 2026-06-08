@@ -2,7 +2,42 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Deny all access until user-owned image paths are modeled.
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    // Private wardrobe item originals.
+    match /users/{userId}/wardrobe/{itemId}/original {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Private style photos used only after explicit consent.
+    match /users/{userId}/style-photos/{photoId}/original {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Private avatar source photos. Avatar processing is not implemented yet.
+    match /users/{userId}/avatar/source/{photoId}/original {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Private generated avatar assets. Backend generation is not implemented yet.
+    match /users/{userId}/avatar/generated/{generationId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Private outfit assets generated or saved for the authenticated user.
+    match /users/{userId}/outfits/{outfitId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Known limitation: MIME type, size, and moderation checks are not modeled yet.
+    // Next steps: add emulator rule tests, content-type checks, max file sizes,
+    // and Cloud Functions for moderation/deletion workflows.
     match /{path=**} {
       allow read, write: if false;
     }

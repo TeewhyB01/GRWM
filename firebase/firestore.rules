@@ -2,7 +2,107 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Deny all access until collections, ownership, and admin roles are modeled.
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function adminUserPath() {
+      return /databases/$(database)/documents/adminUsers/$(request.auth.uid);
+    }
+
+    // Placeholder admin-role check. Next step: issue Firebase custom claims from a trusted
+    // admin workflow and mirror role state into adminUsers for rule-readable checks.
+    // Bootstrap limitation: the first owner must be created through a trusted Admin SDK script.
+    function isAdmin() {
+      return signedIn()
+        && exists(adminUserPath())
+        && get(adminUserPath()).data.active == true
+        && get(adminUserPath()).data.roles.hasAny(["owner", "admin", "moderator", "support", "analyst"]);
+    }
+
+    function createsOwnUserOwnedDocument() {
+      return signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    function readsOwnUserOwnedDocument() {
+      return signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    function updatesOwnUserOwnedDocument() {
+      return readsOwnUserOwnedDocument() && request.resource.data.userId == resource.data.userId;
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if isOwner(userId);
+      // Deletion must go through userDeletionRequests so account removal can be audited.
+      allow delete: if false;
+    }
+
+    match /userProfiles/{profileId} {
+      allow create: if createsOwnUserOwnedDocument();
+      allow read, delete: if readsOwnUserOwnedDocument();
+      allow update: if updatesOwnUserOwnedDocument();
+    }
+
+    match /privacyConsents/{consentId} {
+      allow create: if createsOwnUserOwnedDocument();
+      allow read, delete: if readsOwnUserOwnedDocument();
+      allow update: if updatesOwnUserOwnedDocument();
+    }
+
+    match /wardrobeItems/{itemId} {
+      allow create: if createsOwnUserOwnedDocument();
+      allow read, delete: if readsOwnUserOwnedDocument();
+      allow update: if updatesOwnUserOwnedDocument();
+    }
+
+    match /styleProfiles/{styleProfileId} {
+      allow create: if createsOwnUserOwnedDocument();
+      allow read, delete: if readsOwnUserOwnedDocument();
+      allow update: if updatesOwnUserOwnedDocument();
+    }
+
+    match /outfitRecommendations/{recommendationId} {
+      allow create: if createsOwnUserOwnedDocument();
+      allow read, delete: if readsOwnUserOwnedDocument();
+      allow update: if updatesOwnUserOwnedDocument();
+    }
+
+    match /avatarProfiles/{avatarProfileId} {
+      allow create: if createsOwnUserOwnedDocument();
+      allow read, delete: if readsOwnUserOwnedDocument();
+      allow update: if updatesOwnUserOwnedDocument();
+    }
+
+    match /subscriptions/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      // Subscription writes are reserved for trusted backend/webhook code.
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /userDeletionRequests/{requestId} {
+      allow create: if createsOwnUserOwnedDocument();
+      allow read, delete: if readsOwnUserOwnedDocument() || isAdmin();
+      allow update: if updatesOwnUserOwnedDocument() || isAdmin();
+    }
+
+    match /adminUsers/{adminUserId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /adminAuditLogs/{auditLogId} {
+      allow read, create: if isAdmin();
+      // Audit logs should be append-only from client-accessible paths.
+      allow update, delete: if false;
+    }
+
+    // Known limitation: these rules validate ownership and coarse admin roles only.
+    // Next steps: add emulator rule tests, field-level validation, custom claims,
+    // and stricter status transition rules for deletion and subscription records.
     match /{document=**} {
       allow read, write: if false;
     }

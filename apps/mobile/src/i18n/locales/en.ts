@@ -52,7 +52,11 @@ export const en = {
     },
     settings: {
       title: "Settings",
-      body: "Privacy, language, country, account, and notification controls will live here."
+      body: "Privacy, language, country, account, and notification controls will live here.",
+      privacyTitle: "Privacy controls",
+      accountDeletionCopy: "Account deletion requests will remove or anonymize private profile, wardrobe, photo, and styling data after verification.",
+      authStateLabel: "Auth state",
+      logoutAction: "Log out"
     }
   }
 } as const;

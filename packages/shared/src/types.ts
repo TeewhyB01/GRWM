@@ -1,18 +1,55 @@
 export type SupportedLocale = "en";
 export type SubscriptionPlanId = "free" | "premium";
-export type AdminRole = "owner" | "admin" | "stylist-ops" | "support" | "moderator" | "analyst";
+export type AdminRole = "owner" | "admin" | "moderator" | "support" | "analyst";
 export type WardrobeCategory = "top" | "bottom" | "dress" | "outerwear" | "shoes" | "accessory" | "other";
 export type WardrobeVisibility = "private" | "shared-with-stylist";
 export type OutfitRecommendationStatus = "placeholder" | "draft" | "ready" | "archived";
 export type AvatarProfileStatus = "not-started" | "requested" | "processing" | "ready" | "failed";
+export type AuthProvider = "password";
+export type PrivacyConsentPurpose =
+  | "wardrobePhotoAnalysis"
+  | "stylePhotoAnalysis"
+  | "avatarCreation"
+  | "locationWeatherUse"
+  | "aiRecommendationUse"
+  | "marketingEmails"
+  | "analytics";
+export type UserDeletionRequestStatus = "requested" | "verified" | "processing" | "completed" | "cancelled";
+
+export interface User {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  authProvider: AuthProvider;
+  disabled: boolean;
+  createdAtIso: string;
+  updatedAtIso: string;
+  lastLoginAtIso: string;
+}
 
 export interface UserProfile {
   id: string;
+  userId: string;
   displayName: string;
   locale: SupportedLocale;
   countryCode: string;
   subscriptionPlanId: SubscriptionPlanId;
   privacyConsentVersion: string;
+  createdAtIso: string;
+  updatedAtIso: string;
+}
+
+export interface PrivacyConsent {
+  id: string;
+  userId: string;
+  version: string;
+  wardrobePhotoAnalysis: boolean;
+  stylePhotoAnalysis: boolean;
+  avatarCreation: boolean;
+  locationWeatherUse: boolean;
+  aiRecommendationUse: boolean;
+  marketingEmails: boolean;
+  analytics: boolean;
   createdAtIso: string;
   updatedAtIso: string;
 }
@@ -69,6 +106,34 @@ export interface SubscriptionPlan {
   currency: string;
   includesAiRecommendations: boolean;
   includesAvatarFeatures: boolean;
+}
+
+export interface AdminUser {
+  id: string;
+  userId: string;
+  email: string;
+  roles: readonly AdminRole[];
+  active: boolean;
+  createdAtIso: string;
+  updatedAtIso: string;
+}
+
+export interface AdminAuditLog {
+  id: string;
+  adminUserId: string;
+  action: string;
+  targetCollection: string;
+  targetId: string;
+  createdAtIso: string;
+}
+
+export interface UserDeletionRequest {
+  id: string;
+  userId: string;
+  requestedAtIso: string;
+  status: UserDeletionRequestStatus;
+  reason: string;
+  completedAtIso: string;
 }
 
 export type GrwmUserProfile = UserProfile;

@@ -4,7 +4,7 @@
 
 - `apps/mobile`: Expo React Native mobile app using EAS development builds. Expo Go is not supported.
 - `apps/admin`: Next.js App Router admin dashboard shell.
-- `functions`: Firebase Cloud Functions TypeScript placeholder exports.
+- `functions`: Firebase Cloud Functions TypeScript placeholder exports and runtime config helpers.
 - `packages/shared`: Shared TypeScript domain contracts, constants, and lightweight validation metadata.
 - `firebase`: Firestore and Storage security rule placeholders.
 
@@ -37,13 +37,24 @@
 
 - Functions are exported as Firebase callable/request placeholders only.
 - Placeholder files exist for wardrobe analysis, daily outfit recommendation, occasion outfit recommendation, avatar generation request, user data deletion, affiliate click tracking, and subscription webhook.
+- Auth/privacy placeholders also exist for profile creation on sign-up, deletion requests, admin action logs, consent recording, and admin role validation.
 - External API calls are disabled in Phase 1.
 - User data deletion is the privacy-critical placeholder to prioritize before production data collection.
 
 ## Shared Contracts
 
 - Shared types now cover `UserProfile`, `WardrobeItem`, `OutfitRecommendation`, `StyleProfile`, `AvatarProfile`, `SubscriptionPlan`, and `AdminRole`.
+- Shared types also cover `User`, `PrivacyConsent`, `AdminUser`, `AdminAuditLog`, and `UserDeletionRequest`.
 - Lightweight schema metadata exists without adding a validation library.
+
+## Firebase Data And Access Decision
+
+- Client Firebase config is environment-driven for mobile and admin.
+- Mobile and admin use Firebase Authentication email/password placeholders first.
+- Google and Apple login are intentionally deferred.
+- Firestore collections are top-level and use `userId` fields for user-owned documents.
+- Storage paths are private under `users/{userId}/...`.
+- Admin role checks use the `adminUsers` collection as a rule-readable placeholder before custom claims are implemented.
 
 ## Privacy First Principles
 
@@ -51,6 +62,7 @@
 - Keep user images in Firebase Storage with user-scoped access.
 - Keep personally identifiable data out of logs.
 - Require explicit user consent before using sensitive style, body-shape, or image-derived data.
+- Account deletion is modeled through `userDeletionRequests` rather than direct client deletion.
 
 ## Future Architecture Phases
 

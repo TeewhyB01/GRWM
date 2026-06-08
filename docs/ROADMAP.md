@@ -15,10 +15,12 @@
 - Firebase Functions placeholder exports for deferred workflows.
 - Shared TypeScript domain contracts.
 - Firebase project setup.
-- Authentication.
+- Firebase Auth email/password foundation.
 - User profile model.
 - Privacy and consent model.
 - Wardrobe metadata model.
+- Firestore and Storage ownership rules.
+- Firebase emulator and rules test setup.
 
 ## Phase 2: Wardrobe And Context
 
