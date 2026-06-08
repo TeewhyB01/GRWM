@@ -50,6 +50,16 @@ export function createPrivacyConsentChoices(
   };
 }
 
+export function mergePrivacyConsentChoices(
+  existingChoices: Partial<PrivacyConsentChoices> | null,
+  updates: Partial<PrivacyConsentChoices>
+): PrivacyConsentChoices {
+  return {
+    ...createPrivacyConsentChoices(existingChoices ?? undefined),
+    ...updates
+  };
+}
+
 export function createPrivacyConsentDocument(params: {
   userId: string;
   choices?: Partial<PrivacyConsentChoices>;
@@ -126,10 +136,7 @@ export async function updatePrivacyConsentChoices(params: {
   nowIso?: string;
 }): Promise<PrivacyConsent> {
   const existingConsent = await readPrivacyConsent(params.userId);
-  const mergedChoices = {
-    ...createPrivacyConsentChoices(existingConsent ?? undefined),
-    ...params.choices
-  };
+  const mergedChoices = mergePrivacyConsentChoices(existingConsent, params.choices);
   const recordParams: {
     userId: string;
     choices: PrivacyConsentChoices;

@@ -54,7 +54,14 @@ export function getMobileFirebaseApp(): FirebaseApp {
     throw new Error("Missing Expo Firebase client environment variables.");
   }
 
-  return initializeApp(config);
+  return initializeApp({
+    apiKey: config.apiKey,
+    authDomain: config.authDomain,
+    projectId: config.projectId,
+    storageBucket: config.storageBucket,
+    messagingSenderId: config.messagingSenderId,
+    appId: config.appId
+  });
 }
 
 export function createAsyncStorageAuthPersistence(storage: AsyncStorageLike): Persistence {
@@ -114,7 +121,7 @@ function connectMobileAuthEmulator(auth: Auth): void {
   const config = getMobileFirebaseConfig();
 
   if (config?.useEmulators && !authEmulatorConnected) {
-    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    connectAuthEmulator(auth, config.emulators.auth.url, { disableWarnings: true });
     authEmulatorConnected = true;
   }
 }
@@ -123,7 +130,7 @@ function connectMobileFirestoreEmulator(db: Firestore): void {
   const config = getMobileFirebaseConfig();
 
   if (config?.useEmulators && !firestoreEmulatorConnected) {
-    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    connectFirestoreEmulator(db, config.emulators.firestore.host, config.emulators.firestore.port);
     firestoreEmulatorConnected = true;
   }
 }

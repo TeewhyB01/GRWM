@@ -7,9 +7,12 @@ import { Screen } from "../components/Screen";
 import {
   canAccessMobileRoute,
   createCheckingAuthState,
+  getNextRouteForAuthAndConsent,
+  type PrivacyConsentStatus,
   toMobileAuthState
 } from "../auth/authState";
 import { listenToAuthState, logout as logoutFromFirebase } from "../auth/authService";
+import { readPrivacyConsent } from "../privacy/privacyService";
 import { CountrySelectionScreen } from "../screens/CountrySelectionScreen";
 import { LanguageSelectionScreen } from "../screens/LanguageSelectionScreen";
 import { LoginScreen } from "../screens/LoginScreen";
@@ -21,7 +24,7 @@ import { TodaysOutfitScreen } from "../screens/TodaysOutfitScreen";
 import { WardrobeHomeScreen } from "../screens/WardrobeHomeScreen";
 import { WelcomeScreen } from "../screens/WelcomeScreen";
 import { darkTheme, lightTheme } from "../theme";
-import { getRouteById, initialMobileRoute, mobileRoutes, type MobileRouteId } from "./routes";
+import { initialMobileRoute, mobileRoutes, type MobileRouteId } from "./routes";
 import type { MobileOnboardingDraft, MobileScreenProps } from "./types";
 
 type ScreenComponent = (props: MobileScreenProps) => ReactElement;
@@ -45,6 +48,7 @@ export function NavigationShell() {
   const messages = getMessages();
   const [activeRoute, setActiveRoute] = useState<MobileRouteId>(initialMobileRoute);
   const [authState, setAuthState] = useState(createCheckingAuthState);
+  const [privacyConsentStatus, setPrivacyConsentStatus] = useState<PrivacyConsentStatus>("checking");
   const [onboardingDraft, setOnboardingDraft] = useState<MobileOnboardingDraft>({
     displayName: "",
     locale: "en",
@@ -56,21 +60,45 @@ export function NavigationShell() {
   useEffect(() => listenToAuthState((user) => setAuthState(toMobileAuthState(user))), []);
 
   useEffect(() => {
-    if (authState.status === "checking") {
-      return;
+    let active = true;
+
+    if (authState.status !== "signed-in" || !authState.user) {
+      setPrivacyConsentStatus("checking");
+      return () => {
+        active = false;
+      };
     }
 
-    const route = getRouteById(activeRoute);
+    setPrivacyConsentStatus("checking");
 
-    if (authState.status === "signed-out" && route.requiresAuth) {
-      setActiveRoute("login");
-      return;
-    }
+    void readPrivacyConsent(authState.user.id)
+      .then((consent) => {
+        if (active) {
+          setPrivacyConsentStatus(consent ? "recorded" : "missing");
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setPrivacyConsentStatus("missing");
+        }
+      });
 
-    if (authState.status === "signed-in" && activeRoute === "welcome") {
-      setActiveRoute("wardrobe");
+    return () => {
+      active = false;
+    };
+  }, [authState.status, authState.user]);
+
+  useEffect(() => {
+    const nextRoute = getNextRouteForAuthAndConsent({
+      routeId: activeRoute,
+      authState,
+      privacyConsentStatus
+    });
+
+    if (nextRoute && nextRoute !== activeRoute) {
+      setActiveRoute(nextRoute);
     }
-  }, [activeRoute, authState.status]);
+  }, [activeRoute, authState, privacyConsentStatus]);
 
   const navigate = useCallback(
     (routeId: MobileRouteId) => {
@@ -81,10 +109,15 @@ export function NavigationShell() {
 
   const updateOnboardingDraft = useCallback((updates: Partial<MobileOnboardingDraft>) => {
     setOnboardingDraft((currentDraft) => ({ ...currentDraft, ...updates }));
+
+    if (updates.privacyConsentCompleted === true) {
+      setPrivacyConsentStatus("recorded");
+    }
   }, []);
 
   const logout = useCallback(async () => {
     await logoutFromFirebase();
+    setPrivacyConsentStatus("checking");
     setActiveRoute("login");
   }, []);
 

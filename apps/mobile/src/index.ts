@@ -16,10 +16,14 @@ export {
   canAccessMobileRoute,
   createCheckingAuthState,
   createPlaceholderSignedInAuthState,
-  createSignedOutAuthState
+  createSignedOutAuthState,
+  getNextRouteForAuthAndConsent
 } from "./auth/authState.ts";
 export {
+  getMobileFirebaseConfig,
+  getMobileFirebaseEmulatorConfig,
   isMobileFirebaseConfigured,
+  mobileFirebaseEmulatorEnvKeys,
   mobileFirebaseEnvKeys
 } from "./firebase/config.ts";
 export {
@@ -42,6 +46,7 @@ export {
   createPrivacyConsentChoices,
   createPrivacyConsentDocument,
   createUserDeletionRequestDocument,
+  mergePrivacyConsentChoices,
   optionalPrivacyConsentPurposes,
   validatePrivacyConsentDocument,
   validateUserDeletionRequestDocument

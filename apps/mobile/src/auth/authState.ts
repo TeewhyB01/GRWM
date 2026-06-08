@@ -3,6 +3,7 @@ import { getRouteById } from "../navigation/routes.ts";
 import type { MobileAuthUser } from "./authService.ts";
 
 export type MobileAuthStatus = "checking" | "signed-out" | "signed-in";
+export type PrivacyConsentStatus = "checking" | "missing" | "recorded";
 
 export interface MobileAuthState {
   status: MobileAuthStatus;
@@ -47,4 +48,37 @@ export function canAccessMobileRoute(routeId: MobileRouteId, authState: MobileAu
   const route = getRouteById(routeId);
 
   return !route.requiresAuth || authState.status === "signed-in";
+}
+
+export function getNextRouteForAuthAndConsent(params: {
+  routeId: MobileRouteId;
+  authState: MobileAuthState;
+  privacyConsentStatus: PrivacyConsentStatus;
+}): MobileRouteId | null {
+  const route = getRouteById(params.routeId);
+
+  if (params.authState.status === "checking") {
+    return null;
+  }
+
+  if (params.authState.status === "signed-out") {
+    return route.requiresAuth ? "login" : null;
+  }
+
+  if (params.privacyConsentStatus === "checking") {
+    return null;
+  }
+
+  if (params.privacyConsentStatus === "missing" && params.routeId !== "privacy") {
+    return "privacy";
+  }
+
+  if (
+    params.privacyConsentStatus === "recorded" &&
+    (route.group === "entry" || params.routeId === "privacy")
+  ) {
+    return "wardrobe";
+  }
+
+  return null;
 }

@@ -30,6 +30,35 @@ pnpm emulators:start
 
 This starts the local emulators for the demo project `demo-grwm`. The Functions emulator is configured because the repo has a `functions` workspace, but the current functions are placeholders and are not part of the security rules tests yet.
 
+For mobile auth/profile/privacy QA, use the mobile-specific alias:
+
+```bash
+pnpm qa:mobile:emulators
+```
+
+The mobile QA command starts Auth, Firestore, Storage, and Functions emulators for the same demo project. The mobile app can connect to Auth at port `9099` and Firestore at port `8080`; no real Firebase project is required when `apps/mobile/.env.local` is based on `apps/mobile/.env.emulators.example`.
+
+## Mobile Emulator Client Config
+
+The Expo mobile app reads safe emulator placeholders from `apps/mobile/.env.local`. Start with:
+
+```bash
+cp apps/mobile/.env.emulators.example apps/mobile/.env.local
+```
+
+Default simulator values:
+
+```bash
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=demo-grwm
+EXPO_PUBLIC_USE_FIREBASE_EMULATORS=true
+EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1
+EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT=9099
+EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST=127.0.0.1
+EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT=8080
+```
+
+Use `10.0.2.2` for Android emulator host values, or your computer's LAN IP for physical-device QA.
+
 ## Seed Local Users
 
 Start the emulators first, then run:
@@ -63,7 +92,12 @@ The export target is `.firebase-emulator-data/`, which is intentionally ignored 
 ## Current Limitations
 
 - The Auth emulator is configured and seedable, but rules tests use mocked authenticated contexts from `@firebase/rules-unit-testing`.
+- Mobile emulator QA still requires an installed Expo development build; Expo Go is unsupported.
 - Functions emulator startup is configured, but function-trigger integration tests are not implemented yet.
 - Storage rules do not yet enforce MIME type, max file size, virus scanning, or moderation status.
 - Firestore rules validate ownership and coarse admin access, not full field schemas or every status transition.
 - Production admin bootstrap still needs trusted Admin SDK credentials outside the client rules path.
+
+## Manual Mobile QA
+
+Use `docs/MOBILE_EMULATOR_QA.md` for the full development-build checklist covering signup, login, auth persistence, profile documents, privacy consent capture, Settings consent updates, and deletion request creation.

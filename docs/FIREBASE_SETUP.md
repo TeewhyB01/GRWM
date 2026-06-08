@@ -15,6 +15,10 @@ Mobile Expo client:
 - `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
 - `EXPO_PUBLIC_FIREBASE_APP_ID`
 - `EXPO_PUBLIC_USE_FIREBASE_EMULATORS`
+- `EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST`
+- `EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT`
+- `EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST`
+- `EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT`
 
 Admin Next.js client:
 
@@ -41,6 +45,7 @@ Functions and server runtime:
 
 - `firebase.json` points Firebase CLI at Firestore rules, Storage rules, Functions, and local emulator ports.
 - `.firebaserc.example` documents the project alias shape without committing a real project ID.
+- `.env.mobile.emulators.example` and `apps/mobile/.env.emulators.example` provide safe demo placeholders for local emulator QA.
 - Mobile has lazy Firebase Auth initialization in `apps/mobile/src/firebase`.
 - Mobile Auth uses `@react-native-async-storage/async-storage` for Firebase Auth persistence in EAS development builds.
 - Mobile Firestore writes user-owned signup/profile/consent/deletion documents through the existing rules boundary.
@@ -75,11 +80,37 @@ The protected privacy step writes `privacyConsents/{uid}`. Settings can update t
 
 If `EXPO_PUBLIC_USE_FIREBASE_EMULATORS=true`, the mobile client points Auth at `127.0.0.1:9099` and Firestore at `127.0.0.1:8080`.
 
+The host and port are configurable for simulator/device differences:
+
+```bash
+EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1
+EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT=9099
+EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST=127.0.0.1
+EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT=8080
+```
+
+Use `10.0.2.2` for Android emulator host values. Use a LAN IP address for physical devices. With the safe demo values from `apps/mobile/.env.emulators.example`, local QA does not require a real Firebase project.
+
+## EAS Development Builds
+
+Mobile QA must run through a development build, not Expo Go.
+
+```bash
+pnpm qa:mobile:eas:config
+pnpm qa:mobile:eas:development:ios-simulator
+pnpm qa:mobile:eas:development:ios
+pnpm qa:mobile:eas:development:android
+pnpm qa:mobile:start
+```
+
+`pnpm qa:mobile:eas:config` runs local app/EAS config assertions without starting a cloud build or requiring an Expo account. The `pnpm --filter mobile eas:config:development` command is also available for logged-in EAS CLI users. The build commands are development-build commands only and are not store publishing commands.
+
 ## Manual Testing Still Needed
 
 - Run the full signup, login, auth persistence, logout, consent capture, consent update, and deletion request flows in an EAS development build.
 - Repeat those flows against the Firebase Auth and Firestore emulators.
 - Verify production Firebase project config before collecting real user data.
+- Follow `docs/MOBILE_EMULATOR_QA.md` for the exact local checklist.
 
 ## Emulator Documentation
 
