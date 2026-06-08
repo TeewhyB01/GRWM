@@ -19,6 +19,9 @@
     "functions": {
       "port": 5001
     },
+    "hub": {
+      "port": 4400
+    },
     "storage": {
       "port": 9199
     },

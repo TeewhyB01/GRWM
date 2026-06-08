@@ -5,6 +5,9 @@
 - `pnpm typecheck`: validates TypeScript contracts and placeholder package code.
 - `pnpm lint`: validates TypeScript and TSX linting rules across workspace packages.
 - `pnpm test`: runs unit tests for shared, mobile, admin, and functions placeholders.
+- `pnpm test:firestore-rules`: runs Firestore rules tests through the Firebase Emulator Suite.
+- `pnpm test:storage-rules`: runs Storage rules tests through the Firebase Emulator Suite.
+- `pnpm test:firebase-rules`: runs both Firestore and Storage rules suites.
 - `pnpm --filter mobile typecheck`: validates the Expo React Native shell.
 - `pnpm --filter admin typecheck`: validates the Next.js admin shell.
 - `pnpm --filter functions typecheck`: validates Firebase Functions placeholder exports.
@@ -25,14 +28,22 @@
 - Admin tests validate Firebase client env detection, placeholder login, and route role checks.
 - Functions tests validate runtime config helpers and auth/privacy placeholder registration.
 
-## Firebase Emulator Tests Needed Next
+## Firebase Emulator Rules Coverage
 
 - Firestore owner access for each user-owned collection.
 - Firestore denial across users.
-- Admin collection access through `adminUsers` role records.
+- Standard-user denial for admin collections.
 - Storage owner access for each private path.
 - Storage denial across users and public requests.
-- User deletion request creation and status transition rules.
+- User deletion request creation ownership.
+
+## Firebase Emulator Tests Needed Next
+
+- Admin allow-path coverage through `adminUsers` role records.
+- User deletion request status transition rules.
+- Firestore field-level validation for sensitive data.
+- Storage MIME type, size, and moderation checks.
+- Functions emulator tests for auth/privacy workflows.
 
 ## MVP Test Areas
 

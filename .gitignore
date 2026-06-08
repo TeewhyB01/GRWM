@@ -26,6 +26,7 @@ out/
 
 # Firebase
 .firebase/
+.firebase-emulator-data/
 .firebaserc
 firebase-debug.log
 firestore-debug.log

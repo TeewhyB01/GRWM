@@ -1,0 +1,210 @@
+import {
+  PRIVACY_CONSENT_VERSION,
+  createDefaultPrivacyConsent,
+  storagePaths,
+  type AdminAuditLog,
+  type AdminUser,
+  type OutfitRecommendation,
+  type PrivacyConsent,
+  type User,
+  type UserDeletionRequest,
+  type UserProfile,
+  type WardrobeItem
+} from "@grwm/shared";
+
+import { testDocumentIds, testEmails, testUserIds } from "./ids.ts";
+
+export const seedNowIso = "2026-06-08T00:00:00.000Z";
+
+export interface SeedUserDefinition {
+  uid: string;
+  email: string;
+  displayName: string;
+  password: string;
+}
+
+export const localSeedUserDefinitions = {
+  userA: {
+    uid: testUserIds.userA,
+    email: testEmails.userA,
+    displayName: "Local User A",
+    password: "local-user-a-password"
+  },
+  userB: {
+    uid: testUserIds.userB,
+    email: testEmails.userB,
+    displayName: "Local User B",
+    password: "local-user-b-password"
+  },
+  ownerAdmin: {
+    uid: testUserIds.ownerAdmin,
+    email: testEmails.ownerAdmin,
+    displayName: "Local Owner Admin",
+    password: "local-owner-admin-password"
+  },
+  moderatorAdmin: {
+    uid: testUserIds.moderatorAdmin,
+    email: testEmails.moderatorAdmin,
+    displayName: "Local Moderator Admin",
+    password: "local-moderator-admin-password"
+  }
+} satisfies Record<string, SeedUserDefinition>;
+
+export function createSeedUserRecord(seedUser: SeedUserDefinition): User {
+  return {
+    id: seedUser.uid,
+    email: seedUser.email,
+    emailVerified: true,
+    authProvider: "password",
+    disabled: false,
+    createdAtIso: seedNowIso,
+    updatedAtIso: seedNowIso,
+    lastLoginAtIso: seedNowIso
+  };
+}
+
+export function createSeedUserProfile(params: {
+  id: string;
+  userId: string;
+  displayName: string;
+}): UserProfile {
+  return {
+    id: params.id,
+    userId: params.userId,
+    displayName: params.displayName,
+    locale: "en",
+    countryCode: "GB",
+    subscriptionPlanId: "free",
+    privacyConsentVersion: PRIVACY_CONSENT_VERSION,
+    createdAtIso: seedNowIso,
+    updatedAtIso: seedNowIso
+  };
+}
+
+export function createSeedPrivacyConsent(params: {
+  id: string;
+  userId: string;
+}): PrivacyConsent {
+  return createDefaultPrivacyConsent({
+    id: params.id,
+    userId: params.userId,
+    createdAtIso: seedNowIso
+  });
+}
+
+export function createSeedWardrobeItem(params: {
+  id: string;
+  userId: string;
+}): WardrobeItem {
+  return {
+    id: params.id,
+    userId: params.userId,
+    name: "Local test jacket",
+    category: "outerwear",
+    colorTags: ["navy"],
+    seasonTags: ["spring"],
+    occasionTags: ["work"],
+    storagePath: storagePaths.wardrobeOriginal(params.userId, params.id).path,
+    visibility: "private",
+    createdAtIso: seedNowIso,
+    updatedAtIso: seedNowIso
+  };
+}
+
+export function createSeedOutfitRecommendation(params: {
+  id: string;
+  userId: string;
+}): OutfitRecommendation {
+  return {
+    id: params.id,
+    userId: params.userId,
+    wardrobeItemIds: [],
+    occasion: "local-test",
+    weatherSummary: "No real weather data.",
+    recommendationText: "Local emulator placeholder recommendation.",
+    status: "placeholder",
+    createdAtIso: seedNowIso
+  };
+}
+
+export function createSeedDeletionRequest(params: {
+  id: string;
+  userId: string;
+}): UserDeletionRequest {
+  return {
+    id: params.id,
+    userId: params.userId,
+    requestedAtIso: seedNowIso,
+    status: "requested",
+    reason: "Local emulator test deletion request.",
+    completedAtIso: ""
+  };
+}
+
+export function createSeedAdminUser(params: {
+  userId: string;
+  email: string;
+  roles: AdminUser["roles"];
+}): AdminUser {
+  return {
+    id: params.userId,
+    userId: params.userId,
+    email: params.email,
+    roles: params.roles,
+    active: true,
+    createdAtIso: seedNowIso,
+    updatedAtIso: seedNowIso
+  };
+}
+
+export function createSeedAdminAuditLog(): AdminAuditLog {
+  return {
+    id: testDocumentIds.adminAuditLog,
+    adminUserId: testUserIds.ownerAdmin,
+    action: "local-emulator-seed",
+    targetCollection: "users",
+    targetId: testUserIds.userA,
+    createdAtIso: seedNowIso
+  };
+}
+
+export const localSeedUsers = {
+  userA: createSeedUserRecord(localSeedUserDefinitions.userA),
+  userB: createSeedUserRecord(localSeedUserDefinitions.userB),
+  ownerAdmin: createSeedUserRecord(localSeedUserDefinitions.ownerAdmin),
+  moderatorAdmin: createSeedUserRecord(localSeedUserDefinitions.moderatorAdmin)
+} as const;
+
+export const localSeedAdminUsers = {
+  ownerAdmin: createSeedAdminUser({
+    userId: testUserIds.ownerAdmin,
+    email: testEmails.ownerAdmin,
+    roles: ["owner"]
+  }),
+  moderatorAdmin: createSeedAdminUser({
+    userId: testUserIds.moderatorAdmin,
+    email: testEmails.moderatorAdmin,
+    roles: ["moderator"]
+  })
+} as const;
+
+export const sampleUserProfile = createSeedUserProfile({
+  id: testDocumentIds.userProfileA,
+  userId: testUserIds.userA,
+  displayName: "Local User A"
+});
+
+export const samplePrivacyConsent = createSeedPrivacyConsent({
+  id: testDocumentIds.privacyConsentA,
+  userId: testUserIds.userA
+});
+
+export const sampleWardrobeItem = createSeedWardrobeItem({
+  id: testDocumentIds.wardrobeItemA,
+  userId: testUserIds.userA
+});
+
+export const sampleDeletionRequest = createSeedDeletionRequest({
+  id: testDocumentIds.userDeletionRequestA,
+  userId: testUserIds.userA
+});

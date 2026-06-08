@@ -1,6 +1,15 @@
 # GRWM Firebase
 
-Firebase rule placeholders live here until the Firestore collections and Storage paths are modeled.
+Firebase rules and local emulator test helpers live here.
 
-- `firestore.rules`: Cloud Firestore security rules placeholder.
-- `storage.rules`: Firebase Storage security rules placeholder.
+- `firestore.rules`: Cloud Firestore security rules.
+- `storage.rules`: Firebase Storage security rules.
+- `tests/`: Firestore and Storage emulator rules tests, synthetic seed data, and local seed helpers.
+
+Run local rules tests from the repository root:
+
+```bash
+pnpm test:firestore-rules
+pnpm test:storage-rules
+pnpm test:firebase-rules
+```

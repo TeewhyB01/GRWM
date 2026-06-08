@@ -21,6 +21,7 @@
 - Wardrobe metadata model.
 - Firestore and Storage ownership rules.
 - Firebase emulator and rules test setup.
+- Local emulator seed helpers for synthetic users and admin roles.
 
 ## Phase 2: Wardrobe And Context
 

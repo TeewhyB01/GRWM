@@ -9,14 +9,21 @@
     "pnpm": ">=9.0.0"
   },
   "scripts": {
-    "typecheck": "pnpm -r --if-present typecheck",
-    "lint": "pnpm -r --if-present lint",
-    "test": "pnpm -r --if-present test",
-    "check": "pnpm typecheck && pnpm lint && pnpm test",
-    "typecheck:mobile": "pnpm --filter mobile typecheck",
-    "typecheck:admin": "pnpm --filter admin typecheck",
-    "typecheck:functions": "pnpm --filter functions typecheck",
-    "typecheck:shared": "pnpm --filter @grwm/shared typecheck"
+    "typecheck": "$npm_execpath -r --if-present typecheck",
+    "lint": "$npm_execpath -r --if-present lint",
+    "test": "$npm_execpath -r --if-present test",
+    "check": "$npm_execpath typecheck && $npm_execpath lint && $npm_execpath test",
+    "emulators:start": "firebase emulators:start --project demo-grwm",
+    "emulators:export": "firebase emulators:export .firebase-emulator-data --project demo-grwm --force",
+    "emulators:rules": "$npm_execpath test:firebase-rules",
+    "emulators:seed": "$npm_execpath --filter @grwm/firebase seed:emulator",
+    "test:firestore-rules": "firebase emulators:exec --config firebase/firebase.test.json --project demo-grwm-rules --only firestore \"node --test firebase/tests/firestore.rules.test.ts\"",
+    "test:storage-rules": "firebase emulators:exec --config firebase/firebase.test.json --project demo-grwm-rules --only storage \"node --test firebase/tests/storage.rules.test.ts\"",
+    "test:firebase-rules": "firebase emulators:exec --config firebase/firebase.test.json --project demo-grwm-rules --only firestore,storage \"node --test --test-concurrency=1 firebase/tests/*.rules.test.ts\"",
+    "typecheck:mobile": "$npm_execpath --filter mobile typecheck",
+    "typecheck:admin": "$npm_execpath --filter admin typecheck",
+    "typecheck:functions": "$npm_execpath --filter functions typecheck",
+    "typecheck:shared": "$npm_execpath --filter @grwm/shared typecheck"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
@@ -25,6 +32,7 @@
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.29.0",
     "typescript": "^5.8.3",
+    "firebase-tools": "^14.26.0",
     "typescript-eslint": "^8.34.1"
   }
 }

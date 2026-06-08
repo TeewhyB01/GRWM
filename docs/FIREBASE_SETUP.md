@@ -45,7 +45,24 @@ Functions and server runtime:
 - Admin has lazy Firebase client initialization in `apps/admin/src/lib/firebase`.
 - Functions have runtime config helpers in `functions/src/config.ts`.
 - Firestore and Storage rules model user-owned data and private user file paths.
+- Local emulator scripts live in the root `package.json`.
+- Firebase rules tests live in `firebase/tests`.
+- Synthetic local seed helpers live in `firebase/tests/helpers/seedData.ts`.
 
-## Emulator Recommendation
+## Local Emulator Commands
 
-Firebase emulators are needed next before real user data is stored. The next backend pass should add emulator configuration, rule tests, and seed scripts for a local owner admin user.
+```bash
+pnpm emulators:start
+pnpm emulators:seed
+pnpm emulators:export
+pnpm test:firestore-rules
+pnpm test:storage-rules
+pnpm test:firebase-rules
+```
+
+The configured demo project ID is `demo-grwm`. The current emulator setup is ready for local rules testing, but production use still requires real Firebase project configuration, trusted admin bootstrap, and a full privacy review.
+
+## Emulator Documentation
+
+- `docs/FIREBASE_EMULATORS.md`
+- `docs/SECURITY_RULES_TESTING.md`
