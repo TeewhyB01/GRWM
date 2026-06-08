@@ -1,0 +1,10 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Deny all access until user-owned image paths are modeled.
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

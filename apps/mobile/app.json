@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "GRWM",
+    "slug": "grwm",
+    "scheme": "grwm",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "extra": {
+      "usesDevelopmentBuilds": true,
+      "expoGoSupported": false
+    }
+  }
+}

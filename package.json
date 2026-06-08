@@ -1,0 +1,28 @@
+{
+  "name": "grwm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GRWM monorepo foundation for a global AI fashion styling platform.",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20.11.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test",
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "typecheck:mobile": "pnpm --filter @grwm/mobile typecheck",
+    "typecheck:admin": "pnpm --filter @grwm/admin typecheck",
+    "typecheck:functions": "pnpm --filter @grwm/functions typecheck",
+    "typecheck:shared": "pnpm --filter @grwm/shared typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.29.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.34.1"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@grwm/admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "node --test src/*.test.ts"
+  },
+  "dependencies": {
+    "@grwm/shared": "workspace:*"
+  }
+}

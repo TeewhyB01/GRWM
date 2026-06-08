@@ -1,0 +1,33 @@
+.DS_Store
+node_modules/
+.pnpm-store/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+coverage/
+.turbo/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+android/
+ios/
+
+# Next.js
+.next/
+out/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Logs
+*.log
