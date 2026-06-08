@@ -14,7 +14,7 @@
 
 ## Phase 1 Shell Coverage
 
-- Mobile route registry includes all entry, onboarding, and main placeholder screens.
+- Mobile route registry includes all entry, onboarding, privacy, and main screens.
 - Mobile i18n starts with English resources and theme tokens.
 - Admin route registry includes protected operational pages.
 - Admin protected-route placeholder allows shell development before Firebase custom claims.
@@ -24,9 +24,9 @@
 ## Firebase Auth And Privacy/Data Model Coverage
 
 - Shared tests validate Firestore collection constants, model schemas, privacy consent defaults, admin roles, and Storage path helpers.
-- Mobile tests validate Firebase client env detection, Auth user mapping, and protected route helpers.
+- Mobile tests validate Firebase client env detection, Auth user mapping, protected route helpers, profile default builders, privacy consent validation, deletion request validation, consent feature gates, style placeholders, and the AsyncStorage Auth persistence adapter.
 - Admin tests validate Firebase client env detection, placeholder login, and route role checks.
-- Functions tests validate runtime config helpers and auth/privacy placeholder registration.
+- Functions tests validate runtime config helpers, auth/privacy placeholder registration, and auth/privacy/deletion placeholder contracts.
 
 ## Firebase Emulator Rules Coverage
 
@@ -44,6 +44,18 @@
 - Firestore field-level validation for sensitive data.
 - Storage MIME type, size, and moderation checks.
 - Functions emulator tests for auth/privacy workflows.
+
+## Manual Mobile Testing Needed Next
+
+- EAS development-build signup with email/password.
+- Auth persistence after app restart.
+- Login and logout.
+- Protected-route redirect while signed out.
+- Signup-created `users/{uid}` and `userProfiles/{uid}` documents.
+- Consent capture in `privacyConsents/{uid}` with `source: mobile`.
+- Consent updates from Settings.
+- Deletion request creation in `userDeletionRequests/{uid}`.
+- Same flow against Auth and Firestore emulators.
 
 ## MVP Test Areas
 

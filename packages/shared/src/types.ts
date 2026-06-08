@@ -6,6 +6,7 @@ export type WardrobeVisibility = "private" | "shared-with-stylist";
 export type OutfitRecommendationStatus = "placeholder" | "draft" | "ready" | "archived";
 export type AvatarProfileStatus = "not-started" | "requested" | "processing" | "ready" | "failed";
 export type AuthProvider = "password";
+export type PrivacyConsentSource = "mobile";
 export type PrivacyConsentPurpose =
   | "wardrobePhotoAnalysis"
   | "stylePhotoAnalysis"
@@ -43,6 +44,7 @@ export interface PrivacyConsent {
   id: string;
   userId: string;
   version: string;
+  source: PrivacyConsentSource;
   wardrobePhotoAnalysis: boolean;
   stylePhotoAnalysis: boolean;
   avatarCreation: boolean;
@@ -61,6 +63,8 @@ export interface StyleProfile {
   preferredFits: readonly string[];
   styleKeywords: readonly string[];
   occasionPriorities: readonly string[];
+  modestyPreference: string;
+  weatherLocationPreference: string;
   bodyShapeNotesPrivate: string;
   updatedAtIso: string;
 }

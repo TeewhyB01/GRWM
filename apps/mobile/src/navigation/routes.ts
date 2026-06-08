@@ -4,6 +4,7 @@ export type MobileRouteId =
   | "signUp"
   | "language"
   | "country"
+  | "privacy"
   | "onboarding"
   | "wardrobe"
   | "today"
@@ -22,6 +23,7 @@ export const mobileRoutes: readonly MobileRoute[] = [
   { id: "signUp", labelKey: "signUp", requiresAuth: false, group: "entry" },
   { id: "language", labelKey: "language", requiresAuth: false, group: "onboarding" },
   { id: "country", labelKey: "country", requiresAuth: false, group: "onboarding" },
+  { id: "privacy", labelKey: "privacy", requiresAuth: true, group: "onboarding" },
   { id: "onboarding", labelKey: "onboarding", requiresAuth: true, group: "onboarding" },
   { id: "wardrobe", labelKey: "wardrobe", requiresAuth: true, group: "main" },
   { id: "today", labelKey: "today", requiresAuth: true, group: "main" },

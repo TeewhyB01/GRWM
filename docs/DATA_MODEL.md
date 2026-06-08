@@ -4,9 +4,9 @@
 
 - `users`: Firebase Auth-linked user records.
 - `userProfiles`: user profile, locale, country, and plan metadata.
-- `privacyConsents`: versioned consent choices for sensitive data use.
+- `privacyConsents`: versioned consent choices for sensitive data use, including `source: mobile`.
 - `wardrobeItems`: wardrobe metadata and Firebase Storage references.
-- `styleProfiles`: user preference, fit, and private body-shape notes.
+- `styleProfiles`: user preference, fit, modesty preference placeholder, weather/location preference placeholder, and private body-shape notes.
 - `outfitRecommendations`: future recommendation records, currently placeholders.
 - `avatarProfiles`: future avatar workflow records, currently placeholders.
 - `subscriptions`: future subscription state records.
@@ -35,3 +35,22 @@ All paths are private and user-scoped. Admin service code may access files throu
 ## Validation
 
 Shared TypeScript schemas live in `packages/shared/src/validation.ts`. They are lightweight field-presence checks for foundation testing and are not a replacement for server-side validation in Cloud Functions.
+
+## Mobile Auth/Profile Documents
+
+Email/password signup creates:
+
+- `users/{userId}` with `id`, `email`, `emailVerified`, `authProvider: password`, `disabled: false`, `createdAtIso`, `updatedAtIso`, and `lastLoginAtIso`.
+- `userProfiles/{userId}` with `id`, `userId`, `displayName`, `locale: en`, `countryCode`, `subscriptionPlanId: free`, `privacyConsentVersion`, `createdAtIso`, and `updatedAtIso`.
+
+`countryCode` is stored only when the mobile flow has already collected it. If not collected, it remains an empty string until the user saves a country preference.
+
+## Consent And Deletion Documents
+
+`privacyConsents/{userId}` stores all consent purposes as booleans, `version: 2026-06-foundation`, `source: mobile`, `createdAtIso`, and `updatedAtIso`.
+
+`userDeletionRequests/{userId}` stores `id`, `userId`, `requestedAtIso`, `status: requested`, `reason`, and `completedAtIso`. The mobile client does not delete user data directly; a trusted backend deletion processor is still required.
+
+## Placeholder Preference Persistence
+
+The current onboarding start step can create `styleProfiles/{userId}` with empty arrays/strings for style identity, modesty, weather/location, fit, and body-shape notes. These placeholders exist so later onboarding screens can replace them with explicit user-provided values without changing the collection boundary.

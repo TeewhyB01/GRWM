@@ -31,6 +31,7 @@ export type {
   PlanTier,
   PrivacyConsent,
   PrivacyConsentPurpose,
+  PrivacyConsentSource,
   StyleProfile,
   SubscriptionPlan,
   SubscriptionPlanId,

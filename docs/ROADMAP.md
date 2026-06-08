@@ -16,12 +16,19 @@
 - Shared TypeScript domain contracts.
 - Firebase project setup.
 - Firebase Auth email/password foundation.
-- User profile model.
-- Privacy and consent model.
+- Mobile Firebase Auth email/password signup, login, logout, auth-state listener, protected navigation, and persisted auth state.
+- User profile model and mobile signup-created `users/{uid}` / `userProfiles/{uid}` documents.
+- Privacy and consent model with mobile consent capture, settings updates, and deletion request creation.
 - Wardrobe metadata model.
 - Firestore and Storage ownership rules.
 - Firebase emulator and rules test setup.
 - Local emulator seed helpers for synthetic users and admin roles.
+
+## Phase 1 Remaining Verification
+
+- Manual EAS development-build testing for signup/login/logout/auth persistence.
+- Manual Auth and Firestore emulator testing for profile creation, consent capture/update, and deletion request creation.
+- Functions emulator tests for future trusted consent and deletion processors.
 
 ## Phase 2: Wardrobe And Context
 

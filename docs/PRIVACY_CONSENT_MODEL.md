@@ -4,7 +4,7 @@
 
 Current foundation version: `2026-06-foundation`.
 
-Consent choices are opt-in by default and stored in `privacyConsents`.
+Consent choices are opt-in by default and stored in `privacyConsents/{userId}` with `source: mobile`, `createdAtIso`, and `updatedAtIso`.
 
 ## Consent Purposes
 
@@ -15,6 +15,22 @@ Consent choices are opt-in by default and stored in `privacyConsents`.
 - AI recommendation use
 - Marketing emails
 - Analytics
+
+Feature-specific consent choices must be accepted before the related feature uses that data:
+
+- Wardrobe photo analysis gates wardrobe photo analysis.
+- Style photo analysis gates style photo analysis.
+- Avatar creation gates future avatar workflows.
+- Location and weather use gates weather-aware styling.
+- AI recommendation use gates future recommendation generation.
+
+Marketing emails and analytics are optional controls and can remain off without blocking app access.
+
+## Mobile Capture Flow
+
+After email/password signup, the protected privacy screen shows all consent purposes. The user can opt in or leave choices off, then the mobile client writes `privacyConsents/{userId}` using consent version `2026-06-foundation` and `source: mobile`.
+
+The Settings screen reads the same document, shows current on/off status, and lets the user update consent choices. Future feature screens must check the relevant consent before collecting photos, location/weather context, avatar inputs, or AI recommendation data.
 
 ## Sensitive Data Classes
 
@@ -29,9 +45,11 @@ Consent choices are opt-in by default and stored in `privacyConsents`.
 
 Users request deletion through `userDeletionRequests`. Direct user document deletion is denied in Firestore rules so deletion can be verified, audited, and processed by trusted backend code.
 
+The mobile Settings screen creates `userDeletionRequests/{userId}` with `status: requested`; it does not delete Firestore or Storage data immediately from the client.
+
 ## Next Privacy Work
 
-- Add Firebase emulator tests for consent and deletion rules.
-- Add consent capture UI before image upload or recommendation features.
+- Run manual emulator testing for signup, consent capture, consent updates, logout, and deletion request creation in an EAS development build.
 - Add a trusted deletion processor Cloud Function.
+- Add Functions emulator tests for consent recording and deletion request processing.
 - Define retention windows for Storage files and audit logs.

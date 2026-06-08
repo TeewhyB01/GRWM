@@ -7,10 +7,18 @@ import {
 
 import { getMobileAuth } from "../firebase/client.ts";
 import { isMobileFirebaseConfigured } from "../firebase/config.ts";
+import {
+  createUserDocumentsOnSignup,
+  type SignupProfileInput
+} from "../profile/profileService.ts";
 
 export interface EmailPasswordCredentials {
   email: string;
   password: string;
+}
+
+export interface SignUpEmailPasswordInput extends EmailPasswordCredentials {
+  profile?: SignupProfileInput;
 }
 
 export interface MobileAuthUser {
@@ -35,19 +43,31 @@ export function mapFirebaseAuthUser(user: FirebaseUserLike): MobileAuthUser {
   };
 }
 
-export async function signUpWithEmailPassword(credentials: EmailPasswordCredentials): Promise<MobileAuthUser> {
+export async function signUpWithEmailPassword(input: SignUpEmailPasswordInput): Promise<MobileAuthUser> {
+  const auth = await getMobileAuth();
   const credential = await createUserWithEmailAndPassword(
-    getMobileAuth(),
-    credentials.email,
-    credentials.password
+    auth,
+    input.email,
+    input.password
+  );
+  const authUser = mapFirebaseAuthUser(credential.user);
+
+  await createUserDocumentsOnSignup(
+    input.profile
+      ? {
+          authUser,
+          input: input.profile
+        }
+      : { authUser }
   );
 
-  return mapFirebaseAuthUser(credential.user);
+  return authUser;
 }
 
 export async function loginWithEmailPassword(credentials: EmailPasswordCredentials): Promise<MobileAuthUser> {
+  const auth = await getMobileAuth();
   const credential = await signInWithEmailAndPassword(
-    getMobileAuth(),
+    auth,
     credentials.email,
     credentials.password
   );
@@ -56,7 +76,7 @@ export async function loginWithEmailPassword(credentials: EmailPasswordCredentia
 }
 
 export async function logout(): Promise<void> {
-  await signOut(getMobileAuth());
+  await signOut(await getMobileAuth());
 }
 
 export function listenToAuthState(onChange: (user: MobileAuthUser | null) => void): AuthStateUnsubscribe {
@@ -65,9 +85,29 @@ export function listenToAuthState(onChange: (user: MobileAuthUser | null) => voi
     return () => undefined;
   }
 
-  return onAuthStateChanged(getMobileAuth(), (user) => {
-    onChange(user ? mapFirebaseAuthUser(user) : null);
-  });
+  let active = true;
+  let unsubscribe: AuthStateUnsubscribe | null = null;
+
+  void getMobileAuth()
+    .then((auth) => {
+      if (!active) {
+        return;
+      }
+
+      unsubscribe = onAuthStateChanged(auth, (user) => {
+        onChange(user ? mapFirebaseAuthUser(user) : null);
+      });
+    })
+    .catch(() => {
+      if (active) {
+        onChange(null);
+      }
+    });
+
+  return () => {
+    active = false;
+    unsubscribe?.();
+  };
 }
 
 export const socialLoginTodos = [

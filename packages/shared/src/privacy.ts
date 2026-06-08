@@ -31,6 +31,7 @@ export function createDefaultPrivacyConsent(params: {
     id: params.id,
     userId: params.userId,
     version: PRIVACY_CONSENT_VERSION,
+    source: "mobile",
     wardrobePhotoAnalysis: false,
     stylePhotoAnalysis: false,
     avatarCreation: false,

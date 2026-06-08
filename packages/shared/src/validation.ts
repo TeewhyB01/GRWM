@@ -42,6 +42,7 @@ export const privacyConsentSchema = [
   { field: "id", required: true, kind: "string" },
   { field: "userId", required: true, kind: "string" },
   { field: "version", required: true, kind: "string" },
+  { field: "source", required: true, kind: "string" },
   { field: "wardrobePhotoAnalysis", required: true, kind: "boolean" },
   { field: "stylePhotoAnalysis", required: true, kind: "boolean" },
   { field: "avatarCreation", required: true, kind: "boolean" },
@@ -70,7 +71,9 @@ export const outfitRecommendationSchema = [
 export const styleProfileSchema = [
   { field: "userId", required: true, kind: "string" },
   { field: "preferredColors", required: true, kind: "string-array" },
-  { field: "styleKeywords", required: true, kind: "string-array" }
+  { field: "styleKeywords", required: true, kind: "string-array" },
+  { field: "modestyPreference", required: true, kind: "string" },
+  { field: "weatherLocationPreference", required: true, kind: "string" }
 ] satisfies ValidationSchema<StyleProfile>;
 
 export const avatarProfileSchema = [

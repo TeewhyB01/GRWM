@@ -95,6 +95,7 @@ test("@grwm/shared models privacy consent purposes as opt-in defaults", () => {
   });
 
   assert.equal(consent.version, PRIVACY_CONSENT_VERSION);
+  assert.equal(consent.source, "mobile");
   assert.deepEqual(PRIVACY_CONSENT_PURPOSES, [
     "wardrobePhotoAnalysis",
     "stylePhotoAnalysis",
@@ -106,6 +107,27 @@ test("@grwm/shared models privacy consent purposes as opt-in defaults", () => {
   ]);
   assert.equal(consent.wardrobePhotoAnalysis, false);
   assert.equal(consent.avatarCreation, false);
+});
+
+test("@grwm/shared validates style preference placeholders", () => {
+  assert.equal(
+    hasRequiredFields(
+      {
+        userId: "user_1",
+        preferredColors: [],
+        avoidedColors: [],
+        preferredFits: [],
+        styleKeywords: [],
+        occasionPriorities: [],
+        modestyPreference: "",
+        weatherLocationPreference: "",
+        bodyShapeNotesPrivate: "",
+        updatedAtIso: "2026-06-08T00:00:00.000Z"
+      },
+      validationSchemas.styleProfile
+    ),
+    true
+  );
 });
 
 test("@grwm/shared defines admin roles and console entitlement helpers", () => {

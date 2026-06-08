@@ -42,6 +42,8 @@ Functions and server runtime:
 - `firebase.json` points Firebase CLI at Firestore rules, Storage rules, Functions, and local emulator ports.
 - `.firebaserc.example` documents the project alias shape without committing a real project ID.
 - Mobile has lazy Firebase Auth initialization in `apps/mobile/src/firebase`.
+- Mobile Auth uses `@react-native-async-storage/async-storage` for Firebase Auth persistence in EAS development builds.
+- Mobile Firestore writes user-owned signup/profile/consent/deletion documents through the existing rules boundary.
 - Admin has lazy Firebase client initialization in `apps/admin/src/lib/firebase`.
 - Functions have runtime config helpers in `functions/src/config.ts`.
 - Firestore and Storage rules model user-owned data and private user file paths.
@@ -61,6 +63,23 @@ pnpm test:firebase-rules
 ```
 
 The configured demo project ID is `demo-grwm`. The current emulator setup is ready for local rules testing, but production use still requires real Firebase project configuration, trusted admin bootstrap, and a full privacy review.
+
+## Mobile Auth/Profile Flow
+
+With mobile Firebase environment variables set, signup uses Firebase Authentication email/password and then writes:
+
+- `users/{uid}`
+- `userProfiles/{uid}`
+
+The protected privacy step writes `privacyConsents/{uid}`. Settings can update that consent document, create `userDeletionRequests/{uid}`, and log out.
+
+If `EXPO_PUBLIC_USE_FIREBASE_EMULATORS=true`, the mobile client points Auth at `127.0.0.1:9099` and Firestore at `127.0.0.1:8080`.
+
+## Manual Testing Still Needed
+
+- Run the full signup, login, auth persistence, logout, consent capture, consent update, and deletion request flows in an EAS development build.
+- Repeat those flows against the Firebase Auth and Firestore emulators.
+- Verify production Firebase project config before collecting real user data.
 
 ## Emulator Documentation
 

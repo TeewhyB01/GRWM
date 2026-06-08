@@ -6,6 +6,7 @@ export const en = {
     signUp: "Sign Up",
     language: "Language",
     country: "Country",
+    privacy: "Privacy",
     onboarding: "Onboarding",
     wardrobe: "Wardrobe",
     today: "Today's Outfit",
@@ -19,13 +20,20 @@ export const en = {
     },
     login: {
       title: "Welcome back",
-      body: "Firebase Authentication will power this sign-in flow in the next platform phase.",
-      action: "Continue"
+      body: "Sign in with the email and password used for your GRWM account.",
+      emailLabel: "Email",
+      passwordLabel: "Password",
+      action: "Log in",
+      loadingAction: "Logging in..."
     },
     signUp: {
       title: "Create your GRWM account",
-      body: "The account shell is ready for Firebase Authentication, privacy consent, and locale setup.",
-      action: "Create account"
+      body: "Create an email and password account, then review privacy consent before using protected GRWM screens.",
+      displayNameLabel: "Display name",
+      emailLabel: "Email",
+      passwordLabel: "Password",
+      action: "Create account",
+      loadingAction: "Creating account..."
     },
     language: {
       title: "Choose language",
@@ -37,9 +45,17 @@ export const en = {
       body: "Country selection will help prepare weather, locale, and privacy settings.",
       option: "United Kingdom"
     },
+    privacy: {
+      title: "Privacy consent",
+      body: "Choose how GRWM may use sensitive wardrobe, style, location, recommendation, analytics, and email data.",
+      requiredLabel: "Required before feature use",
+      optionalLabel: "Optional",
+      action: "Save consent",
+      loadingAction: "Saving consent..."
+    },
     onboarding: {
       title: "Start onboarding",
-      body: "Style profile, wardrobe setup, and privacy consent will be collected here.",
+      body: "Style profile, modesty, and weather preference placeholders are ready for the next onboarding phase.",
       action: "Open wardrobe"
     },
     wardrobe: {
@@ -54,9 +70,20 @@ export const en = {
       title: "Settings",
       body: "Privacy, language, country, account, and notification controls will live here.",
       privacyTitle: "Privacy controls",
+      consentStatusTitle: "Current consent status",
+      consentOnLabel: "On",
+      consentOffLabel: "Off",
+      saveConsentAction: "Save privacy updates",
+      savingConsentAction: "Saving updates...",
+      deletionAction: "Request account and data deletion",
+      deletionRequestedTitle: "Deletion request recorded",
       accountDeletionCopy: "Account deletion requests will remove or anonymize private profile, wardrobe, photo, and styling data after verification.",
       authStateLabel: "Auth state",
       logoutAction: "Log out"
+    },
+    loading: {
+      title: "Checking your account",
+      body: "GRWM is confirming your Firebase Authentication session."
     }
   }
 } as const;

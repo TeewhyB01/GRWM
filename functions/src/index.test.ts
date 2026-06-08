@@ -3,7 +3,11 @@ import test from "node:test";
 
 import { functionsFoundation } from "./foundation.ts";
 import { functionsEnvKeys, getFunctionsRuntimeConfig } from "./config.ts";
+import { createUserProfileOnSignupContract } from "./placeholders/createUserProfileOnSignup.ts";
+import { recordPrivacyConsentContract } from "./placeholders/recordPrivacyConsent.ts";
 import { createPlaceholderResponse, functionPlaceholders } from "./placeholders/registry.ts";
+import { requestUserDataDeletionContract } from "./placeholders/requestUserDataDeletion.ts";
+import { validateAdminRoleContract } from "./placeholders/validateAdminRole.ts";
 
 test("@grwm/functions targets Firebase Cloud Functions", () => {
   assert.equal(functionsFoundation.runtime, "firebase-cloud-functions");
@@ -41,6 +45,21 @@ test("@grwm/functions keeps placeholder responses explicit", () => {
     authenticatedUserId: "user_1",
     message: "This Firebase Function is reserved for a future implementation phase."
   });
+});
+
+test("@grwm/functions documents auth and privacy placeholder contracts", () => {
+  assert.deepEqual(createUserProfileOnSignupContract.reservedWrites, ["users", "userProfiles"]);
+  assert.equal(recordPrivacyConsentContract.source, "mobile");
+  assert.deepEqual(recordPrivacyConsentContract.reservedWrites, ["privacyConsents"]);
+  assert.deepEqual(requestUserDataDeletionContract.reservedWrites, ["userDeletionRequests"]);
+  assert.equal(requestUserDataDeletionContract.clientDeletesDataImmediately, false);
+  assert.deepEqual(validateAdminRoleContract.supportedRoles, [
+    "owner",
+    "admin",
+    "moderator",
+    "support",
+    "analyst"
+  ]);
 });
 
 test("@grwm/functions defines environment-backed runtime config", () => {
