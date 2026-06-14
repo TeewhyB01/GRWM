@@ -6,15 +6,23 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.grwm.mobile"
+      "bundleIdentifier": "com.grwm.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.grwm.mobile"
     },
-    "plugins": ["expo-dev-client"],
+    "plugins": [
+      "expo-dev-client"
+    ],
     "extra": {
       "usesDevelopmentBuilds": true,
-      "expoGoSupported": false
+      "expoGoSupported": false,
+      "eas": {
+        "projectId": "07f8ab87-4d20-4a95-9fea-caaf899bc741"
+      }
     }
   }
 }

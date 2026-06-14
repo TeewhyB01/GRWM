@@ -1,5 +1,35 @@
 # Mobile Manual QA Report
 
+## Development Build Installed Update
+
+- Date/time: 2026-06-14 21:07:55 BST.
+- Installer result: EAS iOS simulator development build succeeded and `com.grwm.mobile` is installed on the booted iOS simulator.
+- Current booted simulator: iPhone 17, iOS 26.5, UDID `869FD156-3EC8-4547-885A-17708718D606`.
+- EAS project: `@olutayo001/grwm`, project ID `07f8ab87-4d20-4a95-9fea-caaf899bc741`.
+- EAS build ID: `4fdd7f86-f4f9-4a85-aea8-1b55b809132a`.
+- EAS build URL: `https://expo.dev/accounts/olutayo001/projects/grwm/builds/4fdd7f86-f4f9-4a85-aea8-1b55b809132a`.
+- Build profile: `development-simulator`.
+- Build artifact: iOS simulator development build for `com.grwm.mobile`.
+- Artifact URL: `https://expo.dev/artifacts/eas/J3QTefwCVF-AHGWd3GYfJN6dWDHQTrzG6t4xwhpShRo.tar.gz`.
+- EAS CLI install helper stalled near the end of artifact download, so the artifact was downloaded directly with `curl`, extracted with `tar`, and installed with `xcrun simctl install`.
+- Installed app path: `/Users/olutayooladeinbo/Library/Developer/CoreSimulator/Devices/869FD156-3EC8-4547-885A-17708718D606/data/Containers/Bundle/Application/83D8230E-AB7C-43F3-9F19-CB2AABB82A62/GRWM.app`.
+- `pnpm qa:mobile:install-check`: passed.
+- `xcrun simctl launch booted com.grwm.mobile`: passed and returned process ID `21241`.
+- Expo Go remains unsupported and was not used.
+- EAS added `extra.eas.projectId` and `ios.infoPlist.ITSAppUsesNonExemptEncryption: false` to `apps/mobile/app.json`.
+
+## Current Rerun Decision
+
+Mobile Manual Emulator QA can now be rerun on iOS simulator because `com.grwm.mobile` is installed. Start Firebase emulators and Metro for the dev client, then rerun the A-G checklist in `docs/MOBILE_EMULATOR_QA.md`.
+
+```bash
+pnpm qa:mobile:emulators:isolated
+pnpm mobile:start:dev-client
+pnpm qa:mobile:install-check
+```
+
+Next recommended agent: Mobile Manual Emulator QA Runner.
+
 ## Build Installer Update
 
 - Date/time: 2026-06-14 20:39:32 BST.

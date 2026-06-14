@@ -43,11 +43,17 @@ interface MobileAppJson {
     };
     ios?: {
       bundleIdentifier?: string;
+      infoPlist?: {
+        ITSAppUsesNonExemptEncryption?: boolean;
+      };
     };
     plugins?: string[];
     extra?: {
       usesDevelopmentBuilds?: boolean;
       expoGoSupported?: boolean;
+      eas?: {
+        projectId?: string;
+      };
     };
   };
 }
@@ -90,9 +96,11 @@ test("@grwm/mobile has EAS development build config without store publishing def
 
   assert.equal(appConfig.expo?.plugins?.includes("expo-dev-client"), true);
   assert.equal(appConfig.expo?.ios?.bundleIdentifier, "com.grwm.mobile");
+  assert.equal(appConfig.expo?.ios?.infoPlist?.ITSAppUsesNonExemptEncryption, false);
   assert.equal(appConfig.expo?.android?.package, "com.grwm.mobile");
   assert.equal(appConfig.expo?.extra?.usesDevelopmentBuilds, true);
   assert.equal(appConfig.expo?.extra?.expoGoSupported, false);
+  assert.equal(appConfig.expo?.extra?.eas?.projectId, "07f8ab87-4d20-4a95-9fea-caaf899bc741");
   assert.equal(easConfig.cli?.version, ">= 20.0.0");
   assert.equal(easConfig.build?.development?.developmentClient, true);
   assert.equal(easConfig.build?.development?.distribution, "internal");
