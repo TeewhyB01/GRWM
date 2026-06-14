@@ -3,7 +3,6 @@ export type FunctionPlaceholderId =
   | "daily-outfit-recommendation"
   | "occasion-outfit-recommendation"
   | "avatar-generation-request"
-  | "user-data-deletion"
   | "affiliate-click-tracking"
   | "subscription-webhook"
   | "create-user-profile-on-signup"
@@ -51,12 +50,6 @@ export const functionPlaceholders: readonly FunctionPlaceholder[] = [
   {
     id: "avatar-generation-request",
     exportedName: "avatarGenerationRequest",
-    externalCallsEnabled: false,
-    phase: "phase-1-shell"
-  },
-  {
-    id: "user-data-deletion",
-    exportedName: "userDataDeletion",
     externalCallsEnabled: false,
     phase: "phase-1-shell"
   },

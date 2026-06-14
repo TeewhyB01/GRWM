@@ -78,7 +78,7 @@ const userBWardrobeItem = createSeedWardrobeItem({
   userId: testUserIds.userB
 });
 const userBDeletionRequest = createSeedDeletionRequest({
-  id: testDocumentIds.userDeletionRequestB,
+  id: testUserIds.userB,
   userId: testUserIds.userB
 });
 

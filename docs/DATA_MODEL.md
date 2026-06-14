@@ -49,7 +49,11 @@ Email/password signup creates:
 
 `privacyConsents/{userId}` stores all consent purposes as booleans, `version: 2026-06-foundation`, `source: mobile`, `createdAtIso`, and `updatedAtIso`.
 
-`userDeletionRequests/{userId}` stores `id`, `userId`, `requestedAtIso`, `status: requested`, `reason`, and `completedAtIso`. The mobile client does not delete user data directly; a trusted backend deletion processor is still required.
+`userDeletionRequests/{userId}` stores the deletion lifecycle tombstone: `id`, `userId`, `requestedAtIso`, `status`, `processingStartedAtIso`, `completedAtIso`, `failedAtIso`, `failureReason`, `requestedBy`, `source`, `consentVersionAtRequest`, and `auditLogId`.
+
+Allowed deletion statuses are `requested`, `processing`, `completed`, `failed`, and `cancelled`. The mobile client creates only `requested` records with `requestedBy: user` and `source: mobile`. Trusted backend code owns all later status transitions.
+
+The backend deletion processor deletes private user-owned data from current owner-keyed documents (`users`, `userProfiles`, `privacyConsents`, `styleProfiles`, `avatarProfiles`, and `subscriptions`), current `userId` query collections (`wardrobeItems` and `outfitRecommendations`), and prepared future `userId` query collections (`savedOutfits`, `wornOutfits`, `outfitPhotos`, `avatarGenerations`, `shoppingRecommendations`, `affiliateClicks`, `payments`, `aiJobs`, `aiUsageLogs`, `userFeedback`, and `reports`). It keeps a minimal `userDeletionRequests/{userId}` tombstone and never deletes `adminAuditLogs` or `adminUsers`.
 
 ## Placeholder Preference Persistence
 

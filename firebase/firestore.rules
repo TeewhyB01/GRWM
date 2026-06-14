@@ -41,6 +41,40 @@ service cloud.firestore {
       return readsOwnUserOwnedDocument() && request.resource.data.userId == resource.data.userId;
     }
 
+    function deletionRequestHasExpectedClientFields() {
+      return request.resource.data.keys().hasOnly([
+          "id",
+          "userId",
+          "requestedAtIso",
+          "status",
+          "processingStartedAtIso",
+          "completedAtIso",
+          "failedAtIso",
+          "failureReason",
+          "requestedBy",
+          "source",
+          "consentVersionAtRequest",
+          "auditLogId"
+        ])
+        && request.resource.data.requestedAtIso is string
+        && request.resource.data.processingStartedAtIso == ""
+        && request.resource.data.completedAtIso == ""
+        && request.resource.data.failedAtIso == ""
+        && request.resource.data.failureReason == ""
+        && request.resource.data.consentVersionAtRequest is string
+        && request.resource.data.auditLogId == "";
+    }
+
+    function createsOwnDeletionRequest(requestId) {
+      return isOwner(requestId)
+        && request.resource.data.id == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "requested"
+        && request.resource.data.requestedBy == "user"
+        && request.resource.data.source == "mobile"
+        && deletionRequestHasExpectedClientFields();
+    }
+
     match /users/{userId} {
       allow read, create, update: if isOwner(userId);
       // Deletion must go through userDeletionRequests so account removal can be audited.
@@ -98,13 +132,14 @@ service cloud.firestore {
     }
 
     match /userDeletionRequests/{requestId} {
-      allow create: if createsOwnUserOwnedDocument();
+      allow create: if createsOwnDeletionRequest(requestId);
       allow get: if readsOwnUserOwnedDocumentOrOwnMissing(
         /databases/$(database)/documents/userDeletionRequests/$(requestId),
         requestId
       ) || isAdmin();
-      allow list, delete: if readsOwnUserOwnedDocument() || isAdmin();
-      allow update: if updatesOwnUserOwnedDocument() || isAdmin();
+      allow list: if isAdmin();
+      // Lifecycle transitions are backend-owned through trusted Admin SDK code.
+      allow update, delete: if false;
     }
 
     match /adminUsers/{adminUserId} {

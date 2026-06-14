@@ -74,6 +74,14 @@ Development build creation and install guide: `docs/MOBILE_DEVELOPMENT_BUILD_INS
 
 Latest manual result: on 2026-06-14, the installed `com.grwm.mobile` development build passed A-G auth/profile/privacy/deletion QA on the iPhone 17 simulator against isolated Firebase emulators. Evidence and Firestore document snapshots are in `docs/MOBILE_MANUAL_QA_REPORT.md`.
 
+Account/data deletion remains a client request flow in mobile: Settings creates `userDeletionRequests/{uid}` with `status: requested`, `requestedBy: user`, and `source: mobile`. The mobile client must not directly delete private Firestore records, Firebase Storage files, or Firebase Auth users. The trusted backend `userDataDeletion` trigger processes deletion securely and may sign the user out after completion.
+
+Deletion copy shown in Settings should continue to communicate:
+
+- "Your deletion request has been submitted."
+- "GRWM will process deletion securely."
+- "You may be signed out after deletion is completed."
+
 `pnpm --filter mobile eas:config:development` calls EAS CLI and requires an Expo account or `EXPO_TOKEN`. Use `pnpm qa:mobile:eas:config` for local config validation that does not contact EAS.
 
 The native development-build identifiers are:

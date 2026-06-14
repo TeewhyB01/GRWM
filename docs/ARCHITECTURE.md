@@ -4,7 +4,7 @@
 
 - `apps/mobile`: Expo React Native mobile app using EAS development builds. Expo Go is not supported.
 - `apps/admin`: Next.js App Router admin dashboard shell.
-- `functions`: Firebase Cloud Functions TypeScript placeholder exports and runtime config helpers.
+- `functions`: Firebase Cloud Functions TypeScript exports, runtime config helpers, placeholders for future workflows, and the trusted deletion processor.
 - `packages/shared`: Shared TypeScript domain contracts, constants, and lightweight validation metadata.
 - `firebase`: Firestore and Storage security rule placeholders.
 
@@ -39,12 +39,12 @@
 
 ## Firebase Functions Decision
 
-- Functions are exported as Firebase callable/request placeholders only.
-- Placeholder files exist for wardrobe analysis, daily outfit recommendation, occasion outfit recommendation, avatar generation request, user data deletion, affiliate click tracking, and subscription webhook.
+- Functions include Firebase callable/request placeholders for future workflows plus the active `userDataDeletion` Firestore trigger.
+- Placeholder files exist for wardrobe analysis, daily outfit recommendation, occasion outfit recommendation, avatar generation request, affiliate click tracking, and subscription webhook.
 - Auth/privacy placeholders also exist for profile creation on sign-up, deletion requests, admin action logs, consent recording, and admin role validation.
 - Auth/privacy placeholders now document the reserved backend contracts while the mobile client writes the tested user-owned documents in this phase.
 - External API calls are disabled in Phase 1.
-- User data deletion is the privacy-critical placeholder to prioritize before production data collection.
+- User data deletion is implemented as a trusted Firestore trigger that processes `userDeletionRequests/{userId}` through Admin SDK deletion helpers and audit logging.
 
 ## Shared Contracts
 
@@ -77,8 +77,9 @@
 3. After signup, the mobile client creates `users/{uid}` and `userProfiles/{uid}` with default locale, free plan, consent version, and country only if it was already selected.
 4. The protected privacy screen records consent choices in `privacyConsents/{uid}` before the user continues to onboarding.
 5. Settings reads the current consent document, updates consent choices, creates a deletion request document, and logs out through Firebase Auth.
+6. The backend `userDataDeletion` trigger verifies the deletion request, deletes user-owned Firestore and Storage data, deletes the Auth user where available, writes audit logs, and keeps a minimal deletion request tombstone.
 
-Manual emulator testing is still needed for full signup/login/profile/consent/deletion flows against the Auth and Firestore emulators in an EAS development build.
+Manual emulator testing passed for signup/login/profile/consent/deletion request creation on 2026-06-14 and should be rerun after auth, privacy, rules, or deletion-flow changes.
 
 ## Future Architecture Phases
 

@@ -37,7 +37,7 @@ Mobile QA can also use `firebase/firebase.mobile-isolated.json` if another local
 pnpm emulators:start
 ```
 
-This starts the local emulators for the demo project `demo-grwm`. The Functions emulator is configured because the repo has a `functions` workspace, but the current functions are placeholders and are not part of the security rules tests yet.
+This starts the local emulators for the demo project `demo-grwm`. The Functions emulator loads the compiled Functions exports, including the `userDataDeletion` Firestore trigger for backend deletion processing.
 
 For mobile auth/profile/privacy QA, use the mobile-specific alias:
 
@@ -98,6 +98,8 @@ The seed helper creates only synthetic local data:
 
 The seed script points the Admin SDK at `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` and `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080` if those variables are not already set.
 
+Seeded deletion requests use `userDeletionRequests/{uid}` so the backend deletion processor ownership check can run safely in emulator-only testing.
+
 ## Export Local Emulator Data
 
 ```bash
@@ -110,10 +112,12 @@ The export target is `.firebase-emulator-data/`, which is intentionally ignored 
 
 - The Auth emulator is configured and seedable, but rules tests use mocked authenticated contexts from `@firebase/rules-unit-testing`.
 - Mobile emulator QA still requires an installed Expo development build; Expo Go is unsupported.
-- Functions emulator startup is configured, but function-trigger integration tests are not implemented yet.
+- Functions unit tests cover deletion helper behavior, audit payload shape, target selection, and a fake-dependency processor run. Full Functions emulator trigger integration tests are not implemented yet.
 - Storage rules do not yet enforce MIME type, max file size, virus scanning, or moderation status.
 - Firestore rules validate ownership and coarse admin access, not full field schemas or every status transition.
 - Production admin bootstrap still needs trusted Admin SDK credentials outside the client rules path.
+
+Backend deletion processor details and production readiness checklist: `docs/USER_DATA_DELETION.md`.
 
 ## Manual Mobile QA
 

@@ -15,7 +15,9 @@ export type PrivacyConsentPurpose =
   | "aiRecommendationUse"
   | "marketingEmails"
   | "analytics";
-export type UserDeletionRequestStatus = "requested" | "verified" | "processing" | "completed" | "cancelled";
+export type UserDeletionRequestStatus = "requested" | "processing" | "completed" | "failed" | "cancelled";
+export type UserDeletionRequestRequestedBy = "user" | "admin";
+export type UserDeletionRequestSource = "mobile" | "admin" | "function";
 
 export interface User {
   id: string;
@@ -136,8 +138,14 @@ export interface UserDeletionRequest {
   userId: string;
   requestedAtIso: string;
   status: UserDeletionRequestStatus;
-  reason: string;
+  processingStartedAtIso: string;
   completedAtIso: string;
+  failedAtIso: string;
+  failureReason: string;
+  requestedBy: UserDeletionRequestRequestedBy;
+  source: UserDeletionRequestSource;
+  consentVersionAtRequest: string;
+  auditLogId: string;
 }
 
 export type GrwmUserProfile = UserProfile;

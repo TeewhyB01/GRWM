@@ -160,7 +160,6 @@ export async function updatePrivacyConsentChoices(params: {
 
 export function createUserDeletionRequestDocument(params: {
   userId: string;
-  reason?: string;
   nowIso: string;
 }): UserDeletionRequest {
   return {
@@ -168,8 +167,14 @@ export function createUserDeletionRequestDocument(params: {
     userId: params.userId,
     requestedAtIso: params.nowIso,
     status: "requested",
-    reason: params.reason?.trim() || "Requested from mobile settings.",
-    completedAtIso: ""
+    processingStartedAtIso: "",
+    completedAtIso: "",
+    failedAtIso: "",
+    failureReason: "",
+    requestedBy: "user",
+    source: "mobile",
+    consentVersionAtRequest: PRIVACY_CONSENT_VERSION,
+    auditLogId: ""
   };
 }
 
@@ -183,21 +188,15 @@ export function validateUserDeletionRequestDocument(request: UserDeletionRequest
 
 export async function requestAccountDataDeletion(params: {
   userId: string;
-  reason?: string;
   nowIso?: string;
 }): Promise<UserDeletionRequest> {
   const requestParams: {
     userId: string;
-    reason?: string;
     nowIso: string;
   } = {
     userId: params.userId,
     nowIso: params.nowIso ?? new Date().toISOString()
   };
-
-  if (params.reason !== undefined) {
-    requestParams.reason = params.reason;
-  }
 
   const deletionRequest = createUserDeletionRequestDocument(requestParams);
 

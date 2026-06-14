@@ -103,6 +103,8 @@ Manual note: Simulator click coordinates for lower Settings controls required ca
 - None for the current auth/profile/privacy/deletion emulator QA slice.
 - Account/data deletion is still only requested by the client; production deletion still requires a trusted backend processor before real data collection.
 
+Post-backend update: the trusted `userDataDeletion` processor has since been added. This historical QA report still only verifies mobile deletion request creation; full Functions trigger integration remains separate.
+
 ## Actual Recommended Fixes
 
 - Keep the Firebase Auth persistence adapter covered because the development build exercises a stricter runtime path than the prior unit-only placeholder.

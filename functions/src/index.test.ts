@@ -25,7 +25,6 @@ test("@grwm/functions registers the Phase 1 placeholder functions", () => {
       "dailyOutfitRecommendation",
       "occasionOutfitRecommendation",
       "avatarGenerationRequest",
-      "userDataDeletion",
       "affiliateClickTracking",
       "subscriptionWebhook",
       "createUserProfileOnSignup",

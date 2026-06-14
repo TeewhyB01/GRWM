@@ -8,6 +8,6 @@ export { occasionOutfitRecommendation } from "./placeholders/occasionOutfitRecom
 export { recordPrivacyConsent } from "./placeholders/recordPrivacyConsent.ts";
 export { requestUserDataDeletion } from "./placeholders/requestUserDataDeletion.ts";
 export { subscriptionWebhook } from "./placeholders/subscriptionWebhook.ts";
-export { userDataDeletion } from "./placeholders/userDataDeletion.ts";
+export { userDataDeletion } from "./deletion/index.ts";
 export { validateAdminRole } from "./placeholders/validateAdminRole.ts";
 export { wardrobeAnalysis } from "./placeholders/wardrobeAnalysis.ts";

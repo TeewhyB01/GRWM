@@ -45,11 +45,12 @@ The Settings screen reads the same document, shows current on/off status, and le
 
 Users request deletion through `userDeletionRequests`. Direct user document deletion is denied in Firestore rules so deletion can be verified, audited, and processed by trusted backend code.
 
-The mobile Settings screen creates `userDeletionRequests/{userId}` with `status: requested`; it does not delete Firestore or Storage data immediately from the client.
+The mobile Settings screen creates `userDeletionRequests/{userId}` with `status: requested`; it does not delete Firestore or Storage data from the client.
+
+The trusted backend `userDataDeletion` trigger verifies the request, deletes user-owned Firestore records, deletes private user-scoped Storage files, deletes the Firebase Auth user where available, writes admin audit logs, and retains a minimal deletion request tombstone.
 
 ## Next Privacy Work
 
 - Run manual emulator testing for signup, consent capture, consent updates, logout, and deletion request creation in an EAS development build.
-- Add a trusted deletion processor Cloud Function.
-- Add Functions emulator tests for consent recording and deletion request processing.
+- Add full Functions emulator trigger tests for consent recording and deletion request processing.
 - Define retention windows for Storage files and audit logs.

@@ -44,8 +44,12 @@ Rules tests live in `firebase/tests/`.
 - User cannot read or write another user's `userProfiles` document.
 - User can read and write their own `privacyConsents` document.
 - User cannot read or write another user's `privacyConsents` document.
-- User can create their own `userDeletionRequests` document.
+- User can create their own `userDeletionRequests/{uid}` document with `status: requested`.
 - User cannot create a deletion request for another user.
+- User cannot create deletion requests with extra personal fields such as a free-form reason.
+- User can read their own deletion request status.
+- User cannot client-update deletion request status to backend-owned lifecycle states such as `processing` or `completed`.
+- Role-checked admin clients cannot update deletion lifecycle status through Firestore rules; trusted Admin SDK code owns status transitions.
 - User can read and write their own `wardrobeItems` document.
 - User cannot read or write another user's `wardrobeItems` document.
 - User can read their own `outfitRecommendations` document.
@@ -68,9 +72,9 @@ Rules tests live in `firebase/tests/`.
 ## Before Production
 
 - Add Firestore field-level validation for sensitive profile, wardrobe, consent, deletion, subscription, and admin records.
-- Add strict deletion request status transition rules and trusted backend processors.
+- Add deeper field-level validation for deletion request lifecycle payloads after the admin processor contract stabilizes further.
 - Add Storage MIME type, max file size, content moderation, and retention rules.
 - Add custom-claim-based admin checks and verify role changes cannot be self-granted.
-- Add Functions emulator tests for auth, consent, audit logging, and deletion workflows.
+- Add full Functions emulator tests for auth, consent, audit logging, and deletion trigger workflows.
 - Verify mobile and admin clients use emulators locally and never hardcode Firebase credentials.
 - Complete a privacy review before collecting photos, body data, location data, wardrobe data, or profile data in production.

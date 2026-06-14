@@ -136,8 +136,14 @@ export function createSeedDeletionRequest(params: {
     userId: params.userId,
     requestedAtIso: seedNowIso,
     status: "requested",
-    reason: "Local emulator test deletion request.",
-    completedAtIso: ""
+    processingStartedAtIso: "",
+    completedAtIso: "",
+    failedAtIso: "",
+    failureReason: "",
+    requestedBy: "user",
+    source: "mobile",
+    consentVersionAtRequest: PRIVACY_CONSENT_VERSION,
+    auditLogId: ""
   };
 }
 
@@ -205,6 +211,6 @@ export const sampleWardrobeItem = createSeedWardrobeItem({
 });
 
 export const sampleDeletionRequest = createSeedDeletionRequest({
-  id: testDocumentIds.userDeletionRequestA,
+  id: testUserIds.userA,
   userId: testUserIds.userA
 });

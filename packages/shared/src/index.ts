@@ -37,6 +37,8 @@ export type {
   SubscriptionPlanId,
   SupportedLocale,
   User,
+  UserDeletionRequestRequestedBy,
+  UserDeletionRequestSource,
   UserDeletionRequest,
   UserDeletionRequestStatus,
   UserProfile,
@@ -54,11 +56,16 @@ export {
 
 export {
   firestoreCollections,
+  futureUserOwnedFirestoreCollections,
   userOwnedCollectionNames,
   userScopedDocumentPath
 } from "./firestore.ts";
 
-export type { FirestoreCollectionKey, FirestoreCollectionName } from "./firestore.ts";
+export type {
+  FirestoreCollectionKey,
+  FirestoreCollectionName,
+  FutureUserOwnedFirestoreCollection
+} from "./firestore.ts";
 
 export {
   PRIVACY_CONSENT_PURPOSES,

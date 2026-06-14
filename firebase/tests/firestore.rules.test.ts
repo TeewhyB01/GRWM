@@ -28,6 +28,7 @@ import {
   cleanupRulesTestEnvironment,
   clearFirestoreEmulator,
   initializeRulesTestEnvironment,
+  ownerAdminTestContext,
   seedFirestoreDocuments,
   unauthenticatedTestContext
 } from "./helpers/testEnvironment.ts";
@@ -162,7 +163,7 @@ test("user can create their own userDeletionRequest", async () => {
 
 test("user cannot create deletion request for another user", async () => {
   const userBDeletionRequest = createSeedDeletionRequest({
-    id: testDocumentIds.userDeletionRequestB,
+    id: testUserIds.userB,
     userId: testUserIds.userB
   });
 
@@ -170,6 +171,73 @@ test("user cannot create deletion request for another user", async () => {
     firestoreFor(testUserIds.userA)
       .doc(firestorePathBuilders.userDeletionRequest(userBDeletionRequest.id))
       .set(asDocumentData(userBDeletionRequest))
+  );
+});
+
+test("user cannot create deletion request with extra personal fields", async () => {
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.userDeletionRequest(sampleDeletionRequest.id))
+      .set({
+        ...asDocumentData(sampleDeletionRequest),
+        reason: "Please delete my account."
+      })
+  );
+});
+
+test("user can read their own deletion request status", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.userDeletionRequest(sampleDeletionRequest.id),
+      data: asDocumentData(sampleDeletionRequest)
+    }
+  ]);
+
+  await assertSucceeds(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.userDeletionRequest(sampleDeletionRequest.id))
+      .get()
+  );
+});
+
+test("user cannot update deletion request status from the client", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.userDeletionRequest(sampleDeletionRequest.id),
+      data: asDocumentData(sampleDeletionRequest)
+    }
+  ]);
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.userDeletionRequest(sampleDeletionRequest.id))
+      .update({
+        status: "completed",
+        completedAtIso: "2026-06-08T00:05:00.000Z"
+      })
+  );
+});
+
+test("admin client cannot update deletion request lifecycle status", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.adminUser(localSeedAdminUsers.ownerAdmin.id),
+      data: asDocumentData(localSeedAdminUsers.ownerAdmin)
+    },
+    {
+      path: firestorePathBuilders.userDeletionRequest(sampleDeletionRequest.id),
+      data: asDocumentData(sampleDeletionRequest)
+    }
+  ]);
+
+  await assertFails(
+    ownerAdminTestContext(testEnv)
+      .firestore()
+      .doc(firestorePathBuilders.userDeletionRequest(sampleDeletionRequest.id))
+      .update({
+        status: "completed",
+        completedAtIso: "2026-06-08T00:05:00.000Z"
+      })
   );
 });
 

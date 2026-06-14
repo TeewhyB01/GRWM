@@ -11,6 +11,7 @@ import {
   canAccessAdminConsole,
   createDefaultPrivacyConsent,
   firestoreCollections,
+  futureUserOwnedFirestoreCollections,
   hasRequiredFields,
   isAdminRole,
   isSubscriptionPlanId,
@@ -75,6 +76,19 @@ test("@grwm/shared defines the Firestore collection contract", () => {
     "adminUsers",
     "adminAuditLogs",
     "userDeletionRequests"
+  ]);
+  assert.deepEqual(futureUserOwnedFirestoreCollections, [
+    "savedOutfits",
+    "wornOutfits",
+    "outfitPhotos",
+    "avatarGenerations",
+    "shoppingRecommendations",
+    "affiliateClicks",
+    "payments",
+    "aiJobs",
+    "aiUsageLogs",
+    "userFeedback",
+    "reports"
   ]);
 });
 

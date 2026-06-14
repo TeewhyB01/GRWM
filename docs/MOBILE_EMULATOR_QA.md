@@ -166,8 +166,8 @@ Do not use Expo Go for this QA path.
 ## Known Limitations
 
 - This checklist verifies mobile client writes and rules boundaries only.
-- Account deletion is requested by the client but not processed; a trusted backend deletion processor is still required.
+- Account deletion processing is handled by the trusted backend `userDataDeletion` trigger; full Functions trigger integration QA is separate from this mobile checklist.
 - Storage upload QA is out of scope for this auth/profile/privacy pass.
-- The Functions emulator can start without mobile QA depending on function build output, but placeholder function definitions require compiled `functions/lib/index.js` before function endpoint QA.
+- The Functions emulator can start without mobile QA depending on function build output, but function definitions require compiled `functions/lib/index.js` before function endpoint or trigger QA.
 - `pnpm functions:build`, `pnpm qa:mobile:emulators`, and `pnpm qa:mobile:emulators:isolated` generate the required Functions build output.
 - Google, Apple, AI, avatar, payment, shopping, and production build paths are intentionally not part of this QA slice.

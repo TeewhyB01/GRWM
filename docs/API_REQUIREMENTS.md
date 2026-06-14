@@ -10,7 +10,6 @@ The foundation does not expose production APIs yet. Firebase Cloud Functions wil
 - `dailyOutfitRecommendation`: reserved for future weather-aware daily styling.
 - `occasionOutfitRecommendation`: reserved for future occasion-based styling.
 - `avatarGenerationRequest`: reserved for future avatar workflow requests.
-- `userDataDeletion`: reserved for authenticated privacy deletion workflows.
 - `affiliateClickTracking`: reserved for future affiliate attribution.
 - `subscriptionWebhook`: reserved for future payment provider webhook handling.
 - `createUserProfileOnSignup`: reserved for creating default user/profile/consent records after Auth sign-up.
@@ -20,6 +19,10 @@ The foundation does not expose production APIs yet. Firebase Cloud Functions wil
 - `validateAdminRole`: reserved for trusted admin role validation.
 
 All placeholders must return or emit explicit not-implemented responses and must not call external APIs in Phase 1.
+
+## Active Backend Privacy Functions
+
+- `userDataDeletion`: Firestore `onDocumentCreated` trigger for `userDeletionRequests/{userId}`. It verifies request ownership, writes audit logs, deletes user-owned Firestore records, deletes private Storage files under user-scoped prefixes, deletes the Firebase Auth user when available, and keeps a minimal deletion request tombstone.
 
 ## Future API Areas
 

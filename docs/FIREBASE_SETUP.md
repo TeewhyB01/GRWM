@@ -51,6 +51,7 @@ Functions and server runtime:
 - Mobile Firestore writes user-owned signup/profile/consent/deletion documents through the existing rules boundary.
 - Admin has lazy Firebase client initialization in `apps/admin/src/lib/firebase`.
 - Functions have runtime config helpers in `functions/src/config.ts`.
+- Functions include the trusted `userDataDeletion` Firestore trigger for backend account/data deletion processing.
 - Firestore and Storage rules model user-owned data and private user file paths.
 - Local emulator scripts live in the root `package.json`.
 - Firebase rules tests live in `firebase/tests`.
@@ -77,6 +78,8 @@ With mobile Firebase environment variables set, signup uses Firebase Authenticat
 - `userProfiles/{uid}`
 
 The protected privacy step writes `privacyConsents/{uid}`. Settings can update that consent document, create `userDeletionRequests/{uid}`, and log out.
+
+When the Functions emulator or deployed Functions runtime is active, `userDataDeletion` listens for `userDeletionRequests/{uid}` creation and processes deletion through trusted Admin SDK code. The client does not directly delete private Firestore records, Storage files, or Firebase Auth users.
 
 If `EXPO_PUBLIC_USE_FIREBASE_EMULATORS=true`, the mobile client points Auth at `127.0.0.1:9099` and Firestore at `127.0.0.1:8080`.
 
@@ -109,8 +112,11 @@ pnpm qa:mobile:start
 
 - Run the full signup, login, auth persistence, logout, consent capture, consent update, and deletion request flows in an EAS development build.
 - Repeat those flows against the Firebase Auth and Firestore emulators.
+- Add full Functions emulator trigger integration coverage for backend deletion processing.
 - Verify production Firebase project config before collecting real user data.
 - Follow `docs/MOBILE_EMULATOR_QA.md` for the exact local checklist.
+
+Deletion processor details: `docs/USER_DATA_DELETION.md`.
 
 ## Emulator Documentation
 

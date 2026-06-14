@@ -15,6 +15,22 @@ export const firestoreCollections = {
 export type FirestoreCollectionKey = keyof typeof firestoreCollections;
 export type FirestoreCollectionName = (typeof firestoreCollections)[FirestoreCollectionKey];
 
+export const futureUserOwnedFirestoreCollections = [
+  "savedOutfits",
+  "wornOutfits",
+  "outfitPhotos",
+  "avatarGenerations",
+  "shoppingRecommendations",
+  "affiliateClicks",
+  "payments",
+  "aiJobs",
+  "aiUsageLogs",
+  "userFeedback",
+  "reports"
+] as const;
+
+export type FutureUserOwnedFirestoreCollection = (typeof futureUserOwnedFirestoreCollections)[number];
+
 export const userOwnedCollectionNames = [
   firestoreCollections.users,
   firestoreCollections.userProfiles,

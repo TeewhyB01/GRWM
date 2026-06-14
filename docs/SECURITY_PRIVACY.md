@@ -19,20 +19,23 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 - Environment variables are documented but not committed with secrets.
 - Privacy consent starts from opt-in false for wardrobe photo analysis, style photo analysis, avatar creation, location/weather use, AI recommendations, marketing emails, and analytics.
 - Account deletion requests are modeled so deletion can be verified and audited.
+- Account/data deletion is processed by the trusted `userDataDeletion` Cloud Function trigger, not by direct client deletion.
+- Deletion audit logs record lifecycle events and non-sensitive counts without wardrobe, avatar, or photo object names.
 
 ## Current Rule Limitations
 
 - The first admin owner must be bootstrapped with trusted Admin SDK credentials.
 - Admin custom claims are not implemented yet.
-- Firestore rules do not yet validate every field transition.
+- Firestore rules allow users to create only their own `requested` deletion request and deny client-side deletion status updates. Full field validation for every sensitive collection remains future work.
 - Storage rules do not yet enforce MIME type, file size, or moderation status.
-- Emulator rule tests are needed before production data collection.
+- Full Functions emulator trigger integration is still needed before production data collection.
 
 ## Future Work
 
-- Firebase emulator test suite.
 - Consent versioning UI.
-- Data deletion processor.
-- Audit logging for admin actions.
+- Functions emulator integration tests for deletion triggers.
+- Audit log review and support tooling for failed deletion requests.
 - Role-based access control for the admin dashboard.
 - Privacy review before AI, avatar, shopping, or payment features.
+
+See `docs/USER_DATA_DELETION.md` for deletion coverage, audit events, emulator-safe tests, and production readiness checks.

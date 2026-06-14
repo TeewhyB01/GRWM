@@ -113,7 +113,14 @@ export const userDeletionRequestSchema = [
   { field: "userId", required: true, kind: "string" },
   { field: "requestedAtIso", required: true, kind: "string" },
   { field: "status", required: true, kind: "string" },
-  { field: "reason", required: true, kind: "string" }
+  { field: "processingStartedAtIso", required: true, kind: "string" },
+  { field: "completedAtIso", required: true, kind: "string" },
+  { field: "failedAtIso", required: true, kind: "string" },
+  { field: "failureReason", required: true, kind: "string" },
+  { field: "requestedBy", required: true, kind: "string" },
+  { field: "source", required: true, kind: "string" },
+  { field: "consentVersionAtRequest", required: true, kind: "string" },
+  { field: "auditLogId", required: true, kind: "string" }
 ] satisfies ValidationSchema<UserDeletionRequest>;
 
 export const validationSchemas = {

@@ -323,7 +323,6 @@ test("@grwm/mobile merges Settings privacy consent updates without changing unto
 test("@grwm/mobile validates deletion request and style placeholder payloads", () => {
   const deletionRequest = createUserDeletionRequestDocument({
     userId: "user_1",
-    reason: "  Please delete my local QA account.  ",
     nowIso: "2026-06-08T00:00:00.000Z"
   });
   const styleProfile = createStylePreferencePlaceholder({
@@ -333,7 +332,9 @@ test("@grwm/mobile validates deletion request and style placeholder payloads", (
 
   assert.equal(validateUserDeletionRequestDocument(deletionRequest), true);
   assert.equal(deletionRequest.status, "requested");
-  assert.equal(deletionRequest.reason, "Please delete my local QA account.");
+  assert.equal(deletionRequest.requestedBy, "user");
+  assert.equal(deletionRequest.source, "mobile");
+  assert.equal(deletionRequest.failureReason, "");
   assert.equal(validateStylePreferencePlaceholder(styleProfile), true);
   assert.deepEqual(styleProfile.styleKeywords, []);
 });

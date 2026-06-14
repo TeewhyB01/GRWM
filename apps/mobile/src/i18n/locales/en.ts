@@ -76,8 +76,8 @@ export const en = {
       saveConsentAction: "Save privacy updates",
       savingConsentAction: "Saving updates...",
       deletionAction: "Request account and data deletion",
-      deletionRequestedTitle: "Deletion request recorded",
-      accountDeletionCopy: "Account deletion requests will remove or anonymize private profile, wardrobe, photo, and styling data after verification.",
+      deletionRequestedTitle: "Your deletion request has been submitted.",
+      accountDeletionCopy: "GRWM will process deletion securely. You may be signed out after deletion is completed.",
       authStateLabel: "Auth state",
       logoutAction: "Log out"
     },
