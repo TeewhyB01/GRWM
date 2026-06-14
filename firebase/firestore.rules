@@ -32,6 +32,11 @@ service cloud.firestore {
       return signedIn() && resource.data.userId == request.auth.uid;
     }
 
+    function readsOwnUserOwnedDocumentOrOwnMissing(documentPath, documentId) {
+      return (exists(documentPath) && readsOwnUserOwnedDocument())
+        || (!exists(documentPath) && isOwner(documentId));
+    }
+
     function updatesOwnUserOwnedDocument() {
       return readsOwnUserOwnedDocument() && request.resource.data.userId == resource.data.userId;
     }
@@ -44,13 +49,21 @@ service cloud.firestore {
 
     match /userProfiles/{profileId} {
       allow create: if createsOwnUserOwnedDocument();
-      allow read, delete: if readsOwnUserOwnedDocument();
+      allow get: if readsOwnUserOwnedDocumentOrOwnMissing(
+        /databases/$(database)/documents/userProfiles/$(profileId),
+        profileId
+      );
+      allow list, delete: if readsOwnUserOwnedDocument();
       allow update: if updatesOwnUserOwnedDocument();
     }
 
     match /privacyConsents/{consentId} {
       allow create: if createsOwnUserOwnedDocument();
-      allow read, delete: if readsOwnUserOwnedDocument();
+      allow get: if readsOwnUserOwnedDocumentOrOwnMissing(
+        /databases/$(database)/documents/privacyConsents/$(consentId),
+        consentId
+      );
+      allow list, delete: if readsOwnUserOwnedDocument();
       allow update: if updatesOwnUserOwnedDocument();
     }
 
@@ -86,7 +99,11 @@ service cloud.firestore {
 
     match /userDeletionRequests/{requestId} {
       allow create: if createsOwnUserOwnedDocument();
-      allow read, delete: if readsOwnUserOwnedDocument() || isAdmin();
+      allow get: if readsOwnUserOwnedDocumentOrOwnMissing(
+        /databases/$(database)/documents/userDeletionRequests/$(requestId),
+        requestId
+      ) || isAdmin();
+      allow list, delete: if readsOwnUserOwnedDocument() || isAdmin();
       allow update: if updatesOwnUserOwnedDocument() || isAdmin();
     }
 

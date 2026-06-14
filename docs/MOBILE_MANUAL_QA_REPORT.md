@@ -1,5 +1,128 @@
 # Mobile Manual QA Report
 
+## Actual Manual Emulator QA Run
+
+- Date/time: 2026-06-14 22:19:57 BST.
+- Result: manual A-G QA was actually run against the installed `com.grwm.mobile` development build.
+- Target simulator: iPhone 17, iOS 26.5, UDID `869FD156-3EC8-4547-885A-17708718D606`.
+- App launch: `xcrun simctl launch booted com.grwm.mobile` plus the Expo development-client URL for Metro.
+- Expo Go: not used.
+- Metro/dev-client: `http://localhost:8081/status` returned `packager-status:running`.
+- Local env: `apps/mobile/.env.local` exists, is ignored by `.gitignore`, and points iOS simulator traffic at isolated emulator hosts on `127.0.0.1`.
+- No real Firebase production credentials were used.
+
+## Actual Emulator Ports Used
+
+- Command: `pnpm qa:mobile:emulators:isolated`.
+- Emulator UI: `http://127.0.0.1:4001/`.
+- Emulator hub: `127.0.0.1:4410`.
+- Authentication: `127.0.0.1:9100`.
+- Cloud Firestore: `127.0.0.1:8085`.
+- Cloud Functions: `127.0.0.1:5002`.
+- Firebase Storage: `127.0.0.1:9195`.
+- Logging: `127.0.0.1:4505`.
+- Firestore websocket: `127.0.0.1:9150`.
+
+Auth, Firestore, Storage, and Functions emulators started. Functions definitions loaded from compiled `functions/lib/index.js`.
+
+## Actual Test Account
+
+- Email pattern: `grwm-emulator-qa-20260614-2154@example.test`.
+- Password: synthetic QA password only; not recorded in this report.
+- Auth emulator UID observed: `Gt3Mmto7DIYKd8bxlyIjcjSKpZjW`.
+
+## Actual A-G Result
+
+- A. Fresh signup: passed. New email/password account created, app routed to Privacy Consent, and Firestore created `users/{uid}` plus `userProfiles/{uid}`. `userProfiles/{uid}.locale` was `en`.
+- B. Privacy consent: passed. Required consents were accepted, optional marketing and analytics remained off at initial consent, and `privacyConsents/{uid}` was created with `version: "2026-06-foundation"`, `source: "mobile"`, `createdAtIso`, and `updatedAtIso`.
+- C. Auth persistence: passed. After terminating and relaunching the installed development build, the app returned to the protected Wardrobe screen and did not show Login.
+- D. Logout/login: passed. Logout showed unauthenticated Login UI. Logging back in with the same synthetic account returned to protected Wardrobe/Today's Outfit/Settings screens.
+- E. Settings privacy updates: passed. Marketing consent was toggled on from Settings, analytics remained off, and Firestore updated `privacyConsents/{uid}.marketingEmails` to `true` with a newer `updatedAtIso`.
+- F. Deletion request: passed. Settings created `userDeletionRequests/{uid}` with `status: "requested"` and `requestedAtIso`. The client did not delete `users/{uid}`, `userProfiles/{uid}`, or `privacyConsents/{uid}`.
+- G. Unauthenticated protection: passed. Final logout returned to unauthenticated Login UI, and only unauthenticated tabs were visible. Protected Wardrobe, Today's Outfit, Settings, Onboarding, and Privacy controls were not available while signed out.
+
+## Actual Screens Tested
+
+- Welcome.
+- Login.
+- Sign Up.
+- Privacy Consent.
+- Onboarding Start.
+- Wardrobe.
+- Today's Outfit.
+- Settings.
+
+## Actual Firestore Documents Observed
+
+- `users/Gt3Mmto7DIYKd8bxlyIjcjSKpZjW`: exists with the synthetic email, `authProvider: "password"`, `disabled: false`, and ISO created/updated/last-login timestamps.
+- `userProfiles/Gt3Mmto7DIYKd8bxlyIjcjSKpZjW`: exists with `displayName: ""`, `locale: "en"`, `countryCode: ""`, `subscriptionPlanId: "free"`, and `privacyConsentVersion: "2026-06-foundation"`.
+- `privacyConsents/Gt3Mmto7DIYKd8bxlyIjcjSKpZjW`: exists with all required purposes `true`, `marketingEmails: true` after Settings update, `analytics: false`, `source: "mobile"`, `version: "2026-06-foundation"`, `createdAtIso: "2026-06-14T21:01:25.749Z"`, and `updatedAtIso: "2026-06-14T21:14:42.752Z"`.
+- `userDeletionRequests/Gt3Mmto7DIYKd8bxlyIjcjSKpZjW`: exists with `status: "requested"`, `reason: "Requested from mobile settings."`, `requestedAtIso: "2026-06-14T21:15:54.632Z"`, and empty `completedAtIso`.
+- `styleProfiles/Gt3Mmto7DIYKd8bxlyIjcjSKpZjW`: not created, as expected for this QA slice.
+
+## Actual Screenshot Notes
+
+Screenshots were captured locally under `/tmp/grwm-qa/`, including:
+
+- `/tmp/grwm-qa/final-signup-filled.png`.
+- `/tmp/grwm-qa/final-after-signup.png`.
+- `/tmp/grwm-qa/final-privacy-start.png`.
+- `/tmp/grwm-qa/final-after-save-consent.png`.
+- `/tmp/grwm-qa/final-persistence-reopen.png`.
+- `/tmp/grwm-qa/final-after-login-dismissed.png`.
+- `/tmp/grwm-qa/final-settings-marketing-on-confirmed.png`.
+- `/tmp/grwm-qa/final-settings-after-save-offset.png`.
+- `/tmp/grwm-qa/final-settings-deletion-created.png`.
+- `/tmp/grwm-qa/final-after-logout-confirmed.png`.
+
+Manual note: Simulator click coordinates for lower Settings controls required calibration. This affected desktop automation only; the visible app state and Firestore writes were verified after each step.
+
+## Actual Fixes Made During QA
+
+- Fixed mobile Firebase Auth persistence by returning a constructible AsyncStorage persistence class instead of a plain object. This resolved Firebase Auth's development-build assertion: `Expected a class definition`.
+- Fixed Firestore rules for owner-keyed missing-document reads on `userProfiles`, `privacyConsents`, and `userDeletionRequests`. This allowed the signed-in app to read its own missing consent/deletion documents as not-found instead of failing with a rules null-resource error.
+- Added Firestore rules tests for reading a missing own `privacyConsents/{uid}` document and denying the same read for another user's ID.
+
+## Actual Commands Run
+
+- `pnpm qa:mobile:emulators:isolated`: passed; Auth, Firestore, Storage, Functions, UI, hub, logging, and websocket listeners started on isolated ports.
+- `pnpm mobile:start:dev-client`: Metro was already available and confirmed through `http://localhost:8081/status`.
+- `pnpm qa:mobile:install-check`: passed before this run; `com.grwm.mobile` was installed on the booted iPhone 17 simulator.
+- `xcrun simctl launch booted com.grwm.mobile`: passed.
+- `xcrun simctl openurl booted 'exp+grwm://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081'`: passed.
+- Firebase Admin SDK reads against `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` and `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9100`: passed.
+- `pnpm typecheck`: passed.
+- `pnpm lint`: passed.
+- `pnpm test`: passed.
+- `pnpm test:firebase-rules`: passed, 26/26 rules tests.
+- `pnpm --filter mobile typecheck`: passed.
+- `pnpm --filter mobile test`: passed, 15/15 mobile tests.
+
+## Actual Release Blockers
+
+- None for the current auth/profile/privacy/deletion emulator QA slice.
+- Account/data deletion is still only requested by the client; production deletion still requires a trusted backend processor before real data collection.
+
+## Actual Recommended Fixes
+
+- Keep the Firebase Auth persistence adapter covered because the development build exercises a stricter runtime path than the prior unit-only placeholder.
+- Keep the missing-own-document Firestore rules tests; they protect the first-run privacy consent and deletion-request reads.
+- Add future Functions emulator tests for trusted consent/deletion processors when those backend workflows are implemented.
+
+## Actual Signup/Login/Profile/Consent/Deletion Emulator Status
+
+- Signup works on the installed development build against Auth and Firestore emulators.
+- Login/logout works.
+- Auth persistence works after app relaunch.
+- Profile creation works and defaults locale to English.
+- Initial privacy consent capture works with `source: "mobile"` and timestamps.
+- Settings consent updates work.
+- Deletion request creation works and does not directly delete user data from the client.
+
+## Actual Next Recommended Agent
+
+Backend Deletion Processor Agent, after product approval for trusted account/data deletion processing.
+
 ## Development Build Installed Update
 
 - Date/time: 2026-06-14 21:07:55 BST.
@@ -18,7 +141,7 @@
 - Expo Go remains unsupported and was not used.
 - EAS added `extra.eas.projectId` and `ios.infoPlist.ITSAppUsesNonExemptEncryption: false` to `apps/mobile/app.json`.
 
-## Current Rerun Decision
+## Historical Rerun Decision After Build Install
 
 Mobile Manual Emulator QA can now be rerun on iOS simulator because `com.grwm.mobile` is installed. Start Firebase emulators and Metro for the dev client, then rerun the A-G checklist in `docs/MOBILE_EMULATOR_QA.md`.
 
@@ -105,7 +228,7 @@ pnpm mobile:start:dev-client
 
 Then rerun the A-G checklist in `docs/MOBILE_EMULATOR_QA.md`.
 
-## Current Rerun Decision
+## Historical Rerun Decision Before Build Install
 
 Mobile Manual Emulator QA cannot be rerun yet because `com.grwm.mobile` is still not installed. The Functions `lib/index.js` issue is fixed, and the remaining blocker is native build/install tooling or Expo authentication.
 

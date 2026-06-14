@@ -28,14 +28,14 @@
 - Firebase emulator and rules test setup.
 - Local emulator seed helpers for synthetic users and admin roles.
 
-## Phase 1 Remaining Verification
+## Phase 1 Verification Status
 
-- Execute the `docs/MOBILE_EMULATOR_QA.md` checklist in an installed EAS development build.
-- Install `com.grwm.mobile` on the target simulator/device before rerunning the manual emulator checklist.
-- 2026-06-14 verification prep confirmed isolated emulators and Metro work, but the iOS simulator still lacks the GRWM development build.
-- 2026-06-14 build installer prep added `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md`; remaining verification depends on successfully installing `com.grwm.mobile`.
-- Manual EAS development-build testing for signup/login/logout/auth persistence.
-- Manual Auth and Firestore emulator testing for profile creation, consent capture/update, and deletion request creation.
+- 2026-06-14 earlier verification prep confirmed isolated emulators and Metro worked, but was blocked before the development build was installed.
+- 2026-06-14 build installer prep added `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md` and enabled installing `com.grwm.mobile`.
+- 2026-06-14 installed development-build verification passed: the `docs/MOBILE_EMULATOR_QA.md` A-G checklist ran on iPhone 17 simulator, iOS 26.5, using `com.grwm.mobile` and isolated Firebase emulators.
+- Verified on the installed development build: signup, login/logout, auth persistence, protected-route gating, profile creation, privacy consent capture, Settings consent updates, and deletion request creation.
+- Fixed during verification: Firebase Auth AsyncStorage persistence adapter shape and Firestore missing-own-document reads for first-run privacy/deletion checks.
+- Continue to rerun the manual emulator checklist after any auth, profile, privacy, navigation, or rules changes.
 - Functions emulator tests for future trusted consent and deletion processors.
 
 ## Phase 2: Wardrobe And Context

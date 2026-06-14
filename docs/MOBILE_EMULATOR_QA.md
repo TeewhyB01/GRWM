@@ -8,6 +8,15 @@ Local QA uses the demo project ID `demo-grwm` and safe placeholder Firebase clie
 
 Development build creation and install details live in `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md`.
 
+## Latest Verified Run
+
+- 2026-06-14: Manual A-G QA passed on the installed `com.grwm.mobile` development build.
+- Target: iPhone 17 simulator, iOS 26.5.
+- Emulators: isolated mobile config with UI `http://127.0.0.1:4001/`, Auth `9100`, Firestore `8085`, Functions `5002`, and Storage `9195`.
+- Verified: signup, login/logout, auth persistence after relaunch, profile creation, privacy consent capture, Settings optional consent update, deletion request creation, and signed-out protection.
+- Small blockers fixed during the run: Firebase Auth AsyncStorage persistence class shape and Firestore missing-own-document reads for first-run privacy/deletion checks.
+- Evidence: `docs/MOBILE_MANUAL_QA_REPORT.md`.
+
 ## Emulator Environment
 
 Copy the mobile emulator example into a local app env file:

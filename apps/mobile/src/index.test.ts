@@ -340,7 +340,7 @@ test("@grwm/mobile validates deletion request and style placeholder payloads", (
 
 test("@grwm/mobile adapts AsyncStorage for Firebase Auth persistence", async () => {
   const storage = new Map<string, string>();
-  const persistence = createAsyncStorageAuthPersistence({
+  const PersistenceClass = createAsyncStorageAuthPersistence({
     async getItem(key) {
       return storage.get(key) ?? null;
     },
@@ -351,10 +351,16 @@ test("@grwm/mobile adapts AsyncStorage for Firebase Auth persistence", async () 
       storage.delete(key);
     }
   }) as unknown as {
-    _set(key: string, value: Record<string, unknown>): Promise<void>;
-    _get<T>(key: string): Promise<T | null>;
-    _remove(key: string): Promise<void>;
+    new (): {
+      type: "LOCAL";
+      _set(key: string, value: Record<string, unknown>): Promise<void>;
+      _get<T>(key: string): Promise<T | null>;
+      _remove(key: string): Promise<void>;
+    };
   };
+  const persistence = new PersistenceClass();
+
+  assert.equal(persistence.type, "LOCAL");
 
   await persistence._set("auth", { uid: "user_1" });
   assert.deepEqual(await persistence._get("auth"), { uid: "user_1" });

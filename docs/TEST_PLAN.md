@@ -55,23 +55,19 @@
 ## Manual Mobile Testing Needed Next
 
 - Follow `docs/MOBILE_EMULATOR_QA.md`.
-- Use `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md` to create and install a development build before A-G manual QA.
+- Use `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md` to create and install a development build before rerunning A-G manual QA on a fresh simulator/device.
 - 2026-06-08 prep result: emulator and Metro setup completed, but manual A-G flow was blocked because no `com.grwm.mobile` development build was installed on the booted iOS simulator.
 - 2026-06-14 prep result: isolated emulators and Metro started successfully on iPhone 17 simulator target, but manual A-G flow was blocked again because `com.grwm.mobile` was not installed.
 - 2026-06-14 build installer prep added pnpm scripts for local/EAS development-build install paths and Functions build output generation.
-- EAS development-build signup with email/password against local Auth and Firestore emulators.
-- Auth persistence after app restart.
-- Login and logout.
-- Consent-required redirect before protected screens.
-- Protected-route redirect while signed out.
-- Signup-created `users/{uid}` and `userProfiles/{uid}` documents.
-- Consent capture in `privacyConsents/{uid}` with `source: mobile`.
-- Consent updates from Settings.
-- Deletion request creation in `userDeletionRequests/{uid}`.
+- 2026-06-14 actual run result: A-G mobile manual emulator QA passed on iPhone 17 simulator, iOS 26.5, with the installed `com.grwm.mobile` development build.
+- Verified on emulators: signup with email/password, auth persistence after app restart, login/logout, consent-required redirect before protected screens, signed-out protection, signup-created `users/{uid}` and `userProfiles/{uid}`, initial `privacyConsents/{uid}` with `source: mobile`, Settings consent updates, and `userDeletionRequests/{uid}` creation.
+- Small QA blockers fixed: Firebase Auth AsyncStorage persistence class shape and Firestore owner-keyed missing-document reads for first-run consent/deletion checks.
+- Manual evidence and emulator document snapshots: `docs/MOBILE_MANUAL_QA_REPORT.md`.
+- Next manual rerun should use a new synthetic account and confirm the same A-G flow after any navigation, auth, profile, privacy, or rules changes.
 
 ## Known Limitations
 
-- Mobile emulator QA still requires manual simulator/device verification in an installed development build.
+- Mobile emulator QA must be rerun manually in an installed development build after auth/profile/privacy/navigation changes.
 - Check `xcrun simctl get_app_container booted com.grwm.mobile app` before starting iOS simulator manual QA.
 - `pnpm qa:mobile:install-check` runs the same iOS simulator app-container check.
 - If standard emulator ports are occupied, use `pnpm qa:mobile:emulators:isolated` and point `apps/mobile/.env.local` at Auth `9100` and Firestore `8085`.

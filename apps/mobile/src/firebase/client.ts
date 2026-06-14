@@ -25,20 +25,21 @@ interface AsyncStorageLike {
   removeItem(key: string): Promise<void>;
 }
 
-interface AuthPersistenceValue {
-  readonly [key: string]: unknown;
-}
+type AuthPersistenceStorageValue = Record<string, unknown> | string;
 
-type AuthPersistenceStorageValue = AuthPersistenceValue | string;
-
-interface AuthPersistenceAdapter extends Persistence {
+interface AuthPersistenceInstance {
+  readonly type: "LOCAL";
+  readonly _shouldAllowMigration: boolean;
   _isAvailable(): Promise<boolean>;
   _set(key: string, value: AuthPersistenceStorageValue): Promise<void>;
   _get<T extends AuthPersistenceStorageValue>(key: string): Promise<T | null>;
   _remove(key: string): Promise<void>;
   _addListener(): void;
   _removeListener(): void;
-  _shouldAllowMigration: boolean;
+}
+
+interface AuthPersistenceConstructor extends Persistence {
+  new (): AuthPersistenceInstance;
 }
 
 export function getMobileFirebaseApp(): FirebaseApp {
@@ -65,9 +66,11 @@ export function getMobileFirebaseApp(): FirebaseApp {
 }
 
 export function createAsyncStorageAuthPersistence(storage: AsyncStorageLike): Persistence {
-  const persistence: AuthPersistenceAdapter = {
-    type: "LOCAL",
-    _shouldAllowMigration: true,
+  class AsyncStorageAuthPersistence implements AuthPersistenceInstance {
+    static readonly type = "LOCAL";
+    readonly type = "LOCAL";
+    readonly _shouldAllowMigration = true;
+
     async _isAvailable() {
       const testKey = "grwm.firebase.auth.persistence.available";
 
@@ -78,10 +81,12 @@ export function createAsyncStorageAuthPersistence(storage: AsyncStorageLike): Pe
       } catch {
         return false;
       }
-    },
-    async _set(key, value) {
+    }
+
+    async _set(key: string, value: AuthPersistenceStorageValue) {
       await storage.setItem(key, JSON.stringify(value));
-    },
+    }
+
     async _get<T extends AuthPersistenceStorageValue>(key: string) {
       const storedValue = await storage.getItem(key);
 
@@ -90,19 +95,22 @@ export function createAsyncStorageAuthPersistence(storage: AsyncStorageLike): Pe
       }
 
       return JSON.parse(storedValue) as T;
-    },
-    async _remove(key) {
+    }
+
+    async _remove(key: string) {
       await storage.removeItem(key);
-    },
+    }
+
     _addListener() {
       // AsyncStorage does not provide cross-process storage events.
-    },
+    }
+
     _removeListener() {
       // AsyncStorage does not provide cross-process storage events.
     }
-  };
+  }
 
-  return persistence;
+  return AsyncStorageAuthPersistence as AuthPersistenceConstructor;
 }
 
 async function loadReactNativeAsyncStorage(): Promise<AsyncStorageLike> {

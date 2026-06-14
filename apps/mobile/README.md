@@ -72,6 +72,8 @@ Full checklist: `docs/MOBILE_EMULATOR_QA.md`.
 
 Development build creation and install guide: `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md`.
 
+Latest manual result: on 2026-06-14, the installed `com.grwm.mobile` development build passed A-G auth/profile/privacy/deletion QA on the iPhone 17 simulator against isolated Firebase emulators. Evidence and Firestore document snapshots are in `docs/MOBILE_MANUAL_QA_REPORT.md`.
+
 `pnpm --filter mobile eas:config:development` calls EAS CLI and requires an Expo account or `EXPO_TOKEN`. Use `pnpm qa:mobile:eas:config` for local config validation that does not contact EAS.
 
 The native development-build identifiers are:

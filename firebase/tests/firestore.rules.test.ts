@@ -117,6 +117,22 @@ test("user can read and write their own privacyConsents", async () => {
   await assertSucceeds(db.doc(consentPath).get());
 });
 
+test("user can read missing own privacyConsent as not found", async () => {
+  await assertSucceeds(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.privacyConsent(testUserIds.userA))
+      .get()
+  );
+});
+
+test("user cannot read missing privacyConsent for another user", async () => {
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.privacyConsent(testUserIds.userB))
+      .get()
+  );
+});
+
 test("user cannot read or write another user's privacyConsents", async () => {
   const userBConsent = createSeedPrivacyConsent({
     id: testDocumentIds.privacyConsentB,
