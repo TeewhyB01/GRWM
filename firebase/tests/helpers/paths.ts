@@ -10,6 +10,15 @@ export const firestorePathBuilders = {
   privacyConsent(consentId: string): string {
     return `${firestoreCollections.privacyConsents}/${consentId}`;
   },
+  styleProfile(userId: string): string {
+    return `${firestoreCollections.styleProfiles}/${userId}`;
+  },
+  avatarProfile(userId: string): string {
+    return `${firestoreCollections.avatarProfiles}/${userId}`;
+  },
+  subscription(userId: string): string {
+    return `${firestoreCollections.subscriptions}/${userId}`;
+  },
   wardrobeItem(itemId: string): string {
     return `${firestoreCollections.wardrobeItems}/${itemId}`;
   },
@@ -39,5 +48,8 @@ export const storagePathBuilders = {
   },
   avatarGenerated(userId: string, generationId: string): string {
     return storagePaths.avatarGenerated(userId, generationId).path;
+  },
+  outfit(userId: string, outfitId: string): string {
+    return storagePaths.outfit(userId, outfitId).path;
   }
 } as const;

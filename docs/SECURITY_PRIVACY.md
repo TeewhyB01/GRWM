@@ -21,6 +21,7 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 - Account deletion requests are modeled so deletion can be verified and audited.
 - Account/data deletion is processed by the trusted `userDataDeletion` Cloud Function trigger, not by direct client deletion.
 - Deletion audit logs record lifecycle events and non-sensitive counts without wardrobe, avatar, or photo object names.
+- Functions emulator integration verifies the deletion trigger deletes only the requesting user's data, preserves admin collections, writes audit logs, deletes private Storage files, deletes the Auth emulator user, and leaves unaffected users intact.
 
 ## Current Rule Limitations
 
@@ -28,7 +29,7 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 - Admin custom claims are not implemented yet.
 - Firestore rules allow users to create only their own `requested` deletion request and deny client-side deletion status updates. Full field validation for every sensitive collection remains future work.
 - Storage rules do not yet enforce MIME type, file size, or moderation status.
-- Full Functions emulator trigger integration is still needed before production data collection.
+- Additional production-like failure drills for Firestore or Storage outages are still needed before production data collection.
 
 ## Future Work
 

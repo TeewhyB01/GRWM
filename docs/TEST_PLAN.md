@@ -14,6 +14,9 @@
 - `pnpm --filter functions typecheck`: validates Firebase Functions placeholder exports.
 - `pnpm --filter functions build`: emits Firebase Functions definitions to `functions/lib/index.js`.
 - `pnpm functions:build`: root alias for the Functions build required before Functions emulator definition loading.
+- `pnpm test:functions-emulator`: builds Functions, confirms `functions/lib/index.js`, starts Auth/Firestore/Storage/Functions emulators, and runs deletion trigger integration.
+- `pnpm test:deletion-trigger`: alias for deletion trigger integration.
+- `pnpm qa:deletion:functions-emulator`: QA alias for deletion trigger integration.
 - `pnpm qa:mobile:eas:config`: validates local EAS development-build config assertions without starting a cloud build or requiring an Expo account.
 - `pnpm qa:mobile:install-check`: confirms `com.grwm.mobile` is installed on the booted iOS simulator.
 - `pnpm qa:mobile:emulators:isolated`: starts mobile Auth, Firestore, Storage, and Functions emulators on conflict-free local ports when another project owns the standard Firebase ports.
@@ -53,7 +56,7 @@
 - Firestore field-level validation for sensitive data.
 - Storage MIME type, size, and moderation checks.
 - Full Functions emulator trigger tests for auth/privacy workflows.
-- Full Functions emulator trigger tests for `userDataDeletion`.
+- Additional production-like deletion failure tests for Firestore or Storage outages. Current trigger integration forces an Auth deletion failure safely inside emulators.
 
 ## Manual Mobile Testing Needed Next
 
@@ -76,7 +79,7 @@
 - If standard emulator ports are occupied, use `pnpm qa:mobile:emulators:isolated` and point `apps/mobile/.env.local` at Auth `9100` and Firestore `8085`.
 - The local EAS config validation command does not create a build artifact; the EAS CLI config command still requires an Expo account or `EXPO_TOKEN`.
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
-- Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration still needs to be added before production data collection.
+- Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.
 
 ## MVP Test Areas
 

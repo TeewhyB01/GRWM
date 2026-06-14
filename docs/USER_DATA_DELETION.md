@@ -112,7 +112,19 @@ Rules tests cover:
 - Users cannot update deletion request status from the client.
 - Cross-user deletion request creation is denied.
 
-Full Functions emulator trigger integration is still a production readiness item.
+Full Functions emulator trigger integration now covers the `userDataDeletion` Firestore trigger with synthetic Auth, Firestore, and Storage data. Run:
+
+```bash
+pnpm test:functions-emulator
+pnpm test:deletion-trigger
+pnpm qa:deletion:functions-emulator
+```
+
+The integration test verifies completed deletion, controlled Auth-step failure handling, idempotency, audit logs, Storage deletion, Auth emulator deletion, completed tombstone retention, admin collection preservation, and unaffected-user survival.
+
+Known limitation: the failure-path test forces the Auth deletion step to fail with an invalid emulator UID. It does not simulate a Firestore or Storage emulator outage.
+
+See `docs/FUNCTIONS_EMULATOR_QA.md` for the full runbook and current Java 21 warning.
 
 ## Production Readiness Checklist
 

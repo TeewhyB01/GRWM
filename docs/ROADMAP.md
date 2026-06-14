@@ -24,6 +24,7 @@
 - Mobile development-build installer scripts and documentation for iOS simulator, Android emulator, EAS simulator builds, Metro dev-client start, and installed app checks.
 - Functions TypeScript build output generation for Firebase emulator definition loading.
 - Trusted backend account/data deletion processor with audit logging, status lifecycle tracking, Firestore/Storage/Auth deletion helpers, and emulator-safe unit tests.
+- Functions emulator trigger integration for trusted account/data deletion, including completion, controlled failure, idempotency, audit, and unaffected-user checks.
 - Wardrobe metadata model.
 - Firestore and Storage ownership rules.
 - Firebase emulator and rules test setup.
@@ -37,7 +38,7 @@
 - Verified on the installed development build: signup, login/logout, auth persistence, protected-route gating, profile creation, privacy consent capture, Settings consent updates, and deletion request creation.
 - Fixed during verification: Firebase Auth AsyncStorage persistence adapter shape and Firestore missing-own-document reads for first-run privacy/deletion checks.
 - Continue to rerun the manual emulator checklist after any auth, profile, privacy, navigation, or rules changes.
-- Functions helper tests now cover trusted deletion processing. Full Functions emulator trigger integration remains a production readiness item.
+- Functions helper tests and full Functions emulator trigger integration now cover trusted deletion processing. Keep `pnpm qa:deletion:functions-emulator` green before production data collection.
 
 ## Phase 2: Wardrobe And Context
 

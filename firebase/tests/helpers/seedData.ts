@@ -4,8 +4,10 @@ import {
   storagePaths,
   type AdminAuditLog,
   type AdminUser,
+  type AvatarProfile,
   type OutfitRecommendation,
   type PrivacyConsent,
+  type StyleProfile,
   type User,
   type UserDeletionRequest,
   type UserProfile,
@@ -35,6 +37,18 @@ export const localSeedUserDefinitions = {
     email: testEmails.userB,
     displayName: "Local User B",
     password: "local-user-b-password"
+  },
+  deletionTestUser: {
+    uid: testUserIds.deletionTestUser,
+    email: testEmails.deletionTestUser,
+    displayName: "Deletion Test User",
+    password: "deletion-test-user-password"
+  },
+  unaffectedUser: {
+    uid: testUserIds.unaffectedUser,
+    email: testEmails.unaffectedUser,
+    displayName: "Unaffected User",
+    password: "unaffected-user-password"
   },
   ownerAdmin: {
     uid: testUserIds.ownerAdmin,
@@ -92,6 +106,36 @@ export function createSeedPrivacyConsent(params: {
   });
 }
 
+export function createSeedStyleProfile(params: {
+  userId: string;
+}): StyleProfile {
+  return {
+    userId: params.userId,
+    preferredColors: ["blue"],
+    avoidedColors: [],
+    preferredFits: ["regular"],
+    styleKeywords: ["local-test"],
+    occasionPriorities: ["everyday"],
+    modestyPreference: "",
+    weatherLocationPreference: "",
+    bodyShapeNotesPrivate: "",
+    updatedAtIso: seedNowIso
+  };
+}
+
+export function createSeedAvatarProfile(params: {
+  userId: string;
+}): AvatarProfile {
+  return {
+    userId: params.userId,
+    status: "not-started",
+    consentVersion: PRIVACY_CONSENT_VERSION,
+    sourceImageStoragePaths: [],
+    createdAtIso: seedNowIso,
+    updatedAtIso: seedNowIso
+  };
+}
+
 export function createSeedWardrobeItem(params: {
   id: string;
   userId: string;
@@ -124,6 +168,27 @@ export function createSeedOutfitRecommendation(params: {
     recommendationText: "Local emulator placeholder recommendation.",
     status: "placeholder",
     createdAtIso: seedNowIso
+  };
+}
+
+export function createSeedStorageFile(params: {
+  itemId: string;
+  userId: string;
+}): {
+  contentType: "image/jpeg";
+  customMetadata: {
+    fixture: "grwm-deletion-trigger-test";
+  };
+  bytes: Uint8Array;
+  path: string;
+} {
+  return {
+    bytes: new Uint8Array([71, 82, 87, 77]),
+    contentType: "image/jpeg",
+    customMetadata: {
+      fixture: "grwm-deletion-trigger-test"
+    },
+    path: storagePaths.wardrobeOriginal(params.userId, params.itemId).path
   };
 }
 
@@ -177,6 +242,8 @@ export function createSeedAdminAuditLog(): AdminAuditLog {
 export const localSeedUsers = {
   userA: createSeedUserRecord(localSeedUserDefinitions.userA),
   userB: createSeedUserRecord(localSeedUserDefinitions.userB),
+  deletionTestUser: createSeedUserRecord(localSeedUserDefinitions.deletionTestUser),
+  unaffectedUser: createSeedUserRecord(localSeedUserDefinitions.unaffectedUser),
   ownerAdmin: createSeedUserRecord(localSeedUserDefinitions.ownerAdmin),
   moderatorAdmin: createSeedUserRecord(localSeedUserDefinitions.moderatorAdmin)
 } as const;

@@ -39,6 +39,26 @@ pnpm emulators:start
 
 This starts the local emulators for the demo project `demo-grwm`. The Functions emulator loads the compiled Functions exports, including the `userDataDeletion` Firestore trigger for backend deletion processing.
 
+Build Functions explicitly with:
+
+```bash
+pnpm functions:build
+```
+
+The build emits `functions/lib/index.js`, which must exist before the Functions emulator starts.
+
+## Deletion Trigger QA
+
+Run full Functions trigger integration against isolated local ports:
+
+```bash
+pnpm test:functions-emulator
+pnpm test:deletion-trigger
+pnpm qa:deletion:functions-emulator
+```
+
+These commands use `firebase/firebase.functions-test.json`, demo project `demo-grwm-functions`, and emulator-only Auth, Firestore, Storage, and Functions services. They verify the `userDataDeletion` Firestore trigger processes `userDeletionRequests/{userId}` without production credentials.
+
 For mobile auth/profile/privacy QA, use the mobile-specific alias:
 
 ```bash
@@ -88,6 +108,8 @@ The seed helper creates only synthetic local data:
 
 - `local-user-a`
 - `local-user-b`
+- `deletion-test-user`
+- `unaffected-user`
 - `local-admin-owner`
 - `local-admin-moderator`
 - sample user profile
@@ -112,10 +134,12 @@ The export target is `.firebase-emulator-data/`, which is intentionally ignored 
 
 - The Auth emulator is configured and seedable, but rules tests use mocked authenticated contexts from `@firebase/rules-unit-testing`.
 - Mobile emulator QA still requires an installed Expo development build; Expo Go is unsupported.
-- Functions unit tests cover deletion helper behavior, audit payload shape, target selection, and a fake-dependency processor run. Full Functions emulator trigger integration tests are not implemented yet.
+- Functions unit tests cover deletion helper behavior, audit payload shape, target selection, and a fake-dependency processor run.
+- Full Functions emulator trigger integration covers `userDataDeletion`; see `docs/FUNCTIONS_EMULATOR_QA.md`.
 - Storage rules do not yet enforce MIME type, max file size, virus scanning, or moderation status.
 - Firestore rules validate ownership and coarse admin access, not full field schemas or every status transition.
 - Production admin bootstrap still needs trusted Admin SDK credentials outside the client rules path.
+- Firebase Tools currently warns that Java 21 will be required in firebase-tools 15. The warning does not block current emulator testing.
 
 Backend deletion processor details and production readiness checklist: `docs/USER_DATA_DELETION.md`.
 

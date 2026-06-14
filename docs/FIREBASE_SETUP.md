@@ -66,9 +66,15 @@ pnpm emulators:export
 pnpm test:firestore-rules
 pnpm test:storage-rules
 pnpm test:firebase-rules
+pnpm functions:build
+pnpm test:functions-emulator
+pnpm test:deletion-trigger
+pnpm qa:deletion:functions-emulator
 ```
 
 The configured demo project ID is `demo-grwm`. The current emulator setup is ready for local rules testing, but production use still requires real Firebase project configuration, trusted admin bootstrap, and a full privacy review.
+
+Deletion trigger integration uses a separate demo project, `demo-grwm-functions`, and the isolated config `firebase/firebase.functions-test.json`. It verifies `userDataDeletion` in Auth, Firestore, Storage, and Functions emulators without production credentials.
 
 ## Mobile Auth/Profile Flow
 
@@ -112,7 +118,7 @@ pnpm qa:mobile:start
 
 - Run the full signup, login, auth persistence, logout, consent capture, consent update, and deletion request flows in an EAS development build.
 - Repeat those flows against the Firebase Auth and Firestore emulators.
-- Add full Functions emulator trigger integration coverage for backend deletion processing.
+- Keep full Functions emulator trigger integration coverage for backend deletion processing green.
 - Verify production Firebase project config before collecting real user data.
 - Follow `docs/MOBILE_EMULATOR_QA.md` for the exact local checklist.
 

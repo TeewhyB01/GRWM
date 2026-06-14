@@ -109,6 +109,6 @@ process.stdout.write(
     `Seeded local Firebase emulators for project ${projectId}.`,
     `Auth emulator: ${process.env.FIREBASE_AUTH_EMULATOR_HOST}`,
     `Firestore emulator: ${process.env.FIRESTORE_EMULATOR_HOST}`,
-    "Users: local-user-a, local-user-b, local-admin-owner, local-admin-moderator"
+    `Users: ${Object.values(localSeedUserDefinitions).map((seedUser) => seedUser.uid).join(", ")}`
   ].join("\n")
 );
