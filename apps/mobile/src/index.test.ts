@@ -38,6 +38,12 @@ import {
 
 interface MobileAppJson {
   expo?: {
+    android?: {
+      package?: string;
+    };
+    ios?: {
+      bundleIdentifier?: string;
+    };
     plugins?: string[];
     extra?: {
       usesDevelopmentBuilds?: boolean;
@@ -80,6 +86,8 @@ test("@grwm/mobile has EAS development build config without store publishing def
   const easConfig = readMobileConfigFile<MobileEasJson>("eas.json");
 
   assert.equal(appConfig.expo?.plugins?.includes("expo-dev-client"), true);
+  assert.equal(appConfig.expo?.ios?.bundleIdentifier, "com.grwm.mobile");
+  assert.equal(appConfig.expo?.android?.package, "com.grwm.mobile");
   assert.equal(appConfig.expo?.extra?.usesDevelopmentBuilds, true);
   assert.equal(appConfig.expo?.extra?.expoGoSupported, false);
   assert.equal(easConfig.cli?.version, ">= 20.0.0");

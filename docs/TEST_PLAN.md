@@ -13,6 +13,7 @@
 - `pnpm --filter admin typecheck`: validates the Next.js admin shell.
 - `pnpm --filter functions typecheck`: validates Firebase Functions placeholder exports.
 - `pnpm qa:mobile:eas:config`: validates local EAS development-build config assertions without starting a cloud build or requiring an Expo account.
+- `pnpm qa:mobile:emulators:isolated`: starts mobile Auth, Firestore, Storage, and Functions emulators on conflict-free local ports when another project owns the standard Firebase ports.
 
 ## Phase 1 Shell Coverage
 
@@ -51,6 +52,8 @@
 ## Manual Mobile Testing Needed Next
 
 - Follow `docs/MOBILE_EMULATOR_QA.md`.
+- 2026-06-08 prep result: emulator and Metro setup completed, but manual A-G flow was blocked because no `com.grwm.mobile` development build was installed on the booted iOS simulator.
+- 2026-06-14 prep result: isolated emulators and Metro started successfully on iPhone 17 simulator target, but manual A-G flow was blocked again because `com.grwm.mobile` was not installed.
 - EAS development-build signup with email/password against local Auth and Firestore emulators.
 - Auth persistence after app restart.
 - Login and logout.
@@ -64,6 +67,8 @@
 ## Known Limitations
 
 - Mobile emulator QA still requires manual simulator/device verification in an installed development build.
+- Check `xcrun simctl get_app_container booted com.grwm.mobile app` before starting iOS simulator manual QA.
+- If standard emulator ports are occupied, use `pnpm qa:mobile:emulators:isolated` and point `apps/mobile/.env.local` at Auth `9100` and Firestore `8085`.
 - The local EAS config validation command does not create a build artifact; the EAS CLI config command still requires an Expo account or `EXPO_TOKEN`.
 - Account/data deletion is requested by the mobile client but still needs a trusted backend processor before production data collection.
 

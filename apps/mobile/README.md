@@ -47,6 +47,12 @@ pnpm qa:mobile:emulators
 pnpm qa:mobile:start
 ```
 
+If the standard Firebase ports are occupied by another local project, run the isolated emulator config and point `.env.local` to Auth `9100` and Firestore `8085`:
+
+```bash
+pnpm qa:mobile:emulators:isolated
+```
+
 For Android emulator, set these in `apps/mobile/.env.local`:
 
 ```bash
@@ -60,12 +66,26 @@ Full checklist: `docs/MOBILE_EMULATOR_QA.md`.
 
 `pnpm --filter mobile eas:config:development` calls EAS CLI and requires an Expo account or `EXPO_TOKEN`. Use `pnpm qa:mobile:eas:config` for local config validation that does not contact EAS.
 
+The native development-build identifiers are:
+
+- iOS bundle identifier: `com.grwm.mobile`
+- Android package: `com.grwm.mobile`
+
+Before running iOS simulator QA, confirm the installed development build exists:
+
+```bash
+xcrun simctl get_app_container booted com.grwm.mobile app
+```
+
+If it is missing, install one with `pnpm --filter mobile ios` or `pnpm qa:mobile:eas:development:ios-simulator` before starting the manual A-G checklist.
+
 ## Local QA Scripts
 
 From the repo root:
 
 ```bash
 pnpm qa:mobile:emulators
+pnpm qa:mobile:emulators:isolated
 pnpm qa:mobile:typecheck
 pnpm qa:mobile:test
 pnpm qa:mobile:eas:config

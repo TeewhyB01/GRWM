@@ -47,6 +47,23 @@ Start the Firebase emulators for mobile QA:
 pnpm qa:mobile:emulators
 ```
 
+If the standard local ports are already occupied by another project, use the isolated mobile QA config:
+
+```bash
+pnpm qa:mobile:emulators:isolated
+```
+
+For the isolated config, update `apps/mobile/.env.local` before starting Metro:
+
+```bash
+EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1
+EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT=9100
+EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST=127.0.0.1
+EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT=8085
+```
+
+The isolated emulator UI runs at `http://127.0.0.1:4001`.
+
 In a second terminal, start Metro for the development build:
 
 ```bash
@@ -74,6 +91,20 @@ pnpm qa:mobile:eas:development:ios
 pnpm qa:mobile:eas:development:android
 ```
 
+For a local iOS simulator build, use:
+
+```bash
+pnpm --filter mobile ios
+```
+
+Before running the manual checklist on iOS, confirm the development build is installed on the booted simulator:
+
+```bash
+xcrun simctl get_app_container booted com.grwm.mobile app
+```
+
+If this command reports `No such file or directory`, install a simulator development build before continuing. Expo Go may be present on the simulator, but it must not be used for this QA path.
+
 Do not use Expo Go for this QA path.
 
 ## Manual Checklist
@@ -81,6 +112,8 @@ Do not use Expo Go for this QA path.
 - Start emulators with `pnpm qa:mobile:emulators`.
 - Open Firebase Emulator UI at `http://127.0.0.1:4000`.
 - Launch the app through an installed development build, then connect it to Metro with `pnpm qa:mobile:start`.
+- If iOS launch reports `No development build (com.grwm.mobile)`, install a simulator development build first.
+- If `xcrun simctl get_app_container booted com.grwm.mobile app` fails, install a simulator development build first.
 - Create a new account with a synthetic email and password.
 - Confirm the Auth emulator contains the new user.
 - Confirm `/users/{uid}` is created in Firestore.
@@ -107,4 +140,5 @@ Do not use Expo Go for this QA path.
 - This checklist verifies mobile client writes and rules boundaries only.
 - Account deletion is requested by the client but not processed; a trusted backend deletion processor is still required.
 - Storage upload QA is out of scope for this auth/profile/privacy pass.
+- The Functions emulator can start without mobile QA depending on function build output, but placeholder function definitions require compiled `functions/lib/index.js` before function endpoint QA.
 - Google, Apple, AI, avatar, payment, shopping, and production build paths are intentionally not part of this QA slice.

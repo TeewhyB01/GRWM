@@ -5,6 +5,12 @@
     "scheme": "grwm",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.grwm.mobile"
+    },
+    "android": {
+      "package": "com.grwm.mobile"
+    },
     "plugins": ["expo-dev-client"],
     "extra": {
       "usesDevelopmentBuilds": true,

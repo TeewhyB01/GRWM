@@ -22,6 +22,15 @@ Rules tests use `firebase/firebase.test.json` so they can run even when the norm
 - Test Firebase Storage: `9195`
 - Test logging emulator: `4505`
 
+Mobile QA can also use `firebase/firebase.mobile-isolated.json` if another local project already owns the standard ports:
+
+- Isolated Emulator UI: `4001`
+- Isolated emulator hub: `4410`
+- Isolated Authentication: `9100`
+- Isolated Cloud Firestore: `8085`
+- Isolated Cloud Functions: `5002`
+- Isolated Firebase Storage: `9195`
+
 ## Start Emulators
 
 ```bash
@@ -37,6 +46,14 @@ pnpm qa:mobile:emulators
 ```
 
 The mobile QA command starts Auth, Firestore, Storage, and Functions emulators for the same demo project. The mobile app can connect to Auth at port `9099` and Firestore at port `8080`; no real Firebase project is required when `apps/mobile/.env.local` is based on `apps/mobile/.env.emulators.example`.
+
+If those ports are occupied, use:
+
+```bash
+pnpm qa:mobile:emulators:isolated
+```
+
+Then point `apps/mobile/.env.local` at Auth `9100` and Firestore `8085`.
 
 ## Mobile Emulator Client Config
 

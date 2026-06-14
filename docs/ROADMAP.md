@@ -20,6 +20,7 @@
 - User profile model and mobile signup-created `users/{uid}` / `userProfiles/{uid}` documents.
 - Privacy and consent model with mobile consent capture, settings updates, and deletion request creation.
 - Mobile emulator QA documentation, safe demo env placeholders, configurable Auth/Firestore emulator hosts, and EAS development-build validation scripts.
+- Mobile native development-build identifiers and isolated emulator config for port-conflict QA.
 - Wardrobe metadata model.
 - Firestore and Storage ownership rules.
 - Firebase emulator and rules test setup.
@@ -28,6 +29,8 @@
 ## Phase 1 Remaining Verification
 
 - Execute the `docs/MOBILE_EMULATOR_QA.md` checklist in an installed EAS development build.
+- Install `com.grwm.mobile` on the target simulator/device before rerunning the manual emulator checklist.
+- 2026-06-14 verification prep confirmed isolated emulators and Metro work, but the iOS simulator still lacks the GRWM development build.
 - Manual EAS development-build testing for signup/login/logout/auth persistence.
 - Manual Auth and Firestore emulator testing for profile creation, consent capture/update, and deletion request creation.
 - Functions emulator tests for future trusted consent and deletion processors.
