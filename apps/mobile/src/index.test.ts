@@ -60,6 +60,9 @@ interface MobileEasJson {
     development?: {
       developmentClient?: boolean;
       distribution?: string;
+      android?: {
+        buildType?: string;
+      };
     };
     "development-simulator"?: {
       developmentClient?: boolean;
@@ -93,6 +96,7 @@ test("@grwm/mobile has EAS development build config without store publishing def
   assert.equal(easConfig.cli?.version, ">= 20.0.0");
   assert.equal(easConfig.build?.development?.developmentClient, true);
   assert.equal(easConfig.build?.development?.distribution, "internal");
+  assert.equal(easConfig.build?.development?.android?.buildType, "apk");
   assert.equal(easConfig.build?.["development-simulator"]?.developmentClient, true);
   assert.equal(easConfig.build?.["development-simulator"]?.ios?.simulator, true);
   assert.deepEqual(easConfig.build?.production, {});

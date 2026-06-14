@@ -5,6 +5,7 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "node --test src/*.test.ts"

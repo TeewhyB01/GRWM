@@ -1,6 +1,6 @@
 import { onCall } from "firebase-functions/v2/https";
 
-import { createPlaceholderResponse, DEFAULT_FUNCTION_REGION } from "./registry";
+import { createPlaceholderResponse, DEFAULT_FUNCTION_REGION } from "./registry.ts";
 
 export const avatarGenerationRequest = onCall({ region: DEFAULT_FUNCTION_REGION }, (request) =>
   createPlaceholderResponse("avatar-generation-request", request.auth?.uid ?? null)

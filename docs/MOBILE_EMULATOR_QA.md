@@ -6,6 +6,8 @@ Use this checklist to verify the mobile auth, profile, privacy consent, settings
 
 Local QA uses the demo project ID `demo-grwm` and safe placeholder Firebase client values. No real Firebase project, real Firebase API key, production user, production email, or real personal data is required.
 
+Development build creation and install details live in `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md`.
+
 ## Emulator Environment
 
 Copy the mobile emulator example into a local app env file:
@@ -47,6 +49,8 @@ Start the Firebase emulators for mobile QA:
 pnpm qa:mobile:emulators
 ```
 
+This command builds Functions first so the Functions emulator can load `functions/lib/index.js`.
+
 If the standard local ports are already occupied by another project, use the isolated mobile QA config:
 
 ```bash
@@ -67,8 +71,10 @@ The isolated emulator UI runs at `http://127.0.0.1:4001`.
 In a second terminal, start Metro for the development build:
 
 ```bash
-pnpm qa:mobile:start
+pnpm mobile:start:dev-client
 ```
+
+`pnpm qa:mobile:start` is an equivalent QA alias.
 
 Validate local EAS/app development-build config without starting a cloud build or requiring an Expo account:
 
@@ -86,21 +92,34 @@ pnpm --filter mobile eas:config:development:ios
 Create development builds only when you are ready to install one on a simulator/device:
 
 ```bash
+pnpm mobile:eas:build:ios-simulator
 pnpm qa:mobile:eas:development:ios-simulator
 pnpm qa:mobile:eas:development:ios
 pnpm qa:mobile:eas:development:android
 ```
 
+Install and run the latest EAS iOS simulator build from the development-simulator profile:
+
+```bash
+pnpm mobile:eas:run:ios
+```
+
 For a local iOS simulator build, use:
 
 ```bash
-pnpm --filter mobile ios
+pnpm mobile:dev-client:ios-simulator
+```
+
+For a local Android emulator build, use:
+
+```bash
+pnpm mobile:dev-client:android
 ```
 
 Before running the manual checklist on iOS, confirm the development build is installed on the booted simulator:
 
 ```bash
-xcrun simctl get_app_container booted com.grwm.mobile app
+pnpm qa:mobile:install-check
 ```
 
 If this command reports `No such file or directory`, install a simulator development build before continuing. Expo Go may be present on the simulator, but it must not be used for this QA path.
@@ -141,4 +160,5 @@ Do not use Expo Go for this QA path.
 - Account deletion is requested by the client but not processed; a trusted backend deletion processor is still required.
 - Storage upload QA is out of scope for this auth/profile/privacy pass.
 - The Functions emulator can start without mobile QA depending on function build output, but placeholder function definitions require compiled `functions/lib/index.js` before function endpoint QA.
+- `pnpm functions:build`, `pnpm qa:mobile:emulators`, and `pnpm qa:mobile:emulators:isolated` generate the required Functions build output.
 - Google, Apple, AI, avatar, payment, shopping, and production build paths are intentionally not part of this QA slice.

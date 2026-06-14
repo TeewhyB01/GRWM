@@ -14,7 +14,11 @@ Expo React Native shell for the GRWM mobile app.
 ## Future Commands
 
 ```bash
-pnpm --filter mobile expo start --dev-client
+pnpm mobile:start:dev-client
+pnpm mobile:dev-client:ios-simulator
+pnpm mobile:dev-client:android
+pnpm mobile:eas:build:ios-simulator
+pnpm mobile:eas:run:ios
 pnpm --filter mobile eas:validate:development
 pnpm --filter mobile eas config --profile development --platform android --non-interactive
 pnpm --filter mobile eas build --profile development --platform ios
@@ -25,10 +29,12 @@ Local package scripts can also run as:
 
 ```bash
 pnpm --filter mobile start
+pnpm --filter mobile start:dev-client
 pnpm --filter mobile eas:validate:development
 pnpm --filter mobile eas:config:development
 pnpm --filter mobile eas:config:development:ios
 pnpm --filter mobile eas:build:development:ios-simulator
+pnpm --filter mobile eas:build:run:ios
 pnpm --filter mobile eas:build:development:ios
 pnpm --filter mobile eas:build:development:android
 pnpm --filter mobile eas:build:ios
@@ -44,7 +50,7 @@ Use local Firebase emulators for auth/profile/privacy QA. No real Firebase proje
 ```bash
 cp apps/mobile/.env.emulators.example apps/mobile/.env.local
 pnpm qa:mobile:emulators
-pnpm qa:mobile:start
+pnpm mobile:start:dev-client
 ```
 
 If the standard Firebase ports are occupied by another local project, run the isolated emulator config and point `.env.local` to Auth `9100` and Firestore `8085`:
@@ -64,6 +70,8 @@ For physical devices, use the computer's LAN IP address. Run this app through an
 
 Full checklist: `docs/MOBILE_EMULATOR_QA.md`.
 
+Development build creation and install guide: `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md`.
+
 `pnpm --filter mobile eas:config:development` calls EAS CLI and requires an Expo account or `EXPO_TOKEN`. Use `pnpm qa:mobile:eas:config` for local config validation that does not contact EAS.
 
 The native development-build identifiers are:
@@ -74,10 +82,10 @@ The native development-build identifiers are:
 Before running iOS simulator QA, confirm the installed development build exists:
 
 ```bash
-xcrun simctl get_app_container booted com.grwm.mobile app
+pnpm qa:mobile:install-check
 ```
 
-If it is missing, install one with `pnpm --filter mobile ios` or `pnpm qa:mobile:eas:development:ios-simulator` before starting the manual A-G checklist.
+If it is missing, install one with `pnpm mobile:dev-client:ios-simulator` or `pnpm mobile:eas:build:ios-simulator` followed by `pnpm mobile:eas:run:ios` before starting the manual A-G checklist.
 
 ## Local QA Scripts
 
@@ -86,12 +94,14 @@ From the repo root:
 ```bash
 pnpm qa:mobile:emulators
 pnpm qa:mobile:emulators:isolated
+pnpm qa:mobile:install-check
 pnpm qa:mobile:typecheck
 pnpm qa:mobile:test
 pnpm qa:mobile:eas:config
 pnpm qa:mobile:eas:development:ios-simulator
 pnpm qa:mobile:eas:development:ios
 pnpm qa:mobile:eas:development:android
+pnpm functions:build
 ```
 
 ## Phase 1 Screens

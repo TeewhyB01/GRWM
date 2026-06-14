@@ -1,5 +1,86 @@
 # Mobile Manual QA Report
 
+## Build Installer Update
+
+- Date/time: 2026-06-14 20:39:32 BST.
+- Installer result: development-build install path prepared, but `com.grwm.mobile` is still not installed on the booted iOS simulator.
+- Current booted simulator: iPhone 17, iOS 26.5, UDID `869FD156-3EC8-4547-885A-17708718D606`.
+- Installed app check: `pnpm qa:mobile:install-check` failed with `No such file or directory`.
+- App identity confirmed: iOS bundle identifier and Android package are both `com.grwm.mobile`.
+- Development build dependency confirmed: `expo-dev-client` is installed and configured in `apps/mobile/app.json`.
+- EAS development-simulator profile confirmed: `developmentClient: true` and `ios.simulator: true`.
+- EAS internal development profile confirmed: `developmentClient: true`, `distribution: internal`, and Android `buildType: apk`.
+- Expo Go remains unsupported and was not used.
+- EAS cloud route blocker: `EXPO_TOKEN` is missing and `pnpm --filter mobile exec eas whoami` reports `Not logged in`.
+- Local iOS route blocker: CocoaPods is not installed. Expo tried Gem install, Gem install failed, Homebrew is not available, and Xcode failed with `The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.`
+- Android route blocker in this shell: `adb` is not on PATH.
+
+## Build Installer Fixes
+
+- Added root development-build scripts:
+  - `pnpm mobile:dev-client:ios-simulator`
+  - `pnpm mobile:dev-client:android`
+  - `pnpm mobile:eas:build:ios-simulator`
+  - `pnpm mobile:eas:run:ios`
+  - `pnpm mobile:start:dev-client`
+  - `pnpm functions:build`
+  - `pnpm qa:mobile:install-check`
+- Added mobile package scripts for local iOS/Android dev-client builds and EAS simulator install.
+- Added Android EAS development APK output for emulator/internal installs.
+- Added `functions/tsconfig.build.json` and a Functions build script that emits `functions/lib/index.js`.
+- Updated emulator scripts to run `pnpm functions:build` before starting Functions emulator definitions.
+- Added `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md`.
+
+## Functions Emulator Status
+
+- `pnpm --filter functions build` now generates `functions/lib/index.js`.
+- Firebase Functions emulator successfully loaded definitions from the compiled output.
+- Loaded definitions: `affiliateClickTracking`, `avatarGenerationRequest`, `createUserProfileOnSignup`, `dailyOutfitRecommendation`, `logAdminAction`, `occasionOutfitRecommendation`, `recordPrivacyConsent`, `requestUserDataDeletion`, `subscriptionWebhook`, `userDataDeletion`, `validateAdminRole`, and `wardrobeAnalysis`.
+- Remaining note: Firebase CLI warned that requested Node `20` does not match host Node `24`; the emulator used host Node `24` in this shell.
+
+## Build Installer Commands Run
+
+- `pnpm install`: passed; lockfile already up to date. pnpm warned that dependency build scripts for `re2` are unapproved.
+- `pnpm typecheck`: passed.
+- `pnpm lint`: passed.
+- `pnpm test`: passed.
+- `pnpm test:firebase-rules`: passed, 24/24 rules tests.
+- `pnpm --filter mobile typecheck`: passed.
+- `pnpm --filter mobile test`: passed, 15/15 tests.
+- `pnpm --filter functions typecheck`: passed.
+- `pnpm --filter functions build`: passed.
+- `pnpm qa:mobile:eas:config`: passed, 15/15 tests.
+- `pnpm qa:mobile:install-check`: failed because `com.grwm.mobile` is not installed.
+- `pnpm exec firebase emulators:exec --project demo-grwm --only functions "node -e \"console.log('functions emulator loaded')\""`: passed and loaded Functions definitions.
+- `pnpm mobile:dev-client:ios-simulator`: failed because CocoaPods is unavailable and Pod install could not complete.
+
+## Exact Next Install Commands
+
+After installing CocoaPods locally, rerun:
+
+```bash
+pnpm mobile:dev-client:ios-simulator
+pnpm qa:mobile:install-check
+pnpm mobile:start:dev-client
+```
+
+Or, after logging in to Expo or setting `EXPO_TOKEN`, use the EAS simulator route:
+
+```bash
+pnpm mobile:eas:build:ios-simulator
+pnpm mobile:eas:run:ios
+pnpm qa:mobile:install-check
+pnpm mobile:start:dev-client
+```
+
+Then rerun the A-G checklist in `docs/MOBILE_EMULATOR_QA.md`.
+
+## Current Rerun Decision
+
+Mobile Manual Emulator QA cannot be rerun yet because `com.grwm.mobile` is still not installed. The Functions `lib/index.js` issue is fixed, and the remaining blocker is native build/install tooling or Expo authentication.
+
+Next recommended agent: Mobile Native Tooling Installer for CocoaPods or Expo authentication setup, then Mobile Manual Emulator QA Runner.
+
 ## Run Summary
 
 - Date/time: 2026-06-14 20:08:18 BST.
