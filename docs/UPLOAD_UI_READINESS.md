@@ -2,7 +2,7 @@
 
 Date: 2026-06-15
 
-Decision: ready for Wardrobe Image Upload UI Agent.
+Decision: ready for Wardrobe Image Upload UI Agent. Superseded later on 2026-06-15 by the private upload UI MVP implementation in `docs/WARDROBE_IMAGE_UPLOAD_UI.md`.
 
 This is an implementation-readiness decision only. It does not approve production release, AI analysis, avatar work, shopping, payments, public sharing, or destructive cleanup.
 
@@ -113,7 +113,9 @@ Production-readiness later:
 
 ## Dependency State
 
-`expo-image-picker` is not currently installed. No mobile image picker usage was found.
+Historical dependency state at readiness review: `expo-image-picker` was not installed and no mobile image picker usage was found.
+
+Current implementation state: `expo-image-picker` is installed, configured in `apps/mobile/app.json`, and requires a rebuilt installed development build before upload manual QA.
 
 Recommended next dependency: `expo-image-picker`, installed with the Expo-aware pnpm path, for example:
 

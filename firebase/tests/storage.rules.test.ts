@@ -46,6 +46,7 @@ function wardrobeUploadMetadata(
       ownerId: userId,
       userId,
       itemId,
+      category: "outerwear",
       uploadCategory: "wardrobe-original",
       consentVersion: PRIVACY_CONSENT_VERSION,
       storagePath: storagePaths.wardrobeOriginal(userId, itemId).path,
@@ -212,6 +213,20 @@ test("wardrobe image upload with storage path metadata mismatch is denied", asyn
       path,
       wardrobeUploadMetadata(testUserIds.userA, testDocumentIds.wardrobeItemA, {
         storagePath: storagePathBuilders.wardrobeOriginal(testUserIds.userA, testDocumentIds.wardrobeItemB)
+      })
+    )
+  );
+});
+
+test("wardrobe image upload with invalid category metadata is denied", async () => {
+  const path = storagePathBuilders.wardrobeOriginal(testUserIds.userA, testDocumentIds.wardrobeItemA);
+
+  await assertFails(
+    putStorageObject(
+      testUserIds.userA,
+      path,
+      wardrobeUploadMetadata(testUserIds.userA, testDocumentIds.wardrobeItemA, {
+        category: "not-a-category"
       })
     )
   );

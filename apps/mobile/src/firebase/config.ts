@@ -19,6 +19,10 @@ export interface MobileFirebaseEmulatorConfig {
     host: string;
     port: number;
   };
+  storage: {
+    host: string;
+    port: number;
+  };
 }
 
 export const mobileFirebaseEnvKeys = [
@@ -35,7 +39,9 @@ export const mobileFirebaseEmulatorEnvKeys = [
   "EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST",
   "EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT",
   "EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST",
-  "EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT"
+  "EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT",
+  "EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_HOST",
+  "EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_PORT"
 ] as const;
 
 function readEnv(key: string): string {
@@ -57,6 +63,8 @@ export function getMobileFirebaseEmulatorConfig(): MobileFirebaseEmulatorConfig 
   const authPort = readPortEnv("EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT", 9099);
   const firestoreHost = readEnv("EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST") || "127.0.0.1";
   const firestorePort = readPortEnv("EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT", 8080);
+  const storageHost = readEnv("EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_HOST") || "127.0.0.1";
+  const storagePort = readPortEnv("EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_PORT", 9195);
 
   return {
     auth: {
@@ -67,6 +75,10 @@ export function getMobileFirebaseEmulatorConfig(): MobileFirebaseEmulatorConfig 
     firestore: {
       host: firestoreHost,
       port: firestorePort
+    },
+    storage: {
+      host: storageHost,
+      port: storagePort
     }
   };
 }

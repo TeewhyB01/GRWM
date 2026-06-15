@@ -14,6 +14,7 @@ export const en = {
     wardrobeSetupStyle: "Wardrobe Style",
     wardrobeSetupSummary: "Wardrobe Summary",
     wardrobe: "Wardrobe",
+    addWardrobeItem: "Add item",
     today: "Today's Outfit",
     settings: "Settings"
   },
@@ -201,9 +202,9 @@ export const en = {
     },
     wardrobe: {
       title: "Wardrobe",
-      body: "Your wardrobe home is ready for setup. Real image upload is not active yet.",
-      emptyStateTitle: "Photo upload will be added in the next step.",
-      emptyStateBody: "Use setup now to tell GRWM what you plan to add later. The app will not open an image picker or upload wardrobe files in this phase.",
+      body: "Your wardrobe is private to your account. Add one item at a time from your photo library.",
+      emptyStateTitle: "Your private wardrobe starts here.",
+      emptyStateBody: "Add a photo of clothing you own. Upload is private, and AI analysis stays off.",
       setupStatusLabel: "Wardrobe setup status",
       setupStatusLabels: {
         not_started: "Not started",
@@ -212,8 +213,62 @@ export const en = {
       },
       setupAction: "Set up wardrobe",
       reviewSetupAction: "Review wardrobe setup",
-      addSoonAction: "Add wardrobe item soon",
-      setupLoadError: "Unable to load wardrobe setup status."
+      addItemAction: "Add wardrobe item",
+      setupLoadError: "Unable to load wardrobe setup status.",
+      itemsLoadError: "Unable to load wardrobe items.",
+      list: {
+        title: "Wardrobe items",
+        emptyTitle: "No wardrobe items yet",
+        emptyBody: "Uploaded and processing items will appear here after you add them.",
+        imagePrivateFallback: "Private image",
+        statusLabel: "Upload",
+        analysisOff: "AI analysis"
+      }
+    },
+    addWardrobeItem: {
+      title: "Add wardrobe item",
+      body: "Choose one wardrobe photo from your library, add basic details, and upload it privately.",
+      privacyTitle: "Private upload",
+      privacyBody: "GRWM uses selected wardrobe photos only to help you organise clothes you own. Your wardrobe stays private.",
+      signedOutBody: "Sign in before adding wardrobe photos.",
+      signInAction: "Sign in",
+      setupRequiredBody: "Complete wardrobe setup before uploading photos.",
+      setupRequiredNoticeTitle: "Setup required",
+      setupRequiredNoticeBody: "Wardrobe setup keeps uploads tied to your private preferences and consent choices.",
+      setupAction: "Complete wardrobe setup",
+      backToWardrobeAction: "Back to wardrobe",
+      imagePicker: {
+        title: "Wardrobe photo",
+        action: "Choose from photo library",
+        changeAction: "Choose a different photo",
+        selectedLabel: "Selected wardrobe photo",
+        permissionDenied: "Photo library access is needed to choose a wardrobe image."
+      },
+      categoryTitle: "Category",
+      categoryLabels: {
+        top: "Top",
+        bottom: "Bottom",
+        dress: "Dress",
+        outerwear: "Outerwear",
+        shoes: "Shoes",
+        accessory: "Accessory",
+        other: "Other"
+      },
+      colourTitle: "Primary colour",
+      customColourLabel: "Custom colour",
+      notesLabel: "Optional notes",
+      analysisTitle: "AI analysis is off",
+      analysisBody: "This upload will not create AI jobs. Wardrobe photo analysis can be enabled later in Settings.",
+      uploadAction: "Upload privately",
+      cancelAction: "Cancel upload",
+      retryAction: "Try again",
+      doneAction: "View wardrobe",
+      errorTitle: "Upload issue",
+      missingConsent: "Save privacy consent before uploading wardrobe photos.",
+      genericError: "Unable to upload this wardrobe item.",
+      processingError: "Upload saved, but the processing status could not be checked.",
+      uploadFailed: "The upload could not be finalised. Try again with another image.",
+      cancelled: "Upload cancelled. If a draft was already saved, backend review can handle the pending record."
     },
     today: {
       title: "Today's outfit",

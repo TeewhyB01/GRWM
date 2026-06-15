@@ -106,6 +106,7 @@ test("@grwm/shared rejects incomplete required schema payloads", () => {
         id: "item_1",
         userId: "user_1",
         name: "Jacket",
+        notes: "",
         category: "outerwear",
         storagePath: "users/user_1/wardrobe/item_1/original",
         visibility: "private"
@@ -123,6 +124,7 @@ test("@grwm/shared validates wardrobe item upload metadata shape", () => {
     userId: "user_1",
     ownerId: "user_1",
     name: "Jacket",
+    notes: "Work jacket",
     category: "outerwear",
     primaryColour: "navy",
     colorTags: ["navy"],
@@ -168,6 +170,8 @@ test("@grwm/shared validates wardrobe item upload metadata shape", () => {
     false
   );
   assert.equal(isWardrobeItemUserEditableUpdatePayload({ name: "Updated", updatedAtIso: item.updatedAtIso }), true);
+  assert.equal(isWardrobeItemUserEditableUpdatePayload({ notes: "Freshly cleaned", updatedAtIso: item.updatedAtIso }), true);
+  assert.equal(isWardrobeItemUserEditableUpdatePayload({ notes: "x".repeat(501), updatedAtIso: item.updatedAtIso }), false);
   assert.equal(isWardrobeItemUserEditableUpdatePayload({ uploadStatus: "uploaded" }), false);
 });
 
@@ -357,7 +361,9 @@ test("@grwm/shared coordinates wardrobe upload lifecycle drafts and metadata", (
   });
 
   assert.equal(draft.uploadStatus, "upload_pending");
+  assert.equal(draft.notes, "");
   assert.equal(draft.storagePath, "users/user_1/wardrobe/item_1/original");
+  assert.equal(metadata.category, draft.category);
   assert.equal(isValidWardrobeUploadMetadata(metadata), true);
   assert.deepEqual(parseWardrobeUploadStoragePath(draft.storagePath), {
     itemId: "item_1",

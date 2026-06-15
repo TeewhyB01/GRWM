@@ -1,5 +1,6 @@
 import {
   parseWardrobeUploadStoragePath,
+  isWardrobeCategory,
   storagePaths,
   validateWardrobeUploadMetadata,
   type WardrobeUploadMetadata,
@@ -66,10 +67,15 @@ function hasMetadataMismatch(object: WardrobeStorageObjectReference): boolean {
     return true;
   }
 
+  if (!metadata.category || !isWardrobeCategory(metadata.category)) {
+    return true;
+  }
+
   return !validateWardrobeUploadMetadata({
     ownerId: metadata.ownerId ?? "",
     userId: metadata.userId ?? "",
     itemId: metadata.itemId ?? "",
+    category: metadata.category,
     uploadCategory: metadata.uploadCategory ?? "wardrobe-original",
     consentVersion: metadata.consentVersion ?? "",
     storagePath: metadata.storagePath ?? ""

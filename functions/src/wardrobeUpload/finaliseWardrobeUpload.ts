@@ -91,6 +91,16 @@ export async function finaliseWardrobeUpload(params: {
     });
   }
 
+  if (wardrobeItem.category !== verification.metadata.category) {
+    return markWardrobeUploadFailed(params.deps, {
+      analysisStatus,
+      failureReason: "metadata_mismatch",
+      itemId: verification.itemId,
+      storagePath: verification.storagePath,
+      userId: verification.userId
+    });
+  }
+
   if (wardrobeItem.storagePath !== verification.storagePath) {
     return markWardrobeUploadFailed(params.deps, {
       analysisStatus,

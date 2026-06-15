@@ -2,7 +2,7 @@
 
 Date: 2026-06-15
 
-This document defines the private Firebase Storage upload boundary for GRWM before any real wardrobe image upload UI is built.
+This document defines the private Firebase Storage upload boundary for GRWM. The private wardrobe image upload UI MVP is now implemented for development-build QA.
 
 ## Allowed Client Uploads
 
@@ -43,10 +43,11 @@ All client-writable uploads require:
 - `userId`: must equal `request.auth.uid` and the `{userId}` path segment.
 - `uploadCategory`: must match the path category.
 - `consentVersion`: must be present and non-empty.
+- `category`: required for wardrobe originals and must be a valid wardrobe category.
 
 Path-specific metadata:
 
-- Wardrobe: `itemId` must equal `{itemId}`, and `storagePath` must equal `users/{userId}/wardrobe/{itemId}/original`.
+- Wardrobe: `itemId` must equal `{itemId}`, `category` must match the draft category, and `storagePath` must equal `users/{userId}/wardrobe/{itemId}/original`.
 - Style photos: `photoId` must equal `{photoId}`.
 - Avatar source photos: `photoId` must equal `{photoId}`.
 - Outfits: `outfitId` must equal `{outfitId}`.
@@ -64,6 +65,7 @@ Required fields:
 - `userId`
 - `ownerId`
 - `name`
+- `notes`
 - `category`
 - `primaryColour`
 - `colorTags`
@@ -90,6 +92,7 @@ Client-created wardrobe records must use:
 - `storagePath == users/{userId}/wardrobe/{itemId}/original`
 - `visibility == private`
 - `source == manual` or `import`
+- `notes` is a string no longer than 500 characters
 - `uploadStatus == draft` or `upload_pending`
 - `uploadFailureReason == ""`
 - `uploadedAtIso == ""`
@@ -97,11 +100,15 @@ Client-created wardrobe records must use:
 - `analysisStatus == not_requested`
 - `analysisConsentVersion == ""`
 
-Client updates cannot change `id`, `itemId`, `userId`, `ownerId`, `storagePath`, `source`, `createdAtIso`, upload lifecycle fields, `analysisStatus`, or `analysisConsentVersion`. Backend-owned upload lifecycle changes now flow through the wardrobe upload finalisation service. Backend-owned analysis lifecycle changes remain blocked until a trusted analysis workflow is implemented and consent-gated.
+Client updates cannot change `id`, `itemId`, `userId`, `ownerId`, `storagePath`, `source`, `createdAtIso`, upload lifecycle fields, `analysisStatus`, or `analysisConsentVersion`. Clients can edit bounded user metadata such as `name`, `notes`, `category`, `primaryColour`, tags, visibility, and `updatedAtIso`. Backend-owned upload lifecycle changes now flow through the wardrobe upload finalisation service. Backend-owned analysis lifecycle changes remain blocked until a trusted analysis workflow is implemented and consent-gated.
 
 ## Upload Lifecycle Coordination
 
-The Firestore document is created first, then the private Storage object is uploaded to the exact generated path. The backend finalisation helper verifies path, metadata, MIME type, size, owner fields, item ID, stored `storagePath`, and matching `wardrobeItems/{itemId}` before marking `uploadStatus: uploaded`.
+The Firestore document is created first, then the private Storage object is uploaded to the exact generated path. The backend finalisation helper verifies path, metadata, MIME type, size, owner fields, item ID, category, stored `storagePath`, and matching `wardrobeItems/{itemId}` before marking `uploadStatus: uploaded`.
+
+## Mobile Permission Boundary
+
+The mobile MVP uses `expo-image-picker` for photo-library selection only. `apps/mobile/app.json` provides privacy-first iOS photo copy and sets `cameraPermission: false` and `microphonePermission: false` through the config plugin. The app never calls camera APIs. A rebuilt installed development build is required before manual QA.
 
 If verification fails, an existing item can be marked `upload_failed` with a safe failure reason. Missing Firestore records are audited without creating partial records. The finaliser does not start AI analysis.
 
@@ -140,6 +147,7 @@ Storage rules tests cover:
 - owner metadata mismatch denial
 - item metadata mismatch denial
 - storage path metadata mismatch denial
+- invalid category metadata denial
 - own read allowed
 - cross-user read denied
 - broad list denied

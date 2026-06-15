@@ -21,7 +21,7 @@ Wardrobe setup explains:
 - `WardrobeCategoryPreferencesScreen`: captures clothing categories the user expects to add later.
 - `WardrobeStyleBasicsScreen`: captures dress code, formality, colour families, modesty preference, and workwear/occasionwear relevance.
 - `WardrobeSetupSummaryScreen`: reviews saved choices and completes setup.
-- `WardrobeHomeScreen`: shows an empty state and disabled "Add wardrobe item soon" CTA.
+- `WardrobeHomeScreen`: shows wardrobe setup status, owned wardrobe item list/empty state, and the upload CTA after setup is complete.
 
 ## Data Stored
 
@@ -90,7 +90,7 @@ The foundation intentionally does not implement:
 - AI analysis jobs or provider calls.
 - Avatar, payment, shopping, or affiliate flows.
 
-Real wardrobe image upload UI is ready for the next Wardrobe Image Upload UI Agent within the private MVP scope documented in `docs/WARDROBE_UPLOAD_UI_PLAN.md`. AI analysis, avatar, payment, shopping, affiliate, public sharing, production deployment, and destructive orphan cleanup remain blocked.
+Real wardrobe image upload UI is implemented within the private MVP scope documented in `docs/WARDROBE_IMAGE_UPLOAD_UI.md`. Upload manual QA is pending a rebuilt installed development build. AI analysis, avatar, payment, shopping, affiliate, public sharing, production deployment, and destructive orphan cleanup remain blocked.
 
 ## Next Step Before Upload UI
 

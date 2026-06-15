@@ -109,6 +109,7 @@ service cloud.firestore {
           "userId",
           "ownerId",
           "name",
+          "notes",
           "category",
           "primaryColour",
           "colorTags",
@@ -132,6 +133,7 @@ service cloud.firestore {
           "userId",
           "ownerId",
           "name",
+          "notes",
           "category",
           "primaryColour",
           "colorTags",
@@ -162,6 +164,8 @@ service cloud.firestore {
         && isSafeLifecycleId(request.resource.data.userId)
         && isSafeLifecycleId(request.resource.data.ownerId)
         && isNonEmptyString(request.resource.data.name)
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 500
         && request.resource.data.category in [
           "top",
           "bottom",
@@ -201,6 +205,7 @@ service cloud.firestore {
     function validWardrobeUserEditableUpdateOnly() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
         "name",
+        "notes",
         "category",
         "primaryColour",
         "colorTags",

@@ -62,8 +62,23 @@ export {
   validateWardrobeSetupProfileDocument
 } from "./wardrobe/wardrobeSetupService.ts";
 export {
-  createAsyncStorageAuthPersistence
+  createAsyncStorageAuthPersistence,
+  getMobileStorage
 } from "./firebase/client.ts";
+export {
+  createWardrobeUploadPlan,
+  inferWardrobeImageContentType,
+  runWardrobeUploadWithDependencies,
+  validateWardrobeImageSelection
+} from "./wardrobe/wardrobeUploadService.ts";
+export type {
+  WardrobeImageAssetInput,
+  WardrobeUploadDependencies,
+  WardrobeUploadPhase,
+  WardrobeUploadProgressSnapshot,
+  WardrobeUploadRequest,
+  WardrobeUploadResult
+} from "./wardrobe/wardrobeUploadTypes.ts";
 export {
   continueWithLocalQaAccount,
   createLocalQaCredentials,

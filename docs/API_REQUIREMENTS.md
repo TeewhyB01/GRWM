@@ -46,6 +46,13 @@ All placeholders must return or emit explicit not-implemented responses and must
 
 ## Next API Boundary
 
-Before wardrobe upload UI is built, define whether the client writes `wardrobeItems` directly under rules, requests a signed/upload session from a trusted Function, or uses a backend coordinator after Storage upload. The rule-level path is now constrained by MIME type, size, metadata, and `wardrobeItems` validation, but the selected lifecycle pattern must still be documented and covered by end-to-end tests before real images are accepted.
+The private wardrobe upload MVP uses direct authenticated client writes under hardened rules:
+
+1. Client creates `wardrobeItems/{itemId}` as a private `upload_pending` draft.
+2. Client uploads to `users/{userId}/wardrobe/{itemId}/original`.
+3. Storage metadata must include owner/user IDs, item ID, category, upload category, consent version, and exact storage path.
+4. Trusted Storage finalisation verifies the object and draft before marking `uploaded`.
+
+No signed upload session API is implemented yet. If production needs stronger abuse controls, a future trusted upload coordinator can replace direct client draft/upload writes without changing the private path contract.
 
 Future analysis APIs must read the current consent document and require `wardrobePhotoAnalysis` before queuing any wardrobe photo analysis. Private upload consent is not sufficient for AI analysis.

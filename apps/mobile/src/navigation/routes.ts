@@ -12,6 +12,7 @@ export type MobileRouteId =
   | "wardrobeSetupStyle"
   | "wardrobeSetupSummary"
   | "wardrobe"
+  | "addWardrobeItem"
   | "today"
   | "settings";
 
@@ -67,6 +68,13 @@ export const mobileRoutes: readonly MobileRoute[] = [
     visibleInNavigation: false
   },
   { id: "wardrobe", labelKey: "wardrobe", requiresAuth: true, group: "main" },
+  {
+    id: "addWardrobeItem",
+    labelKey: "addWardrobeItem",
+    requiresAuth: true,
+    group: "main",
+    visibleInNavigation: false
+  },
   { id: "today", labelKey: "today", requiresAuth: true, group: "main" },
   { id: "settings", labelKey: "settings", requiresAuth: true, group: "main" }
 ] as const;

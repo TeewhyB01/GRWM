@@ -13,6 +13,7 @@ import {
 } from "../auth/authState";
 import { listenToAuthState, logout as logoutFromFirebase } from "../auth/authService";
 import { readPrivacyConsent } from "../privacy/privacyService";
+import { AddWardrobeItemScreen } from "../screens/AddWardrobeItemScreen";
 import { CountrySelectionScreen } from "../screens/CountrySelectionScreen";
 import { LanguageSelectionScreen } from "../screens/LanguageSelectionScreen";
 import { LoginScreen } from "../screens/LoginScreen";
@@ -48,6 +49,7 @@ const screenComponents: Record<MobileRouteId, ScreenComponent> = {
   wardrobeSetupStyle: WardrobeStyleBasicsScreen,
   wardrobeSetupSummary: WardrobeSetupSummaryScreen,
   wardrobe: WardrobeHomeScreen,
+  addWardrobeItem: AddWardrobeItemScreen,
   today: TodaysOutfitScreen,
   settings: SettingsScreen
 };

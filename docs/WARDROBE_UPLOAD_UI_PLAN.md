@@ -2,9 +2,25 @@
 
 Date: 2026-06-15
 
-Status: approved next implementation scope after `docs/UPLOAD_UI_READINESS.md`.
+Status: implemented for the private mobile MVP. Development-build rebuild and manual QA remain pending.
 
-This plan defines the only upload UI work the next Wardrobe Image Upload UI Agent may build.
+This plan defined the only upload UI work for the Wardrobe Image Upload UI Agent. The implementation is now documented in `docs/WARDROBE_IMAGE_UPLOAD_UI.md`.
+
+## Implementation Update
+
+Implemented on 2026-06-15:
+
+- `expo-image-picker` installed with pnpm-compatible Expo CLI.
+- `apps/mobile/app.json` configured for photo-library permission copy, with camera and microphone disabled through the config plugin.
+- `AddWardrobeItemScreen`, `WardrobeImagePickerSection`, inline preview, upload progress/error components, item cards, and Wardrobe Home list were added.
+- Protected `addWardrobeItem` route was added.
+- Client validation blocks missing auth, missing category, missing primary colour, missing file URI, non-image assets, unsupported content types, invalid sizes, and oversized images.
+- Draft-first Firestore creation uses shared lifecycle helpers.
+- Storage upload uses the exact private path and shared metadata, including category.
+- Finalisation status handling listens for backend `uploaded` or `upload_failed`, with timeout fallback.
+- AI analysis remains off and no AI job is created.
+
+Manual QA is pending and must use a rebuilt installed development build. See `docs/MOBILE_WARDROBE_UPLOAD_QA.md`.
 
 ## Allowed Scope
 
@@ -150,7 +166,7 @@ Manual QA:
 
 ## Dependency Plan
 
-`expo-image-picker` is the recommended dependency for the next agent because the app already uses Expo development builds. It is not currently installed.
+`expo-image-picker` is installed for the mobile workspace because the app already uses Expo development builds.
 
 Install with pnpm through the Expo install command:
 
@@ -164,7 +180,7 @@ If pnpm is not on PATH:
 /Users/olutayooladeinbo/Documents/IAttend\ 2/.tools/bin/pnpm --filter mobile expo install expo-image-picker
 ```
 
-Add its config plugin in `apps/mobile/app.json` and rebuild the development build. Suggested first-MVP plugin intent:
+Its config plugin is added in `apps/mobile/app.json`. Rebuild the development build before manual QA. First-MVP plugin intent:
 
 - Photo library permission: private wardrobe upload only.
 - Camera permission: `false`.

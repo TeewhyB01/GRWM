@@ -110,31 +110,34 @@ The Wardrobe Home empty state shows "Add wardrobe item soon" as a disabled place
 
 Manual QA after upload UI changes should use an installed development build, not Expo Go. Verify setup save/resume, completion, Settings privacy link, the upload flow, and the consent/privacy boundaries before enabling any release-facing upload path.
 
-## Wardrobe Upload UI Handoff
+## Wardrobe Image Upload UI
 
-The project is ready for the Wardrobe Image Upload UI Agent. The next agent may build only the private upload MVP defined in `docs/WARDROBE_UPLOAD_UI_PLAN.md`.
+The private wardrobe image upload UI MVP is implemented. It is limited to photo-library selection, Firestore draft-first upload, exact private Firebase Storage upload, backend finalisation listening, and Wardrobe Home list display.
 
 Current mobile dependency state:
 
-- `expo-image-picker` is not installed.
-- No mobile image picker usage exists.
-- No mobile Firebase Storage upload usage exists.
+- `expo-image-picker` is installed.
+- `apps/mobile/app.json` includes the ImagePicker config plugin with privacy-first photo permission copy.
+- Camera and microphone permissions are disabled through the config plugin where supported.
+- The app calls only photo-library picker APIs, not camera APIs.
 
-Recommended next dependency:
+The dependency was installed with:
 
 ```bash
-pnpm --filter mobile expo install expo-image-picker
+pnpm --filter mobile exec expo install expo-image-picker
 ```
 
 If pnpm is not on PATH:
 
 ```bash
-/Users/olutayooladeinbo/Documents/IAttend\ 2/.tools/bin/pnpm --filter mobile expo install expo-image-picker
+/Users/olutayooladeinbo/Documents/IAttend\ 2/.tools/bin/pnpm --filter mobile exec expo install expo-image-picker
 ```
 
-Add the `expo-image-picker` config plugin to `apps/mobile/app.json` with photo-library permission copy for private wardrobe upload. Keep camera and microphone permissions disabled for the first upload MVP unless camera capture is separately approved. Rebuild the installed development build after adding the dependency or changing native config.
+Rebuild the installed development build after adding the dependency or changing native config. Manual upload QA is pending until that rebuild is installed.
 
-The next upload UI must create a Firestore draft first, upload to the exact private Storage path with required metadata, show progress/error/retry/cancel states, and let the backend finalisation handler mark the item `uploaded`. It must not create AI jobs, avatar workflows, shopping, payment, affiliate, public sharing, or destructive cleanup.
+The upload UI creates a Firestore draft first, uploads to the exact private Storage path with required metadata, shows progress/error/cancel/retry states, and lets the backend finalisation handler mark the item `uploaded`. It must not create AI jobs, avatar workflows, shopping, payment, affiliate, public sharing, or destructive cleanup.
+
+Manual QA checklist: `docs/MOBILE_WARDROBE_UPLOAD_QA.md`.
 
 Account/data deletion remains a client request flow in mobile: Settings creates `userDeletionRequests/{uid}` with `status: requested`, `requestedBy: user`, and `source: mobile`. The mobile client must not directly delete private Firestore records, Firebase Storage files, or Firebase Auth users. The trusted backend `userDataDeletion` trigger processes deletion securely and may sign the user out after completion.
 

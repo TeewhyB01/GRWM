@@ -1,6 +1,7 @@
 import {
   MAX_WARDROBE_IMAGE_BYTES,
   isAllowedWardrobeImageContentType,
+  isWardrobeCategory,
   parseWardrobeUploadStoragePath,
   validateWardrobeUploadMetadata,
   type WardrobeUploadFailureReason,
@@ -46,6 +47,7 @@ function readWardrobeUploadMetadata(
     ownerId: metadata.ownerId,
     userId: metadata.userId,
     itemId: metadata.itemId,
+    category: metadata.category,
     uploadCategory: metadata.uploadCategory,
     consentVersion: metadata.consentVersion,
     storagePath: metadata.storagePath
@@ -55,6 +57,8 @@ function readWardrobeUploadMetadata(
     typeof candidate.ownerId !== "string" ||
     typeof candidate.userId !== "string" ||
     typeof candidate.itemId !== "string" ||
+    typeof candidate.category !== "string" ||
+    !isWardrobeCategory(candidate.category) ||
     candidate.uploadCategory !== "wardrobe-original" ||
     typeof candidate.consentVersion !== "string" ||
     typeof candidate.storagePath !== "string"
@@ -66,6 +70,7 @@ function readWardrobeUploadMetadata(
     ownerId: candidate.ownerId,
     userId: candidate.userId,
     itemId: candidate.itemId,
+    category: candidate.category,
     uploadCategory: candidate.uploadCategory,
     consentVersion: candidate.consentVersion,
     storagePath: candidate.storagePath

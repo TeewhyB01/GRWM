@@ -56,6 +56,7 @@ In this local Firebase CLI run, Storage emulator writes registered successfully 
 - Audit logs are written without private object paths.
 - Missing `wardrobePhotoAnalysis` consent does not block private upload finalisation.
 - Metadata mismatch fails safely with `upload_failed`.
+- Category metadata mismatch fails safely with `upload_failed`.
 - Missing wardrobe records are audited without creating partial items.
 - Cross-user item ID collisions do not touch the other user's wardrobe item.
 - Admin-bypassed invalid content type and oversized objects are rejected by finalisation.

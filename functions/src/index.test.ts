@@ -101,6 +101,7 @@ test("@grwm/functions scaffolds non-destructive wardrobe orphan detection", () =
             ownerId: "user_1",
             userId: "user_1",
             itemId: "item_1",
+            category: "outerwear",
             uploadCategory: "wardrobe-original",
             consentVersion: "2026-06-foundation",
             storagePath: existingPath
@@ -112,6 +113,7 @@ test("@grwm/functions scaffolds non-destructive wardrobe orphan detection", () =
             ownerId: "user_1",
             userId: "user_1",
             itemId: "item_wrong",
+            category: "outerwear",
             uploadCategory: "wardrobe-original",
             consentVersion: "2026-06-foundation",
             storagePath: orphanPath

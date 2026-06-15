@@ -15,7 +15,15 @@
       "package": "com.grwm.mobile"
     },
     "plugins": [
-      "expo-dev-client"
+      "expo-dev-client",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "GRWM uses your selected wardrobe photos only to help you organise and style clothes you own. Your wardrobe stays private.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
     ],
     "extra": {
       "usesDevelopmentBuilds": true,

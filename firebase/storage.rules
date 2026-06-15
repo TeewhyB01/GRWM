@@ -32,9 +32,22 @@ service firebase.storage {
         && hasUploadConsentVersion();
     }
 
+    function isWardrobeCategory(value) {
+      return value in [
+        "top",
+        "bottom",
+        "dress",
+        "outerwear",
+        "shoes",
+        "accessory",
+        "other"
+      ];
+    }
+
     function hasWardrobeMetadata(userId, itemId) {
       return hasOwnerMetadata(userId, "wardrobe-original")
         && request.resource.metadata.itemId == itemId
+        && isWardrobeCategory(request.resource.metadata.category)
         && request.resource.metadata.storagePath == "users/" + userId + "/wardrobe/" + itemId + "/original";
     }
 

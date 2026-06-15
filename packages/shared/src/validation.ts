@@ -151,6 +151,7 @@ export const WARDROBE_UPLOAD_FAILURE_REASONS = [
 ] as const satisfies readonly WardrobeUploadFailureReason[];
 export const WARDROBE_ITEM_USER_EDITABLE_FIELDS = [
   "name",
+  "notes",
   "category",
   "primaryColour",
   "colorTags",
@@ -213,6 +214,7 @@ export const wardrobeItemSchema = [
   { field: "userId", required: true, kind: "string" },
   { field: "ownerId", required: true, kind: "string" },
   { field: "name", required: true, kind: "string" },
+  { field: "notes", required: true, kind: "string" },
   { field: "category", required: true, kind: "string" },
   { field: "primaryColour", required: true, kind: "string" },
   { field: "colorTags", required: true, kind: "string-array" },
@@ -235,6 +237,7 @@ export const wardrobeUploadMetadataSchema = [
   { field: "ownerId", required: true, kind: "string" },
   { field: "userId", required: true, kind: "string" },
   { field: "itemId", required: true, kind: "string" },
+  { field: "category", required: true, kind: "string" },
   { field: "uploadCategory", required: true, kind: "string" },
   { field: "consentVersion", required: true, kind: "string" },
   { field: "storagePath", required: true, kind: "string" }
@@ -591,6 +594,7 @@ export function isValidWardrobeUploadMetadata(metadata: WardrobeUploadMetadata):
     isSafeWardrobeLifecycleId(metadata.ownerId) &&
     isSafeWardrobeLifecycleId(metadata.itemId) &&
     metadata.ownerId === metadata.userId &&
+    isWardrobeCategory(metadata.category) &&
     metadata.uploadCategory === "wardrobe-original" &&
     metadata.consentVersion.length > 0 &&
     isExpectedWardrobeUploadStoragePath({
@@ -629,6 +633,7 @@ export function isClientWritableWardrobeItem(value: WardrobeItem): boolean {
     value.id === value.itemId &&
     value.ownerId === value.userId &&
     value.name.length > 0 &&
+    value.notes.length <= 500 &&
     isWardrobeCategory(value.category) &&
     value.primaryColour.length > 0 &&
     value.storagePath === expectedPath &&
@@ -651,6 +656,10 @@ export function isWardrobeItemUserEditableUpdatePayload(value: unknown): boolean
   }
 
   if ("name" in value && (typeof value.name !== "string" || value.name.length === 0)) {
+    return false;
+  }
+
+  if ("notes" in value && (typeof value.notes !== "string" || value.notes.length > 500)) {
     return false;
   }
 

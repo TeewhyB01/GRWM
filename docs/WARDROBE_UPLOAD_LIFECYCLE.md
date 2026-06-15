@@ -2,14 +2,14 @@
 
 Date: 2026-06-15
 
-This document defines the privacy-first lifecycle for wardrobe image uploads. The lifecycle foundation is now implemented across shared TypeScript contracts, Firestore rules, Storage rules, backend finalisation helpers, non-destructive orphan detection, and emulator-backed Storage trigger handler QA. The project is ready for the next Wardrobe Image Upload UI Agent to implement the private upload UI MVP within the scope in `docs/WARDROBE_UPLOAD_UI_PLAN.md`.
+This document defines the privacy-first lifecycle for wardrobe image uploads. The lifecycle foundation is implemented across shared TypeScript contracts, Firestore rules, Storage rules, backend finalisation helpers, non-destructive orphan detection, emulator-backed Storage trigger handler QA, and the private mobile upload UI MVP. Manual upload QA is pending until the development build is rebuilt with `expo-image-picker`.
 
 ## Lifecycle
 
 1. The user records privacy consent before any wardrobe upload draft is created.
 2. The app creates `wardrobeItems/{itemId}` first with `userId`, `ownerId`, `itemId`, the generated private `storagePath`, `uploadStatus: upload_pending`, `analysisStatus: not_requested`, placeholder category/colour values, timestamps, and `source: manual` or `import`.
 3. The app uploads the private image to Firebase Storage at the exact generated path: `users/{userId}/wardrobe/{itemId}/original`.
-4. The upload must include custom metadata: `ownerId`, `userId`, `itemId`, `uploadCategory: wardrobe-original`, `consentVersion`, and `storagePath`.
+4. The upload must include custom metadata: `ownerId`, `userId`, `itemId`, `category`, `uploadCategory: wardrobe-original`, `consentVersion`, and `storagePath`.
 5. Storage rules enforce authenticated ownership, allowed image MIME type, 10 MiB max size, matching metadata, no public access, no broad list access, and no generated-output writes.
 6. The backend Storage finalisation service verifies the object path, metadata, MIME type, size, matching Firestore record, owner fields, item ID, and stored path.
 7. The backend marks `uploadStatus: uploaded` only after verification succeeds. Clients cannot set `uploaded`.
@@ -31,8 +31,15 @@ Clients may create only their own draft or upload-pending wardrobe item:
 - `uploadFailureReason`, `uploadedAtIso`, `uploadFailedAtIso`: empty strings.
 - `visibility`: `private`.
 - `source`: `manual` or `import`.
+- `notes`: user-editable text capped to 500 characters.
 
-Clients can update only user-editable wardrobe metadata such as name, category, colour/tags, visibility, and `updatedAtIso`. Owner fields, path, source, upload lifecycle fields, analysis lifecycle fields, and creation timestamp are backend-owned after creation.
+Clients can update only user-editable wardrobe metadata such as name, notes, category, colour/tags, visibility, and `updatedAtIso`. Owner fields, path, source, upload lifecycle fields, analysis lifecycle fields, and creation timestamp are backend-owned after creation.
+
+## Mobile Upload UI
+
+The private mobile MVP now creates a draft before uploading and listens for backend finalisation. It uses only photo-library selection through `expo-image-picker`, validates allowed MIME type and size before upload where the picker exposes them, and rejects unknown content types unless a safe file extension can infer the content type.
+
+The UI shows upload progress, `Processing upload`, backend success/failure, and a timeout fallback of `Upload saved, still processing`. It does not start AI analysis or create `aiJobs`.
 
 ## Backend Finalisation
 

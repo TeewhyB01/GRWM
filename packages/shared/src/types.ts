@@ -152,6 +152,7 @@ export interface WardrobeItem {
   userId: string;
   ownerId: string;
   name: string;
+  notes: string;
   category: WardrobeCategory;
   primaryColour: string;
   colorTags: readonly string[];
@@ -196,6 +197,7 @@ export interface WardrobeUploadMetadata {
   ownerId: string;
   userId: string;
   itemId: string;
+  category: WardrobeCategory;
   uploadCategory: "wardrobe-original";
   consentVersion: string;
   storagePath: string;

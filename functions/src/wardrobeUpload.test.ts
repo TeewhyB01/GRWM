@@ -30,6 +30,7 @@ function createWardrobeItem(params: {
     userId: params.userId,
     ownerId: params.userId,
     name: "Local jacket",
+    notes: "",
     category: "outerwear",
     primaryColour: "navy",
     colorTags: ["navy"],
@@ -57,6 +58,7 @@ function createStorageObject(params: {
   userId: string;
 }): WardrobeStorageObjectSnapshot {
   const metadata = buildWardrobeUploadMetadata({
+    category: "outerwear",
     consentVersion: PRIVACY_CONSENT_VERSION,
     itemId: params.itemId,
     userId: params.userId

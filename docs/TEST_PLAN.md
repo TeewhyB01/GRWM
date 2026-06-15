@@ -9,7 +9,7 @@
 - `pnpm test:storage-rules`: runs Storage rules tests through the Firebase Emulator Suite.
 - `pnpm test:firebase-rules`: runs both Firestore and Storage rules suites.
 - `pnpm --filter mobile typecheck`: validates the Expo React Native shell.
-- `pnpm --filter mobile test`: runs mobile Node tests for auth routing, Firebase emulator config helpers, privacy consent helpers, and profile/deletion payload builders.
+- `pnpm --filter mobile test`: runs mobile Node tests for auth routing, Firebase emulator config helpers, privacy consent helpers, profile/deletion payload builders, wardrobe setup, upload UI route/config, local upload validation, draft-first orchestration, metadata, and no-AI side effects.
 - `pnpm --filter admin typecheck`: validates the Next.js admin shell.
 - `pnpm --filter functions typecheck`: validates Firebase Functions placeholder exports.
 - `pnpm --filter functions build`: emits Firebase Functions definitions to `functions/lib/index.js`.
@@ -36,7 +36,7 @@
 ## Firebase Auth And Privacy/Data Model Coverage
 
 - Shared tests validate Firestore collection constants, model schemas, rejection of incomplete required payloads, privacy consent defaults, admin roles, and Storage path helpers.
-- Mobile tests validate Firebase client env detection, Auth user mapping, protected route helpers, profile default builders, privacy consent validation, deletion request validation, consent feature gates, style placeholders, wardrobe setup payload builders, wardrobe onboarding i18n keys, and the AsyncStorage Auth persistence adapter.
+- Mobile tests validate Firebase client env detection, Auth user mapping, protected route helpers, profile default builders, privacy consent validation, deletion request validation, consent feature gates, style placeholders, wardrobe setup payload builders, wardrobe onboarding i18n keys, upload UI i18n keys, ImagePicker permission config, local upload validation, draft-first upload orchestration, and the AsyncStorage Auth persistence adapter.
 - Mobile tests also validate local emulator placeholder config, consent-required route decisions before protected screens, Settings consent choice merging, privacy-first deletion request payloads, and the dev-only local QA access harness.
 - Local QA access tests cover disabled-by-default behavior, development/emulator-only enablement, production runtime blocking, production Firebase config blocking, generated local credentials, required `users/{uid}` and `userProfiles/{uid}` creation, optional-only privacy consent creation, and no `wardrobeSetupProfiles`, `wardrobeItems`, Storage upload, or AI job actions.
 - Admin tests validate Firebase client env detection, placeholder login, and route role checks.
@@ -52,10 +52,10 @@
 - User deletion request creation ownership.
 - User deletion request status reads by owner.
 - Client denial for backend-owned deletion status updates.
-- Storage upload MIME type, max file size, required owner metadata, required path ID metadata, unauthenticated denial, cross-user denial, broad list denial, generated avatar client-write denial, and owner delete policy.
+- Storage upload MIME type, max file size, required owner metadata, required path ID metadata, required wardrobe category metadata, unauthenticated denial, cross-user denial, broad list denial, generated avatar client-write denial, and owner delete policy.
 - Firestore `wardrobeItems` required fields, owner consistency, immutable owner/path/source fields, allowed category/source/status values, private visibility, backend-owned upload lifecycle field denial, backend-owned analysis field denial, and valid non-AI user updates.
 - Firestore `wardrobeSetupProfiles` ownership, missing-own-document reads, required fields, status/source/category/style enum validation, immutable owner fields, unauthenticated denial, and valid completion updates.
-- Shared upload policy constants, private path builders, invalid path IDs, consent gates, wardrobe upload draft creation, metadata validation, backend-owned field detection, upload failure payloads, and wardrobe item schema validation.
+- Shared upload policy constants, private path builders, invalid path IDs, consent gates, wardrobe upload draft creation, category-bound metadata validation, notes validation, backend-owned field detection, upload failure payloads, and wardrobe item schema validation.
 - Shared wardrobe setup profile validation, category preference validation, and style basics validation.
 - Functions helper tests for wardrobe upload finalisation, including valid Storage object finalisation, metadata mismatch, missing Firestore record, user mismatch, invalid content type, oversized object, and consent-blocked analysis requests.
 - Storage trigger handler integration verifies Functions emulator registration, private wardrobe path filtering, valid upload finalisation, missing analysis consent, metadata mismatch, missing record, cross-user collision protection, unsafe object rejection, idempotency, ignored non-wardrobe paths, audit logs, and no AI job creation.
@@ -82,10 +82,10 @@
 - Small QA blockers fixed: Firebase Auth AsyncStorage persistence class shape and Firestore owner-keyed missing-document reads for first-run consent/deletion checks.
 - Manual evidence and emulator document snapshots: `docs/MOBILE_MANUAL_QA_REPORT.md`.
 - Next manual rerun should use a new synthetic account and confirm the same A-G flow after any navigation, auth, profile, privacy, or rules changes.
-- Wardrobe onboarding manual QA should also verify Intro, Privacy Explainer, Category Preferences, Style Basics, Summary, and Wardrobe Home empty state using an installed development build. Confirm the "Add wardrobe item soon" CTA is disabled and no image picker or Storage upload occurs.
+- Wardrobe onboarding manual QA should also verify Intro, Privacy Explainer, Category Preferences, Style Basics, Summary, and Wardrobe Home using an installed development build.
 - 2026-06-15 wardrobe onboarding rerun result: A-J passed on the installed `com.grwm.mobile` development build with isolated Firebase emulators and the dev-only local QA access harness. The harness did not create privacy consent, wardrobe setup data, wardrobe items, Storage files, or AI jobs. Evidence: `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
 - Local QA access remains available only for emulator manual QA when simulator text input is unreliable. Enable it only in ignored local env with `GRWM_ENABLE_QA_ACCESS=true` and `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` while using the demo Firebase emulator config. It is hidden by default, hidden outside emulator mode, hidden in production runtime, and hidden for non-`demo-grwm` Firebase config.
-- The next upload UI manual QA run should first confirm auth, privacy consent, wardrobe onboarding completion, Settings consent updates, and the disabled pre-upload state still work before exercising the new add-item upload surface.
+- The next upload UI manual QA run must rebuild the installed development build after `expo-image-picker`, then follow `docs/MOBILE_WARDROBE_UPLOAD_QA.md`. It should first confirm auth, privacy consent, wardrobe onboarding completion, Settings consent updates, and protected routing still work before exercising the new add-item upload surface.
 
 ## Wardrobe Upload UI MVP Acceptance Gates
 
@@ -96,9 +96,9 @@
 - The app must validate allowed image MIME type and `MAX_WARDROBE_IMAGE_BYTES` before upload where the selected asset exposes those values.
 - The app must create `wardrobeItems/{itemId}` before uploading to Storage.
 - The app must upload only to `users/{userId}/wardrobe/{itemId}/original`.
-- Storage custom metadata must match the authenticated user, draft item ID, consent version, upload category, and exact storage path.
+- Storage custom metadata must match the authenticated user, draft item ID, wardrobe category, consent version, upload category, and exact storage path.
 - The app must show upload progress, success/pending, failure, retry, and cancel states.
-- The client must not set `uploaded`, `upload_failed`, `uploadedAtIso`, `uploadFailedAtIso`, `uploadFailureReason`, `analysisStatus`, or `analysisConsentVersion`.
+- The client must not set final `uploaded`, final `upload_failed`, non-empty `uploadedAtIso`, non-empty `uploadFailedAtIso`, non-empty `uploadFailureReason`, completed analysis, or `analysisConsentVersion`.
 - No Storage upload may start if Firestore draft creation fails.
 - No cross-user Firestore or Storage write may succeed.
 - No AI job, recommendation, avatar, shopping, payment, affiliate, or public sharing record may be created.
@@ -116,7 +116,7 @@
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
 - Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.
 - Architecture review status on 2026-06-15 remains amber. Wardrobe onboarding foundation work can proceed.
-- Wardrobe onboarding foundation, setup profile rules, upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, non-destructive orphan detection, wardrobe trigger handler QA, and installed-development-build wardrobe onboarding manual QA are now implemented and tested. Real wardrobe upload UI is ready for the approved MVP implementation scope in `docs/WARDROBE_UPLOAD_UI_PLAN.md`; production upload enablement still requires non-production deployed Storage event verification and cleanup/retention approval.
+- Wardrobe onboarding foundation, setup profile rules, upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, non-destructive orphan detection, wardrobe trigger handler QA, installed-development-build wardrobe onboarding manual QA, and the private wardrobe upload UI MVP are now implemented and automated-test covered. Upload manual QA is pending a rebuilt installed development build; production upload enablement still requires non-production deployed Storage event verification and cleanup/retention approval.
 
 ## MVP Test Areas
 

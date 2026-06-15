@@ -19,6 +19,7 @@ import {
   createStylePreferencePlaceholder,
   createUserDeletionRequestDocument,
   createUserFoundationDocuments,
+  createWardrobeUploadPlan,
   createWardrobeSetupProfileDocument,
   getQaAccessState,
   getMobileFirebaseConfig,
@@ -35,14 +36,17 @@ import {
   mobileFoundation,
   mobileRoutes,
   optionalPrivacyConsentPurposes,
+  runWardrobeUploadWithDependencies,
   socialLoginTodos,
   supportedLocales,
   themes,
+  validateWardrobeImageSelection,
   validatePrivacyConsentDocument,
   validateStylePreferencePlaceholder,
   validateWardrobeSetupProfileDocument,
   validateUserDeletionRequestDocument,
-  validateUserFoundationDocuments
+  validateUserFoundationDocuments,
+  type WardrobeUploadDependencies
 } from "./index.ts";
 
 interface MobileAppJson {
@@ -56,7 +60,7 @@ interface MobileAppJson {
         ITSAppUsesNonExemptEncryption?: boolean;
       };
     };
-    plugins?: string[];
+    plugins?: Array<string | [string, Record<string, unknown>]>;
     extra?: {
       usesDevelopmentBuilds?: boolean;
       expoGoSupported?: boolean;
@@ -112,6 +116,10 @@ function createSafeLocalFirebaseConfig(useEmulators = true) {
       firestore: {
         host: "127.0.0.1",
         port: 8080
+      },
+      storage: {
+        host: "127.0.0.1",
+        port: 9195
       }
     }
   };
@@ -136,6 +144,11 @@ test("@grwm/mobile has EAS development build config without store publishing def
   const easConfig = readMobileConfigFile<MobileEasJson>("eas.json");
 
   assert.equal(appConfig.expo?.plugins?.includes("expo-dev-client"), true);
+  const imagePickerPlugin = appConfig.expo?.plugins?.find((plugin) => Array.isArray(plugin) && plugin[0] === "expo-image-picker");
+  assert.ok(Array.isArray(imagePickerPlugin));
+  assert.match(String(imagePickerPlugin[1]?.photosPermission), /wardrobe stays private/i);
+  assert.equal(imagePickerPlugin[1]?.cameraPermission, false);
+  assert.equal(imagePickerPlugin[1]?.microphonePermission, false);
   assert.equal(appConfig.expo?.ios?.bundleIdentifier, "com.grwm.mobile");
   assert.equal(appConfig.expo?.ios?.infoPlist?.ITSAppUsesNonExemptEncryption, false);
   assert.equal(appConfig.expo?.android?.package, "com.grwm.mobile");
@@ -174,6 +187,7 @@ test("@grwm/mobile defines the Phase 1 route shell", () => {
       "wardrobeSetupStyle",
       "wardrobeSetupSummary",
       "wardrobe",
+      "addWardrobeItem",
       "today",
       "settings"
     ]
@@ -214,6 +228,8 @@ test("@grwm/mobile accepts safe local emulator Firebase placeholders", () => {
     process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT = "9099";
     process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST = "10.0.2.2";
     process.env.EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT = "8080";
+    process.env.EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_HOST = "10.0.2.2";
+    process.env.EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_PORT = "9195";
 
     const emulatorConfig = getMobileFirebaseEmulatorConfig();
     const firebaseConfig = getMobileFirebaseConfig();
@@ -223,6 +239,8 @@ test("@grwm/mobile accepts safe local emulator Firebase placeholders", () => {
     assert.equal(emulatorConfig.auth.url, "http://10.0.2.2:9099");
     assert.equal(emulatorConfig.firestore.host, "10.0.2.2");
     assert.equal(emulatorConfig.firestore.port, 8080);
+    assert.equal(emulatorConfig.storage.host, "10.0.2.2");
+    assert.equal(emulatorConfig.storage.port, 9195);
   } finally {
     for (const [key, value] of previousEnv) {
       if (value === undefined) {
@@ -463,6 +481,8 @@ test("@grwm/mobile guards protected routes until auth exists", () => {
   assert.equal(canAccessMobileRoute("wardrobe", createCheckingAuthState()), false);
   assert.equal(canAccessMobileRoute("wardrobe", createSignedOutAuthState()), false);
   assert.equal(canAccessMobileRoute("wardrobe", createPlaceholderSignedInAuthState()), true);
+  assert.equal(canAccessMobileRoute("addWardrobeItem", createPlaceholderSignedInAuthState()), true);
+  assert.equal(canAccessMobileRoute("addWardrobeItem", createSignedOutAuthState()), false);
   assert.equal(canAccessMobileRoute("wardrobeSetupIntro", createPlaceholderSignedInAuthState()), true);
   assert.equal(canAccessMobileRoute("wardrobeSetupStyle", createSignedOutAuthState()), false);
   assert.equal(canAccessMobileRoute("privacy", createSignedOutAuthState()), false);
@@ -533,7 +553,10 @@ test("@grwm/mobile keeps wardrobe setup i18n keys present", () => {
   assert.match(messages.screens.wardrobeSetupIntro.consentBody, /Photo upload will be added/);
   assert.match(messages.screens.wardrobePrivacyExplainer.consentBody, /Settings/);
   assert.equal(messages.screens.wardrobeSetupCategories.categoryLabels.traditional_cultural_clothing, "Traditional or cultural clothing");
-  assert.equal(messages.screens.wardrobe.addSoonAction, "Add wardrobe item soon");
+  assert.equal(messages.screens.wardrobe.addItemAction, "Add wardrobe item");
+  assert.match(messages.screens.wardrobe.emptyStateBody, /AI analysis stays off/);
+  assert.match(messages.screens.addWardrobeItem.privacyBody, /wardrobe stays private/i);
+  assert.match(messages.screens.addWardrobeItem.analysisBody, /will not create AI jobs/i);
 });
 
 test("@grwm/mobile builds profile defaults after email signup", () => {
@@ -671,6 +694,166 @@ test("@grwm/mobile preserves wardrobe setup createdAt during draft updates", () 
   assert.equal(updatedProfile.updatedAt, "2026-06-15T00:05:00.000Z");
   assert.equal(updatedProfile.completedAt, "");
   assert.deepEqual(updatedProfile.selectedCategories, ["tops", "shoes"]);
+});
+
+test("@grwm/mobile validates wardrobe image upload assets locally", () => {
+  const accepted = validateWardrobeImageSelection({
+    asset: {
+      fileName: "jacket.jpg",
+      fileSize: 1024,
+      mimeType: "image/jpeg",
+      type: "image",
+      uri: "file:///wardrobe/jacket.jpg"
+    },
+    category: "outerwear",
+    primaryColour: "navy",
+    userId: "user_1"
+  });
+
+  assert.equal(accepted.ok, true);
+
+  const unknownMime = validateWardrobeImageSelection({
+    asset: {
+      fileName: "jacket.bin",
+      fileSize: 1024,
+      type: "image",
+      uri: "file:///wardrobe/jacket.bin"
+    },
+    category: "outerwear",
+    primaryColour: "navy",
+    userId: "user_1"
+  });
+
+  assert.equal(unknownMime.ok, false);
+  assert.equal(unknownMime.code, "unsupported_content_type");
+
+  const oversized = validateWardrobeImageSelection({
+    asset: {
+      fileName: "jacket.png",
+      fileSize: 11 * 1024 * 1024,
+      mimeType: "image/png",
+      type: "image",
+      uri: "file:///wardrobe/jacket.png"
+    },
+    category: "outerwear",
+    primaryColour: "navy",
+    userId: "user_1"
+  });
+
+  assert.equal(oversized.ok, false);
+  assert.equal(oversized.code, "file_too_large");
+});
+
+test("@grwm/mobile builds wardrobe upload drafts and metadata without finalisation claims", () => {
+  const consent = createPrivacyConsentDocument({
+    userId: "user_1",
+    nowIso: "2026-06-15T00:00:00.000Z"
+  });
+  const plan = createWardrobeUploadPlan({
+    consent,
+    contentType: "image/jpeg",
+    itemId: "item_1",
+    nowIso: "2026-06-15T00:01:00.000Z",
+    request: {
+      asset: {
+        fileName: "jacket.jpg",
+        fileSize: 1024,
+        mimeType: "image/jpeg",
+        type: "image",
+        uri: "file:///wardrobe/jacket.jpg"
+      },
+      category: "outerwear",
+      notes: "Work jacket",
+      primaryColour: "navy",
+      userId: "user_1"
+    }
+  });
+
+  assert.equal(plan.draft.userId, "user_1");
+  assert.equal(plan.draft.ownerId, "user_1");
+  assert.equal(plan.draft.uploadStatus, "upload_pending");
+  assert.equal(plan.draft.uploadFailureReason, "");
+  assert.equal(plan.draft.uploadedAtIso, "");
+  assert.equal(plan.draft.uploadFailedAtIso, "");
+  assert.equal(plan.draft.analysisStatus, "not_requested");
+  assert.equal(plan.draft.analysisConsentVersion, "");
+  assert.equal(plan.draft.notes, "Work jacket");
+  assert.equal(plan.metadata.category, "outerwear");
+  assert.equal(plan.metadata.storagePath, plan.draft.storagePath);
+});
+
+test("@grwm/mobile upload orchestration gates auth, category, draft, and AI side effects", async () => {
+  const consent = createPrivacyConsentDocument({
+    userId: "user_1",
+    nowIso: "2026-06-15T00:00:00.000Z"
+  });
+  const baseRequest = {
+    asset: {
+      fileName: "jacket.jpg",
+      fileSize: 1024,
+      mimeType: "image/jpeg",
+      type: "image",
+      uri: "file:///wardrobe/jacket.jpg"
+    },
+    category: "outerwear" as const,
+    consent,
+    primaryColour: "navy",
+    userId: "user_1"
+  };
+  const actions: string[] = [];
+  const deps: WardrobeUploadDependencies = {
+    async createDraft() {
+      actions.push("firestore:wardrobeItems");
+    },
+    createItemId() {
+      actions.push("firestore:create-item-id");
+
+      return "item_1";
+    },
+    nowIso() {
+      return "2026-06-15T00:01:00.000Z";
+    },
+    async uploadOriginal({ metadata, storagePath }) {
+      actions.push("storage:upload");
+      assert.equal(metadata.category, "outerwear");
+      assert.equal(storagePath, "users/user_1/wardrobe/item_1/original");
+    }
+  };
+
+  await runWardrobeUploadWithDependencies(baseRequest, deps);
+  assert.deepEqual(actions, ["firestore:create-item-id", "firestore:wardrobeItems", "storage:upload"]);
+  assert.equal(actions.includes("firestore:aiJobs"), false);
+
+  const blockedActions: string[] = [];
+  const blockedDeps: WardrobeUploadDependencies = {
+    async createDraft() {
+      blockedActions.push("firestore:wardrobeItems");
+      throw new Error("draft failed");
+    },
+    createItemId() {
+      blockedActions.push("firestore:create-item-id");
+
+      return "item_2";
+    },
+    nowIso() {
+      return "2026-06-15T00:01:00.000Z";
+    },
+    async uploadOriginal() {
+      blockedActions.push("storage:upload");
+    }
+  };
+
+  await assert.rejects(runWardrobeUploadWithDependencies(baseRequest, blockedDeps), /draft failed/);
+  assert.deepEqual(blockedActions, ["firestore:create-item-id", "firestore:wardrobeItems"]);
+
+  await assert.rejects(
+    runWardrobeUploadWithDependencies({ ...baseRequest, userId: null }, deps),
+    /Sign in/
+  );
+  await assert.rejects(
+    runWardrobeUploadWithDependencies({ ...baseRequest, category: "" }, deps),
+    /category/
+  );
 });
 
 test("@grwm/mobile adapts AsyncStorage for Firebase Auth persistence", async () => {

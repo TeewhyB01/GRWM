@@ -218,6 +218,7 @@ async function uploadWardrobeObject(params: {
   userId: string;
 }): Promise<UploadedStorageObject> {
   const metadata = buildWardrobeUploadMetadata({
+    category: "outerwear",
     consentVersion: PRIVACY_CONSENT_VERSION,
     itemId: params.itemId,
     userId: params.userId

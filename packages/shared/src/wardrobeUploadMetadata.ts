@@ -1,6 +1,7 @@
 import type { WardrobeUploadMetadata } from "./types.ts";
 import { storagePaths } from "./storagePaths.ts";
 import { isSafeWardrobeLifecycleId, isValidWardrobeUploadMetadata } from "./validation.ts";
+import type { WardrobeCategory } from "./types.ts";
 
 export interface ParsedWardrobeUploadStoragePath {
   itemId: string;
@@ -15,6 +16,7 @@ export function getWardrobeUploadStoragePath(params: {
 }
 
 export function buildWardrobeUploadMetadata(params: {
+  category?: WardrobeCategory;
   consentVersion: string;
   itemId: string;
   ownerId?: string;
@@ -25,6 +27,7 @@ export function buildWardrobeUploadMetadata(params: {
     ownerId,
     userId: params.userId,
     itemId: params.itemId,
+    category: params.category ?? "other",
     uploadCategory: "wardrobe-original",
     consentVersion: params.consentVersion,
     storagePath: getWardrobeUploadStoragePath({
@@ -69,6 +72,7 @@ export function validateWardrobeUploadMetadata(
   metadata: WardrobeUploadMetadata,
   expected?: {
     itemId?: string;
+    category?: WardrobeCategory;
     storagePath?: string;
     userId?: string;
   }
@@ -82,6 +86,10 @@ export function validateWardrobeUploadMetadata(
   }
 
   if (expected?.userId !== undefined && metadata.userId !== expected.userId) {
+    return false;
+  }
+
+  if (expected?.category !== undefined && metadata.category !== expected.category) {
     return false;
   }
 

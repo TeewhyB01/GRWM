@@ -150,6 +150,7 @@ export function createSeedWardrobeItem(params: {
     userId: params.userId,
     ownerId: params.userId,
     name: "Local test jacket",
+    notes: "",
     category: "outerwear",
     primaryColour: "navy",
     colorTags: ["navy"],

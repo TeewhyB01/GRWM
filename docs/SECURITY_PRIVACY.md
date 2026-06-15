@@ -16,7 +16,7 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 
 - Firestore rules now model user-owned collections and admin-only collections.
 - Storage rules now allow access only under the authenticated user's own `users/{userId}` path and enforce upload MIME type, max size, required owner metadata, category metadata, path ID metadata, and consent version metadata for client-writable image paths.
-- Wardrobe Storage rules also require `storagePath` metadata to match the exact private object path.
+- Wardrobe Storage rules also require wardrobe `category` metadata and `storagePath` metadata to match the exact private object path.
 - Wardrobe upload lifecycle helpers now require Firestore draft creation before Storage upload, then trusted backend finalisation before `uploadStatus: uploaded`.
 - Wardrobe onboarding preferences are stored under `wardrobeSetupProfiles/{userId}` with owner-bound Firestore rules, required fields, mobile source, setup status enums, and bounded category/style enums.
 - Environment variables are documented but not committed with secrets.
@@ -41,13 +41,17 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 
 ## Wardrobe Upload Security Status
 
-- Wardrobe onboarding foundation is implemented without image picker UI, Storage upload, AI analysis, avatar, payment, or shopping features.
+- Wardrobe onboarding foundation is implemented.
+- Private mobile wardrobe image upload UI is implemented with photo-library selection only.
+- `expo-image-picker` is installed and configured with privacy-first photo permission copy, `cameraPermission: false`, and `microphonePermission: false`.
+- The app never calls camera APIs for this MVP.
 - Setup preferences are private, owner-keyed, and included in the trusted account deletion plan.
 - Final lifecycle is Firestore draft first, exact private Storage upload second, trusted backend finalisation third.
+- Optional item notes are bounded user-owned metadata and are not sent to AI.
 - AI analysis remains separate from private upload. Future analysis requests are blocked unless `wardrobePhotoAnalysis` consent is true.
 - Server-side orphan detection is expanded but remains non-destructive.
 - Wardrobe onboarding manual QA passed on the installed `com.grwm.mobile` development build on 2026-06-15.
-- Real wardrobe image upload UI is ready to implement as a private MVP within `docs/WARDROBE_UPLOAD_UI_PLAN.md`.
+- Real wardrobe image upload manual QA is pending until a rebuilt installed development build is available.
 - Production upload enablement is still blocked on non-production deployed Storage event verification and cleanup/retention approval.
 - Keep generated avatar outputs backend-owned; do not expose client avatar generation writes.
 

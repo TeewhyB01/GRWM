@@ -11,13 +11,20 @@ import {
   getFirestore,
   type Firestore
 } from "firebase/firestore";
+import {
+  connectStorageEmulator,
+  getStorage,
+  type FirebaseStorage
+} from "firebase/storage";
 
 import { getMobileFirebaseConfig } from "./config.ts";
 
 let cachedAuth: Auth | null = null;
 let cachedFirestore: Firestore | null = null;
+let cachedStorage: FirebaseStorage | null = null;
 let authEmulatorConnected = false;
 let firestoreEmulatorConnected = false;
+let storageEmulatorConnected = false;
 
 interface AsyncStorageLike {
   getItem(key: string): Promise<string | null>;
@@ -143,6 +150,15 @@ function connectMobileFirestoreEmulator(db: Firestore): void {
   }
 }
 
+function connectMobileStorageEmulator(storage: FirebaseStorage): void {
+  const config = getMobileFirebaseConfig();
+
+  if (config?.useEmulators && !storageEmulatorConnected) {
+    connectStorageEmulator(storage, config.emulators.storage.host, config.emulators.storage.port);
+    storageEmulatorConnected = true;
+  }
+}
+
 export async function getMobileAuth(): Promise<Auth> {
   if (!cachedAuth) {
     const app = getMobileFirebaseApp();
@@ -169,4 +185,13 @@ export function getMobileFirestore(): Firestore {
   }
 
   return cachedFirestore;
+}
+
+export function getMobileStorage(): FirebaseStorage {
+  if (!cachedStorage) {
+    cachedStorage = getStorage(getMobileFirebaseApp());
+    connectMobileStorageEmulator(cachedStorage);
+  }
+
+  return cachedStorage;
 }
