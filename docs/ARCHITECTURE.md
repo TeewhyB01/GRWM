@@ -6,7 +6,7 @@
 - `apps/admin`: Next.js App Router admin dashboard shell.
 - `functions`: Firebase Cloud Functions TypeScript exports, runtime config helpers, placeholders for future workflows, and the trusted deletion processor.
 - `packages/shared`: Shared TypeScript domain contracts, constants, and lightweight validation metadata.
-- `firebase`: Firestore and Storage security rule placeholders.
+- `firebase`: Firestore and Storage security rules plus emulator rule and deletion trigger tests.
 
 ## Platform Services
 
@@ -51,7 +51,8 @@
 - Shared types now cover `UserProfile`, `WardrobeItem`, `OutfitRecommendation`, `StyleProfile`, `AvatarProfile`, `SubscriptionPlan`, and `AdminRole`.
 - Shared types also cover `User`, `PrivacyConsent`, `AdminUser`, `AdminAuditLog`, and `UserDeletionRequest`.
 - `PrivacyConsent` includes `source: mobile`; `StyleProfile` includes empty placeholder fields for modesty and weather/location preference until full onboarding inputs are designed.
-- Lightweight schema metadata exists without adding a validation library.
+- Style, avatar, and recommendation records carry owner fields and timestamp fields so future workflows can audit lifecycle changes consistently.
+- Lightweight schema metadata exists without adding a validation library. It is contract metadata for tests and client helpers, not a replacement for Firestore rules or server-side validation.
 
 ## Firebase Data And Access Decision
 
@@ -83,9 +84,14 @@ Manual emulator testing passed for signup/login/profile/consent/deletion request
 
 ## Future Architecture Phases
 
-1. Manual emulator/device verification for authentication, profile persistence, consent, and deletion requests.
-2. Wardrobe upload and metadata.
-3. Weather and occasion context.
-4. AI recommendation service boundary.
-5. Avatar and virtual try-on architecture.
-6. Premium, shopping, and affiliate integrations.
+1. Wardrobe onboarding for explicit user-provided style, fit, modesty, and context preferences.
+2. Wardrobe upload security boundary, including Storage MIME/size checks, upload metadata, and `wardrobeItems` field validation.
+3. Wardrobe upload and metadata.
+4. Weather and occasion context.
+5. AI recommendation service boundary.
+6. Avatar and virtual try-on architecture.
+7. Premium, shopping, and affiliate integrations.
+
+## Latest Architecture Review
+
+See `docs/ARCHITECTURE_REVIEW.md` for the 2026-06-15 review. Current health is amber: the repository structure is clean enough for wardrobe onboarding foundation work, but wardrobe upload should wait for Storage upload constraints, Firestore field validation, and admin-auth hardening.

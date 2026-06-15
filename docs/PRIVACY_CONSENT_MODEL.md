@@ -51,6 +51,6 @@ The trusted backend `userDataDeletion` trigger verifies the request, deletes use
 
 ## Next Privacy Work
 
-- Run manual emulator testing for signup, consent capture, consent updates, logout, and deletion request creation in an EAS development build.
-- Add full Functions emulator trigger tests for consent recording and deletion request processing.
+- Rerun manual emulator testing for signup, consent capture, consent updates, logout, and deletion request creation in an EAS development build after auth, privacy, navigation, or rules changes.
+- Add Functions emulator trigger tests for future backend consent recording if that placeholder becomes active.
 - Define retention windows for Storage files and audit logs.

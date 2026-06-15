@@ -42,10 +42,14 @@
 
 ## Phase 2: Wardrobe And Context
 
-- User image upload to Firebase Storage.
+- Wardrobe onboarding for explicit user-provided style, fit, modesty, and context preferences.
+- Wardrobe upload security boundary: Storage MIME/size checks, required upload metadata, `wardrobeItems` field validation, and emulator tests.
+- User image upload to Firebase Storage after the upload boundary is green.
 - Wardrobe item management.
 - Weather context integration.
 - Occasion-based styling inputs.
+
+Phase 2 entry status after the 2026-06-15 architecture review: onboarding foundation can begin, but wardrobe upload must wait for the upload security boundary and tests in `docs/ARCHITECTURE_REVIEW.md`.
 
 ## Phase 3: Intelligence
 

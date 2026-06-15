@@ -34,7 +34,9 @@ All paths are private and user-scoped. Admin service code may access files throu
 
 ## Validation
 
-Shared TypeScript schemas live in `packages/shared/src/validation.ts`. They are lightweight field-presence checks for foundation testing and are not a replacement for server-side validation in Cloud Functions.
+Shared TypeScript schemas live in `packages/shared/src/validation.ts`. They are lightweight field-presence checks for foundation testing and are not a replacement for Firestore rules or server-side validation in Cloud Functions.
+
+The shared schemas now require owner fields, array fields, and timestamp fields that are present in the TypeScript contracts. Future upload work still needs Firestore rule validation for allowed enum values, immutable owner fields, and Storage path consistency.
 
 ## Mobile Auth/Profile Documents
 
@@ -57,4 +59,18 @@ The backend deletion processor deletes private user-owned data from current owne
 
 ## Placeholder Preference Persistence
 
-The current onboarding start step can create `styleProfiles/{userId}` with empty arrays/strings for style identity, modesty, weather/location, fit, and body-shape notes. These placeholders exist so later onboarding screens can replace them with explicit user-provided values without changing the collection boundary.
+The current onboarding start step can create `styleProfiles/{userId}` with `id`, `userId`, empty arrays/strings for style identity, modesty, weather/location, fit, and body-shape notes, plus `createdAtIso` and `updatedAtIso`. These placeholders exist so later onboarding screens can replace them with explicit user-provided values without changing the collection boundary.
+
+## Model Review Notes
+
+- `User`: owner-keyed by Auth UID with email, provider, disabled flag, and ISO lifecycle timestamps. Production should move sensitive lifecycle updates to trusted backend code.
+- `UserProfile`: owner-keyed by user ID with locale, country, plan ID, consent version, and timestamps.
+- `PrivacyConsent`: owner-keyed by user ID with explicit boolean purposes, version, source, and timestamps. It does not store free-form sensitive notes.
+- `WardrobeItem`: queryable by `userId`, includes private `storagePath`, visibility, tags, and timestamps. Before upload, add strict Firestore rule validation for path ownership and allowed enum values.
+- `StyleProfile`: owner-keyed by user ID, includes placeholder arrays/strings and timestamps. Body-shape notes remain private and should stay user-controlled.
+- `OutfitRecommendation`: queryable by `userId`, includes item IDs, generated text, status, and timestamps. AI generation is not implemented.
+- `AvatarProfile`: owner-keyed by user ID, includes consent version, source image paths, status, and timestamps. Avatar processing is not implemented.
+- `SubscriptionPlan`: global plan catalog model only. User subscription state remains backend/webhook-owned under `subscriptions/{userId}`.
+- `AdminUser`: admin role record with active flag and timestamps. The first owner still requires trusted bootstrap.
+- `AdminAuditLog`: append-only operational audit shape. Deletion audit logs extend it with system actor, status, source, target user, and safe metadata.
+- `UserDeletionRequest`: owner-keyed lifecycle tombstone. The mobile client can create only `requested` records; backend code owns processing, completion, failure, and audit fields.

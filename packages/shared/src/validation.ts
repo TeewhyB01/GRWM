@@ -25,7 +25,10 @@ export const userSchema = [
   { field: "email", required: true, kind: "string" },
   { field: "emailVerified", required: true, kind: "boolean" },
   { field: "authProvider", required: true, kind: "string" },
-  { field: "disabled", required: true, kind: "boolean" }
+  { field: "disabled", required: true, kind: "boolean" },
+  { field: "createdAtIso", required: true, kind: "string" },
+  { field: "updatedAtIso", required: true, kind: "string" },
+  { field: "lastLoginAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<User>;
 
 export const userProfileSchema = [
@@ -35,7 +38,9 @@ export const userProfileSchema = [
   { field: "locale", required: true, kind: "string" },
   { field: "countryCode", required: true, kind: "string" },
   { field: "subscriptionPlanId", required: true, kind: "string" },
-  { field: "privacyConsentVersion", required: true, kind: "string" }
+  { field: "privacyConsentVersion", required: true, kind: "string" },
+  { field: "createdAtIso", required: true, kind: "string" },
+  { field: "updatedAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<UserProfile>;
 
 export const privacyConsentSchema = [
@@ -49,7 +54,9 @@ export const privacyConsentSchema = [
   { field: "locationWeatherUse", required: true, kind: "boolean" },
   { field: "aiRecommendationUse", required: true, kind: "boolean" },
   { field: "marketingEmails", required: true, kind: "boolean" },
-  { field: "analytics", required: true, kind: "boolean" }
+  { field: "analytics", required: true, kind: "boolean" },
+  { field: "createdAtIso", required: true, kind: "string" },
+  { field: "updatedAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<PrivacyConsent>;
 
 export const wardrobeItemSchema = [
@@ -57,29 +64,50 @@ export const wardrobeItemSchema = [
   { field: "userId", required: true, kind: "string" },
   { field: "name", required: true, kind: "string" },
   { field: "category", required: true, kind: "string" },
+  { field: "colorTags", required: true, kind: "string-array" },
+  { field: "seasonTags", required: true, kind: "string-array" },
+  { field: "occasionTags", required: true, kind: "string-array" },
   { field: "storagePath", required: true, kind: "string" },
-  { field: "visibility", required: true, kind: "string" }
+  { field: "visibility", required: true, kind: "string" },
+  { field: "createdAtIso", required: true, kind: "string" },
+  { field: "updatedAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<WardrobeItem>;
 
 export const outfitRecommendationSchema = [
   { field: "id", required: true, kind: "string" },
   { field: "userId", required: true, kind: "string" },
+  { field: "wardrobeItemIds", required: true, kind: "string-array" },
   { field: "occasion", required: true, kind: "string" },
-  { field: "status", required: true, kind: "string" }
+  { field: "weatherSummary", required: true, kind: "string" },
+  { field: "recommendationText", required: true, kind: "string" },
+  { field: "status", required: true, kind: "string" },
+  { field: "createdAtIso", required: true, kind: "string" },
+  { field: "updatedAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<OutfitRecommendation>;
 
 export const styleProfileSchema = [
+  { field: "id", required: true, kind: "string" },
   { field: "userId", required: true, kind: "string" },
   { field: "preferredColors", required: true, kind: "string-array" },
+  { field: "avoidedColors", required: true, kind: "string-array" },
+  { field: "preferredFits", required: true, kind: "string-array" },
   { field: "styleKeywords", required: true, kind: "string-array" },
+  { field: "occasionPriorities", required: true, kind: "string-array" },
   { field: "modestyPreference", required: true, kind: "string" },
-  { field: "weatherLocationPreference", required: true, kind: "string" }
+  { field: "weatherLocationPreference", required: true, kind: "string" },
+  { field: "bodyShapeNotesPrivate", required: true, kind: "string" },
+  { field: "createdAtIso", required: true, kind: "string" },
+  { field: "updatedAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<StyleProfile>;
 
 export const avatarProfileSchema = [
+  { field: "id", required: true, kind: "string" },
   { field: "userId", required: true, kind: "string" },
   { field: "status", required: true, kind: "string" },
-  { field: "consentVersion", required: true, kind: "string" }
+  { field: "consentVersion", required: true, kind: "string" },
+  { field: "sourceImageStoragePaths", required: true, kind: "string-array" },
+  { field: "createdAtIso", required: true, kind: "string" },
+  { field: "updatedAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<AvatarProfile>;
 
 export const subscriptionPlanSchema = [
@@ -96,7 +124,9 @@ export const adminUserSchema = [
   { field: "userId", required: true, kind: "string" },
   { field: "email", required: true, kind: "string" },
   { field: "roles", required: true, kind: "string-array" },
-  { field: "active", required: true, kind: "boolean" }
+  { field: "active", required: true, kind: "boolean" },
+  { field: "createdAtIso", required: true, kind: "string" },
+  { field: "updatedAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<AdminUser>;
 
 export const adminAuditLogSchema = [

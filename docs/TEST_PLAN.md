@@ -32,7 +32,7 @@
 
 ## Firebase Auth And Privacy/Data Model Coverage
 
-- Shared tests validate Firestore collection constants, model schemas, privacy consent defaults, admin roles, and Storage path helpers.
+- Shared tests validate Firestore collection constants, model schemas, rejection of incomplete required payloads, privacy consent defaults, admin roles, and Storage path helpers.
 - Mobile tests validate Firebase client env detection, Auth user mapping, protected route helpers, profile default builders, privacy consent validation, deletion request validation, consent feature gates, style placeholders, and the AsyncStorage Auth persistence adapter.
 - Mobile tests also validate local emulator placeholder config, consent-required route decisions before protected screens, Settings consent choice merging, and privacy-first deletion request payloads.
 - Admin tests validate Firebase client env detection, placeholder login, and route role checks.
@@ -52,11 +52,11 @@
 ## Firebase Emulator Tests Needed Next
 
 - Admin allow-path coverage through `adminUsers` role records.
-- User deletion request status transition rules.
-- Firestore field-level validation for sensitive data.
-- Storage MIME type, size, and moderation checks.
-- Full Functions emulator trigger tests for auth/privacy workflows.
+- Firestore field-level validation for sensitive data, especially `wardrobeItems` before upload.
+- Storage MIME type, size, owner metadata, item metadata, and moderation checks before wardrobe upload.
+- Full Functions emulator trigger tests for future auth/privacy workflows beyond deletion.
 - Additional production-like deletion failure tests for Firestore or Storage outages. Current trigger integration forces an Auth deletion failure safely inside emulators.
+- Upload lifecycle tests for orphaned Storage files and deletion cleanup after wardrobe upload is designed.
 
 ## Manual Mobile Testing Needed Next
 
@@ -80,6 +80,7 @@
 - The local EAS config validation command does not create a build artifact; the EAS CLI config command still requires an Expo account or `EXPO_TOKEN`.
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
 - Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.
+- Architecture review status on 2026-06-15 is amber. Wardrobe onboarding foundation work can proceed, but wardrobe upload is blocked until Storage upload constraints and `wardrobeItems` field validation are implemented and tested.
 
 ## MVP Test Areas
 

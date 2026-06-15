@@ -59,6 +59,7 @@ export interface PrivacyConsent {
 }
 
 export interface StyleProfile {
+  id: string;
   userId: string;
   preferredColors: readonly string[];
   avoidedColors: readonly string[];
@@ -68,6 +69,7 @@ export interface StyleProfile {
   modestyPreference: string;
   weatherLocationPreference: string;
   bodyShapeNotesPrivate: string;
+  createdAtIso: string;
   updatedAtIso: string;
 }
 
@@ -94,9 +96,11 @@ export interface OutfitRecommendation {
   recommendationText: string;
   status: OutfitRecommendationStatus;
   createdAtIso: string;
+  updatedAtIso: string;
 }
 
 export interface AvatarProfile {
+  id: string;
   userId: string;
   status: AvatarProfileStatus;
   consentVersion: string;

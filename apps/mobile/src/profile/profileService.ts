@@ -156,6 +156,7 @@ export function createStylePreferencePlaceholder(params: {
   nowIso: string;
 }): StyleProfile {
   return {
+    id: params.userId,
     userId: params.userId,
     preferredColors: [],
     avoidedColors: [],
@@ -165,6 +166,7 @@ export function createStylePreferencePlaceholder(params: {
     modestyPreference: "",
     weatherLocationPreference: "",
     bodyShapeNotesPrivate: "",
+    createdAtIso: params.nowIso,
     updatedAtIso: params.nowIso
   };
 }

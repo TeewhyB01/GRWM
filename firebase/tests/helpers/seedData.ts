@@ -110,6 +110,7 @@ export function createSeedStyleProfile(params: {
   userId: string;
 }): StyleProfile {
   return {
+    id: params.userId,
     userId: params.userId,
     preferredColors: ["blue"],
     avoidedColors: [],
@@ -119,6 +120,7 @@ export function createSeedStyleProfile(params: {
     modestyPreference: "",
     weatherLocationPreference: "",
     bodyShapeNotesPrivate: "",
+    createdAtIso: seedNowIso,
     updatedAtIso: seedNowIso
   };
 }
@@ -127,6 +129,7 @@ export function createSeedAvatarProfile(params: {
   userId: string;
 }): AvatarProfile {
   return {
+    id: params.userId,
     userId: params.userId,
     status: "not-started",
     consentVersion: PRIVACY_CONSENT_VERSION,
@@ -167,7 +170,8 @@ export function createSeedOutfitRecommendation(params: {
     weatherSummary: "No real weather data.",
     recommendationText: "Local emulator placeholder recommendation.",
     status: "placeholder",
-    createdAtIso: seedNowIso
+    createdAtIso: seedNowIso,
+    updatedAtIso: seedNowIso
   };
 }
 

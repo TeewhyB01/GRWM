@@ -19,7 +19,8 @@ import {
   storagePaths,
   userDeletionRequestSchema,
   userProfileSchema,
-  validationSchemas
+  validationSchemas,
+  type WardrobeItem
 } from "./index.ts";
 
 test("@grwm/shared keeps English as the launch locale", () => {
@@ -55,11 +56,30 @@ test("@grwm/shared validates required profile fields without external dependenci
         locale: "en",
         countryCode: "GB",
         subscriptionPlanId: "free",
-        privacyConsentVersion: "2026-06"
+        privacyConsentVersion: "2026-06",
+        createdAtIso: "2026-06-08T00:00:00.000Z",
+        updatedAtIso: "2026-06-08T00:00:00.000Z"
       },
       userProfileSchema
     ),
     true
+  );
+});
+
+test("@grwm/shared rejects incomplete required schema payloads", () => {
+  assert.equal(
+    hasRequiredFields<WardrobeItem>(
+      {
+        id: "item_1",
+        userId: "user_1",
+        name: "Jacket",
+        category: "outerwear",
+        storagePath: "users/user_1/wardrobe/item_1/original",
+        visibility: "private"
+      },
+      validationSchemas.wardrobeItem
+    ),
+    false
   );
 });
 
@@ -127,6 +147,7 @@ test("@grwm/shared validates style preference placeholders", () => {
   assert.equal(
     hasRequiredFields(
       {
+        id: "user_1",
         userId: "user_1",
         preferredColors: [],
         avoidedColors: [],
@@ -136,6 +157,7 @@ test("@grwm/shared validates style preference placeholders", () => {
         modestyPreference: "",
         weatherLocationPreference: "",
         bodyShapeNotesPrivate: "",
+        createdAtIso: "2026-06-08T00:00:00.000Z",
         updatedAtIso: "2026-06-08T00:00:00.000Z"
       },
       validationSchemas.styleProfile

@@ -60,6 +60,8 @@ Auth, Firestore, Storage, and Functions emulators started. Functions definitions
 - `userDeletionRequests/Gt3Mmto7DIYKd8bxlyIjcjSKpZjW`: exists with `status: "requested"`, `reason: "Requested from mobile settings."`, `requestedAtIso: "2026-06-14T21:15:54.632Z"`, and empty `completedAtIso`.
 - `styleProfiles/Gt3Mmto7DIYKd8bxlyIjcjSKpZjW`: not created, as expected for this QA slice.
 
+Current model note: the active deletion request schema and Firestore rules no longer allow a free-form `reason` field. Current mobile deletion requests use only the minimal lifecycle fields documented in `docs/USER_DATA_DELETION.md`.
+
 ## Actual Screenshot Notes
 
 Screenshots were captured locally under `/tmp/grwm-qa/`, including:

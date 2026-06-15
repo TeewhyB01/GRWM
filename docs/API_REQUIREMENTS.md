@@ -27,8 +27,8 @@ All placeholders must return or emit explicit not-implemented responses and must
 ## Future API Areas
 
 - Authentication-aware user profile APIs.
-- Wardrobe item creation, update, delete, and listing.
-- Image upload coordination with Firebase Storage.
+- Wardrobe item creation, update, delete, and listing with strict `userId`, `storagePath`, status, and timestamp validation.
+- Image upload coordination with Firebase Storage, including content type, size, owner metadata, item metadata, consent version, and orphan cleanup rules.
 - Styling context APIs for weather, occasion, and preferences.
 - Admin dashboard APIs with role-based access.
 - User data deletion and export APIs.
@@ -42,3 +42,8 @@ All placeholders must return or emit explicit not-implemented responses and must
 - Do not expose private Storage paths without authorization.
 - Log operational metadata only, never raw personal styling inputs or image contents.
 - Keep consent and deletion endpoints idempotent where practical.
+- Do not enqueue wardrobe image analysis unless the current consent document allows wardrobe photo analysis.
+
+## Next API Boundary
+
+Before wardrobe upload UI is built, define whether the client writes `wardrobeItems` directly under rules, requests a signed/upload session from a trusted Function, or uses a backend coordinator after Storage upload. The selected pattern must be documented and covered by emulator tests before real images are accepted.
