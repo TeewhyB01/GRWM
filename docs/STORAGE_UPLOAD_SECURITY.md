@@ -182,6 +182,11 @@ See `docs/STORAGE_TRIGGER_QA.md`.
 
 ## Current Status
 
-The upload lifecycle foundation is defined, helper-tested, rules-tested, and covered by emulator-backed trigger handler QA. Real wardrobe image upload UI is still blocked until wardrobe onboarding manual emulator QA passes in an installed development build, automatic Storage event delivery is rechecked before production enablement, and destructive orphan cleanup is separately tested and approved.
+The upload lifecycle foundation is defined, helper-tested, rules-tested, and covered by emulator-backed trigger handler QA. Wardrobe onboarding manual QA passed on the installed `com.grwm.mobile` development build on 2026-06-15.
+
+GRWM is ready for the Wardrobe Image Upload UI Agent to build the private upload UI MVP. The next agent must keep the same boundary: Firestore draft first, exact private Storage upload second, trusted backend finalisation third, and no AI analysis by default.
+
+Production upload enablement still requires deployed Storage event verification in a non-production Firebase project. Destructive orphan cleanup remains disabled until separately tested and approved.
 
 See `docs/WARDROBE_UPLOAD_LIFECYCLE.md` for the end-to-end lifecycle and readiness boundary.
+See `docs/UPLOAD_UI_READINESS.md` and `docs/WARDROBE_UPLOAD_UI_PLAN.md` for the current upload UI handoff.

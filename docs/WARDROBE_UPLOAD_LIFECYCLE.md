@@ -2,7 +2,7 @@
 
 Date: 2026-06-15
 
-This document defines the privacy-first lifecycle for future wardrobe image uploads. The lifecycle foundation is now implemented across shared TypeScript contracts, Firestore rules, Storage rules, backend finalisation helpers, and non-destructive orphan detection. The mobile image picker and real upload button UI are still blocked.
+This document defines the privacy-first lifecycle for wardrobe image uploads. The lifecycle foundation is now implemented across shared TypeScript contracts, Firestore rules, Storage rules, backend finalisation helpers, non-destructive orphan detection, and emulator-backed Storage trigger handler QA. The project is ready for the next Wardrobe Image Upload UI Agent to implement the private upload UI MVP within the scope in `docs/WARDROBE_UPLOAD_UI_PLAN.md`.
 
 ## Lifecycle
 
@@ -69,12 +69,14 @@ Safe now:
 - Storage upload security boundary, backend finalisation helper tests, and emulator-backed trigger handler QA.
 - Consent-gated future analysis request helper.
 - Non-destructive orphan detection.
+- Real wardrobe image upload UI implementation within the approved MVP scope.
 
 Still blocked:
 
-- Real wardrobe image picker/upload UI.
 - AI analysis jobs.
 - Avatar, payment, shopping, and recommendation workflows.
 - Destructive orphan cleanup.
-- Wardrobe onboarding installed-development-build manual QA after upload-adjacent changes.
-- Production-like automatic Storage event delivery verification in a non-production Firebase project before enabling real uploads.
+- Production enablement of real uploads until deployed Storage event delivery is verified in a non-production Firebase project.
+- Production cleanup/retention enforcement until destructive orphan cleanup is separately tested and approved.
+
+The 2026-06-15 installed-development-build wardrobe onboarding manual QA passed, and `docs/STORAGE_TRIGGER_QA.md` confirms Storage trigger handler registration and lifecycle behavior in Firebase emulators. Current local emulator limitations mean automatic v2 Storage event delivery should still be rechecked before production enablement, but it is not a blocker to implementing the upload UI MVP.

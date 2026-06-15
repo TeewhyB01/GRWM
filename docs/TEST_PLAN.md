@@ -83,9 +83,27 @@
 - Manual evidence and emulator document snapshots: `docs/MOBILE_MANUAL_QA_REPORT.md`.
 - Next manual rerun should use a new synthetic account and confirm the same A-G flow after any navigation, auth, profile, privacy, or rules changes.
 - Wardrobe onboarding manual QA should also verify Intro, Privacy Explainer, Category Preferences, Style Basics, Summary, and Wardrobe Home empty state using an installed development build. Confirm the "Add wardrobe item soon" CTA is disabled and no image picker or Storage upload occurs.
-- 2026-06-15 wardrobe onboarding run result: isolated emulators, Metro, and the installed `com.grwm.mobile` development build launched on iPhone 17 simulator, iOS 26.5. After app-data reset the unauthenticated Welcome state appeared, but the A-J wardrobe onboarding flow was blocked before account creation by desktop Simulator input/focus issues. Evidence: `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
-- A dev-only local QA access harness now exists to avoid simulator text input for account creation. Enable it only in ignored local env with `GRWM_ENABLE_QA_ACCESS=true` and `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` while using the demo Firebase emulator config. It is hidden by default, hidden outside emulator mode, hidden in production runtime, and hidden for non-`demo-grwm` Firebase config.
-- The next wardrobe onboarding manual rerun should tap "Continue with local QA account", save privacy consent through the app UI, then complete the wardrobe onboarding screens. The harness must not skip the wardrobe setup screens, and `wardrobeSetupProfiles/{uid}` must appear only after the setup flow saves it.
+- 2026-06-15 wardrobe onboarding rerun result: A-J passed on the installed `com.grwm.mobile` development build with isolated Firebase emulators and the dev-only local QA access harness. The harness did not create privacy consent, wardrobe setup data, wardrobe items, Storage files, or AI jobs. Evidence: `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
+- Local QA access remains available only for emulator manual QA when simulator text input is unreliable. Enable it only in ignored local env with `GRWM_ENABLE_QA_ACCESS=true` and `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` while using the demo Firebase emulator config. It is hidden by default, hidden outside emulator mode, hidden in production runtime, and hidden for non-`demo-grwm` Firebase config.
+- The next upload UI manual QA run should first confirm auth, privacy consent, wardrobe onboarding completion, Settings consent updates, and the disabled pre-upload state still work before exercising the new add-item upload surface.
+
+## Wardrobe Upload UI MVP Acceptance Gates
+
+- The upload UI must run only in an installed development build; Expo Go is unsupported.
+- The user must be signed in before accessing upload.
+- A recorded privacy consent document must exist before draft creation.
+- The app must select one private wardrobe image from the device library.
+- The app must validate allowed image MIME type and `MAX_WARDROBE_IMAGE_BYTES` before upload where the selected asset exposes those values.
+- The app must create `wardrobeItems/{itemId}` before uploading to Storage.
+- The app must upload only to `users/{userId}/wardrobe/{itemId}/original`.
+- Storage custom metadata must match the authenticated user, draft item ID, consent version, upload category, and exact storage path.
+- The app must show upload progress, success/pending, failure, retry, and cancel states.
+- The client must not set `uploaded`, `upload_failed`, `uploadedAtIso`, `uploadFailedAtIso`, `uploadFailureReason`, `analysisStatus`, or `analysisConsentVersion`.
+- No Storage upload may start if Firestore draft creation fails.
+- No cross-user Firestore or Storage write may succeed.
+- No AI job, recommendation, avatar, shopping, payment, affiliate, or public sharing record may be created.
+- Upload failure should avoid orphan records where practical; destructive cleanup remains out of scope.
+- Required command gates after implementation: root typecheck/lint/test, Firestore rules, Storage rules, combined Firebase rules, wardrobe upload trigger QA, Functions typecheck/build, mobile typecheck/test, and admin typecheck.
 
 ## Known Limitations
 
@@ -98,7 +116,7 @@
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
 - Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.
 - Architecture review status on 2026-06-15 remains amber. Wardrobe onboarding foundation work can proceed.
-- Wardrobe onboarding foundation, setup profile rules, upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, non-destructive orphan detection, and wardrobe trigger handler QA are now implemented and tested. The 2026-06-15 installed-development-build wardrobe onboarding manual run was blocked before account creation, so real wardrobe upload UI remains blocked until wardrobe onboarding manual QA passes and upload UI readiness is separately approved.
+- Wardrobe onboarding foundation, setup profile rules, upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, non-destructive orphan detection, wardrobe trigger handler QA, and installed-development-build wardrobe onboarding manual QA are now implemented and tested. Real wardrobe upload UI is ready for the approved MVP implementation scope in `docs/WARDROBE_UPLOAD_UI_PLAN.md`; production upload enablement still requires non-production deployed Storage event verification and cleanup/retention approval.
 
 ## MVP Test Areas
 

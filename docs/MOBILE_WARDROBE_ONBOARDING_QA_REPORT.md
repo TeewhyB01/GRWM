@@ -8,6 +8,10 @@ Manual QA was rerun for the wardrobe onboarding foundation on the installed `com
 
 No Expo Go, image picker, Firebase Storage upload UI, AI, avatar, payment, shopping, affiliate, or upload work was built.
 
+## Superseded Earlier Attempt
+
+An earlier 2026-06-15 13:21 BST attempt on the iPhone 17 simulator reached the installed development build, isolated emulators, Metro, development-client loading, and the unauthenticated Welcome state, but it was blocked before account creation by desktop Simulator input/focus issues. That attempt produced no wardrobe setup profile, no wardrobe items, no Storage files, and no AI side effects. Its useful context is preserved here; readiness decisions should use this 19:45 BST passing report.
+
 ## Target
 
 - Simulator: `GRWM Wardrobe QA iPhone 16`

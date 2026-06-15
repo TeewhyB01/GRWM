@@ -91,7 +91,7 @@ The QA button creates a generated `example.test` Auth user and ensures only `use
 
 Latest manual result: on 2026-06-14, the installed `com.grwm.mobile` development build passed A-G auth/profile/privacy/deletion QA on the iPhone 17 simulator against isolated Firebase emulators. Evidence and Firestore document snapshots are in `docs/MOBILE_MANUAL_QA_REPORT.md`.
 
-Latest wardrobe onboarding manual result: on 2026-06-15, isolated emulators, Metro, and the installed `com.grwm.mobile` development build launched on the iPhone 17 simulator. After resetting app data, the unauthenticated Welcome state appeared, but the A-J wardrobe onboarding flow was blocked before account creation by Simulator input/focus issues. A local QA access harness is now available for the rerun, but the A-J checklist has not passed yet. Evidence is in `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
+Latest wardrobe onboarding manual result: on 2026-06-15, the installed `com.grwm.mobile` development build passed the A-J wardrobe onboarding checklist against isolated Firebase emulators. The dev-only local QA access harness was used only to bypass unreliable simulator account text entry; privacy consent and wardrobe setup were still completed through the app UI. Evidence is in `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
 
 ## Wardrobe Onboarding Foundation
 
@@ -108,7 +108,33 @@ Screens:
 
 The Wardrobe Home empty state shows "Add wardrobe item soon" as a disabled placeholder CTA. The app must not open an image picker, write Firebase Storage objects, create image-backed `wardrobeItems`, or request AI analysis in this phase.
 
-Manual QA after this change should use an installed development build, not Expo Go. Verify setup save/resume, completion, Settings privacy link, and the disabled upload CTA. The 2026-06-15 wardrobe onboarding attempt did not complete those checks, so rerun on a clean, controllable simulator or physical device before enabling upload UI work.
+Manual QA after upload UI changes should use an installed development build, not Expo Go. Verify setup save/resume, completion, Settings privacy link, the upload flow, and the consent/privacy boundaries before enabling any release-facing upload path.
+
+## Wardrobe Upload UI Handoff
+
+The project is ready for the Wardrobe Image Upload UI Agent. The next agent may build only the private upload MVP defined in `docs/WARDROBE_UPLOAD_UI_PLAN.md`.
+
+Current mobile dependency state:
+
+- `expo-image-picker` is not installed.
+- No mobile image picker usage exists.
+- No mobile Firebase Storage upload usage exists.
+
+Recommended next dependency:
+
+```bash
+pnpm --filter mobile expo install expo-image-picker
+```
+
+If pnpm is not on PATH:
+
+```bash
+/Users/olutayooladeinbo/Documents/IAttend\ 2/.tools/bin/pnpm --filter mobile expo install expo-image-picker
+```
+
+Add the `expo-image-picker` config plugin to `apps/mobile/app.json` with photo-library permission copy for private wardrobe upload. Keep camera and microphone permissions disabled for the first upload MVP unless camera capture is separately approved. Rebuild the installed development build after adding the dependency or changing native config.
+
+The next upload UI must create a Firestore draft first, upload to the exact private Storage path with required metadata, show progress/error/retry/cancel states, and let the backend finalisation handler mark the item `uploaded`. It must not create AI jobs, avatar workflows, shopping, payment, affiliate, public sharing, or destructive cleanup.
 
 Account/data deletion remains a client request flow in mobile: Settings creates `userDeletionRequests/{uid}` with `status: requested`, `requestedBy: user`, and `source: mobile`. The mobile client must not directly delete private Firestore records, Firebase Storage files, or Firebase Auth users. The trusted backend `userDataDeletion` trigger processes deletion securely and may sign the user out after completion.
 

@@ -55,11 +55,11 @@ Account deletion includes `wardrobeSetupProfiles/{userId}` in the trusted backen
 
 ## Manual QA Status
 
-2026-06-15 installed-development-build wardrobe onboarding QA was attempted against isolated Firebase emulators on the iPhone 17 simulator. The installed `com.grwm.mobile` build, emulator startup, Metro startup, development-client launch, and fresh unauthenticated Welcome state after app-data reset were confirmed.
+2026-06-15 installed-development-build wardrobe onboarding QA passed against isolated Firebase emulators on the iPhone 16 simulator. The dev-only local QA access harness was used only to bypass unreliable simulator account text entry; privacy consent and all wardrobe setup screens were completed through the app UI.
 
-The full A-J wardrobe onboarding flow was not completed because desktop Simulator input/focus automation blocked test account creation before protected wardrobe screens could be reached. No app fixes were made. Evidence is in `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
+The A-J checklist verified fresh auth state, consent-required routing, Wardrobe Setup Intro, Privacy Explainer, Category Preferences, Style Basics, Summary save, Wardrobe Home empty state, persistence after reopen, Settings consent updates, logout, signed-out protection, zero Storage files, zero `wardrobeItems`, and zero AI side effects. Evidence is in `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
 
-Status: implemented and automated checks are green, but the wardrobe onboarding foundation is not yet manually verified.
+Status: implemented, automated checks are green, and the wardrobe onboarding foundation is manually verified in an installed development build.
 
 ## Local QA Access Harness
 
@@ -90,10 +90,10 @@ The foundation intentionally does not implement:
 - AI analysis jobs or provider calls.
 - Avatar, payment, shopping, or affiliate flows.
 
-Real wardrobe image upload UI remains blocked until full Storage trigger emulator coverage, installed development-build mobile QA, and retention/cleanup approval are complete.
+Real wardrobe image upload UI is ready for the next Wardrobe Image Upload UI Agent within the private MVP scope documented in `docs/WARDROBE_UPLOAD_UI_PLAN.md`. AI analysis, avatar, payment, shopping, affiliate, public sharing, production deployment, and destructive orphan cleanup remain blocked.
 
 ## Next Step Before Upload UI
 
-Recommended next step: Mobile Wardrobe Manual QA Rerun Agent using the local QA access harness, then Upload UI Readiness Agent only after manual onboarding passes.
+Recommended next step: Wardrobe Image Upload UI Agent.
 
-The manual QA rerun should complete the A-J installed-development-build checklist with a fresh synthetic emulator account. Storage trigger handler QA is now covered separately in `docs/STORAGE_TRIGGER_QA.md`; after onboarding manual QA passes, upload readiness work should confirm non-destructive cleanup/retention decisions, recheck automatic Storage event delivery before production enablement, and rerun installed-development-build mobile manual QA before any real image picker or Storage upload UI is enabled.
+The upload UI agent should keep the lifecycle boundary from `docs/WARDROBE_UPLOAD_LIFECYCLE.md`: Firestore draft first, exact private Storage upload second, trusted backend finalisation third, and no AI analysis by default. Automatic Storage event delivery should still be rechecked before production enablement, and cleanup/retention enforcement remains a later production-readiness task.

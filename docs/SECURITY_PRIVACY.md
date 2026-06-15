@@ -46,7 +46,9 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 - Final lifecycle is Firestore draft first, exact private Storage upload second, trusted backend finalisation third.
 - AI analysis remains separate from private upload. Future analysis requests are blocked unless `wardrobePhotoAnalysis` consent is true.
 - Server-side orphan detection is expanded but remains non-destructive.
-- Real wardrobe image upload UI is still blocked until wardrobe onboarding manual emulator QA passes in an installed development build, automatic Storage event delivery is rechecked before production enablement, and cleanup/retention behavior is approved.
+- Wardrobe onboarding manual QA passed on the installed `com.grwm.mobile` development build on 2026-06-15.
+- Real wardrobe image upload UI is ready to implement as a private MVP within `docs/WARDROBE_UPLOAD_UI_PLAN.md`.
+- Production upload enablement is still blocked on non-production deployed Storage event verification and cleanup/retention approval.
 - Keep generated avatar outputs backend-owned; do not expose client avatar generation writes.
 
 ## Future Work
@@ -63,3 +65,4 @@ See `docs/STORAGE_UPLOAD_SECURITY.md` for the current upload policy, metadata co
 See `docs/STORAGE_TRIGGER_QA.md` for Storage trigger registration and backend finalisation lifecycle QA.
 See `docs/WARDROBE_UPLOAD_LIFECYCLE.md` for the wardrobe upload lifecycle.
 See `docs/WARDROBE_ONBOARDING.md` for the current non-image wardrobe setup foundation.
+See `docs/UPLOAD_UI_READINESS.md` and `docs/WARDROBE_UPLOAD_UI_PLAN.md` for the approved upload UI implementation boundary.

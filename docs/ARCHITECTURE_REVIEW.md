@@ -2,9 +2,9 @@
 
 Date: 2026-06-15
 
-Architecture health rating: amber.
+Architecture health rating: amber for production, ready for Wardrobe Image Upload UI MVP implementation.
 
-GRWM now has a wardrobe onboarding foundation that collects explicit user-provided category and style basics without uploading images. The wardrobe upload lifecycle foundation is defined, helper-tested, rules-tested, and covered by Storage trigger handler QA in Firebase emulators, but GRWM is still not ready for real wardrobe image upload UI until the release blockers below are addressed.
+GRWM now has the foundations needed to implement the real private wardrobe image upload UI. The upload UI itself is still intentionally unbuilt, but the preconditions for a narrow MVP are in place: signed-in and consent-gated mobile flow, manually verified wardrobe onboarding, private exact Storage paths, field-bound `wardrobeItems` drafts, backend finalisation helpers, Storage trigger handler QA, and documented non-destructive orphan detection.
 
 ## What Is Solid
 
@@ -12,94 +12,90 @@ GRWM now has a wardrobe onboarding foundation that collects explicit user-provid
 - Package management is consistently pnpm-based in workspace scripts.
 - Mobile uses Expo development builds with `expo-dev-client`; Expo Go remains explicitly unsupported.
 - Mobile Auth, profile persistence, protected navigation, privacy consent capture, Settings consent updates, and deletion request creation are implemented and manually QA'd against emulators.
-- Firebase Functions have a clean placeholder registry for deferred workflows and an active trusted `userDataDeletion` trigger.
-- Deletion processing is explicit, idempotent, audited, emulator-tested, and scoped to the requesting user.
-- Firestore rules enforce user ownership for current user-owned collections and deny client-owned deletion lifecycle transitions.
-- Storage rules are private by user path and deny public access.
-- Wardrobe upload lifecycle now uses Firestore draft first, exact private Storage upload second, and trusted backend finalisation third.
-- Shared helpers now create upload drafts, build/validate required metadata, detect backend-owned wardrobe fields, create safe upload failure payloads, and block analysis requests without `wardrobePhotoAnalysis` consent.
-- Functions helpers now verify wardrobe Storage objects, mark existing uploads uploaded or failed, write safe audit entries, and keep AI analysis unstarted.
-- Storage trigger QA now confirms `functions/lib/index.js` generation, Functions emulator definition loading, `wardrobeUploadFinalisation` registration, private wardrobe path filtering, valid finalisation, consent-separated upload behaviour, failure paths, cross-user collision protection, idempotency, and no AI job creation.
-- Orphan detection now reports missing records/files, stale `upload_pending` records, `upload_failed` records, and metadata mismatches without deleting anything.
-- Mobile wardrobe onboarding now includes intro, privacy explainer, category preferences, style basics, setup summary, and Wardrobe Home empty state without image picker or Storage upload.
-- `wardrobeSetupProfiles/{userId}` stores private setup preferences with owner-bound rules, field validation, setup status, mobile source, and deletion-plan coverage.
-- Emulator rules and deletion trigger tests cover cross-user denial, public Storage denial, deletion tombstone retention, audit logs, Auth deletion, and unaffected-user protection.
-- Shared TypeScript contracts cover the foundation model set and now include consistent IDs/timestamps on style, avatar, and recommendation records.
+- Wardrobe onboarding is implemented with intro, privacy explainer, category preferences, style basics, setup summary, and Wardrobe Home empty state.
+- Installed-development-build wardrobe onboarding QA passed on 2026-06-15 using the local QA access harness without skipping privacy consent or setup.
+- Wardrobe Home clearly states that real image upload is not active yet and shows a disabled "Add wardrobe item soon" CTA.
+- `wardrobeSetupProfiles/{userId}` stores private setup preferences separately from image-backed wardrobe item records.
+- `wardrobeItems` supports draft/upload lifecycle, owner binding, private storage path, upload status, analysis status, safe failure fields, and timestamps.
+- Firestore rules enforce owner consistency, private client-writable wardrobe records, exact Storage path consistency, and client denial for backend-owned upload/analysis lifecycle fields.
+- Storage rules enforce private user paths, allowed image MIME types, 10 MiB wardrobe max size, required owner/item/path/consent metadata, no broad list access, cross-user denial, and backend-owned generated output paths.
+- Shared helpers create wardrobe upload drafts, build/validate required metadata, detect backend-owned wardrobe fields, validate upload policy, and separate upload consent from analysis consent.
+- Functions helpers verify wardrobe Storage objects, mark valid uploads as `uploaded`, mark safe failure states where appropriate, write safe audit entries, and keep AI analysis unstarted.
+- Storage trigger QA confirms Functions build output, v2 Storage trigger registration, private wardrobe path filtering, valid finalisation, safe failures, cross-user collision protection, idempotency, ignored non-wardrobe paths, and no AI job creation.
+- Orphan detection reports missing records/files, stale `upload_pending` records, `upload_failed` records, and metadata mismatches without deleting anything.
+- Account deletion covers wardrobe setup records, wardrobe item records, and private wardrobe Storage prefixes.
+
+## Readiness Decision
+
+GRWM is ready for the Wardrobe Image Upload UI Agent.
+
+Allowed next work is limited to the private upload UI MVP in `docs/WARDROBE_UPLOAD_UI_PLAN.md`: add item screen, single image selection, client validation, Firestore draft first, exact Firebase Storage upload with required metadata, progress/error/retry/cancel states, backend finalisation to `uploaded`, and wardrobe list display.
+
+The next agent must not build AI analysis, automatic outfit generation, avatar try-on, shopping recommendations, payment, affiliate links, public sharing, destructive orphan cleanup, or production deployment.
 
 ## What Is Risky
 
-- Firestore rules still validate ownership more strongly than field shape for most user-owned collections.
-- Storage rules enforce content type, max file size, upload metadata, and path-to-metadata consistency for upload paths. They still cannot verify bytes against MIME claims, run moderation/malware checks, or prove Firestore document existence before upload.
-- Admin access is still a placeholder local session. Real admin access requires Firebase Auth, custom claims or trusted role issuance, and owner bootstrap.
-- User-owned `users/{uid}` writes are currently client writable for the signed-in owner. That is acceptable for the foundation, but production should move sensitive lifecycle fields to trusted backend writes.
-- Wardrobe upload lifecycle plumbing is implemented, but real wardrobe image upload UI is intentionally not implemented. AI, avatar, payments, shopping, and recommendation flows remain intentionally not implemented.
-- Local Firebase Tools registered the v2 Storage trigger but did not auto-deliver Storage emulator write events in this run. QA invokes the registered handler with finalized payloads after emulator uploads; automatic event delivery should be rechecked before production enablement.
-- Wardrobe onboarding creates setup preferences only. It does not prove the future image upload UI is ready.
-- The existing untracked `functions/src/placeholders/userDataDeletion.ts` duplicates the active trigger name conceptually. It is not exported, but it should be removed or renamed by the owner before it becomes confusing.
+- Storage rules validate MIME type, size, and metadata claims, but cannot verify image bytes, run malware/moderation checks, or prove Firestore document existence before upload.
+- Local Firebase Tools registered the v2 Storage trigger, but Storage emulator writes did not auto-deliver finalize events in this environment. QA invokes the registered handler with finalized payloads after emulator uploads; deployed event delivery should be rechecked before production enablement.
+- Destructive orphan cleanup is intentionally disabled pending retention policy, audit design, and integration tests.
+- Admin access is still a placeholder local session. Real admin access requires Firebase Auth, trusted role issuance, custom claims or mirrored role state, and owner bootstrap.
+- Firestore rules still validate ownership more strongly than field shape for most non-wardrobe user-owned collections.
+- User-owned `users/{uid}` writes are currently client writable for the foundation mobile signup flow. Production should move sensitive lifecycle fields behind trusted backend writes or stricter validation.
 
-## Must Be Fixed Before Wardrobe Upload
+## Blockers
 
-- Rule-level Storage checks for allowed image MIME types, maximum file size, required owner metadata, required path ID metadata, and consent version metadata are implemented and emulator-tested.
-- Firestore field-level validation for `wardrobeItems`, including `userId`, `storagePath`, private visibility, timestamps, source, analysis status, and allowed enum values is implemented and emulator-tested.
-- Storage paths under `users/{uid}/wardrobe/{itemId}/original` now deny oversized files, disallowed content types, mismatched owner metadata, mismatched item metadata, unauthenticated writes, and cross-user writes.
-- Keep the selected lifecycle: Firestore draft first, Storage object second, trusted Function finalisation third.
-- Keep `pnpm test:storage-trigger` green for `wardrobeUploadFinalisation` registration and backend lifecycle coverage.
-- Recheck automatic Storage event delivery in a non-production Firebase project or upgraded emulator runtime before real upload enablement.
-- Operationally approve server-side retention and deletion behavior for failed or orphaned upload objects before enabling destructive cleanup.
-- Rerun installed-development-build mobile manual QA after upload-adjacent changes.
+Blocking before upload UI:
 
-## What Can Wait
+- None found.
 
-- AI recommendation generation.
-- Avatar and virtual try-on.
-- Payments and subscription enforcement.
-- Shopping and affiliate integrations.
-- Production admin dashboards beyond protected shell and role model.
-- Production analytics and marketing email integrations.
-- Full legal retention design for payment/provider records, because payment is not active yet.
+Can wait until after upload UI MVP:
 
-## Release Blockers
+- Recheck automatic v2 Storage finalize event delivery when Firebase Tools/runtime versions change.
+- Extend deletion trigger integration to seed `wardrobeSetupProfiles` directly; the deletion plan already includes it and integration covers wardrobe item plus Storage deletion.
+- Add UI-specific retry/rollback refinements after first manual upload QA if needed.
 
-- Real wardrobe image upload UI remains blocked until installed-development-build mobile QA is rerun after these upload-adjacent changes.
-- Wardrobe onboarding manual QA should be run in an installed development build after this navigation/rules change.
-- Automatic Storage event delivery should be rechecked before production upload enablement.
-- Firestore field validation is incomplete for sensitive non-wardrobe user-owned data.
-- Real admin authentication and role issuance are not implemented.
-- Production Firebase project configuration and trusted owner bootstrap are not verified.
-- Mobile manual QA must be rerun after any auth, privacy, navigation, rules, or upload-boundary change.
+Production-readiness later:
 
-## Technical Debt
-
-- Placeholder Functions are intentionally broad and should stay not-implemented until their phase starts.
-- Admin placeholder auth should be replaced before any real operational data is exposed.
-- Shared validation remains lightweight metadata, not a server-side validator.
-- Historical QA notes include older states and should be read with the latest status sections first.
-- The local untracked duplicate deletion placeholder should be cleaned up outside this review if it is not intentional work-in-progress.
+- Verify deployed Storage finalize behavior in a non-production Firebase project.
+- Define retention windows for failed uploads and orphaned Storage objects.
+- Keep destructive cleanup disabled until separately tested and approved.
+- Add image byte verification, moderation, and abuse scanning strategy before public launch.
+- Replace admin placeholder auth and bootstrap real owner/admin roles.
+- Add stronger rules validation for sensitive non-wardrobe collections.
 
 ## Security Concerns
 
-- No cross-user read/write issue was found in the reviewed rules and deletion processor.
+- No cross-user Firestore or Storage issue was found in the reviewed upload boundary.
 - No public Storage path was found.
-- The deletion lifecycle correctly keeps client writes to `requested` only and backend ownership of later states.
-- Audit logging avoids private Storage object names and raw sensitive styling data.
-- Admin escalation remains the main unresolved boundary because custom claims and trusted role assignment are not active.
-- Upload-specific rule controls and lifecycle helpers are now in place, but real wardrobe images still need full trigger integration coverage, non-destructive cleanup operational approval, and manual QA before upload UI.
+- Generated avatar output paths remain backend-owned and not client-writable.
+- Upload finalisation audit logs avoid private object names and image content.
+- Private upload and AI analysis are separate: missing `wardrobePhotoAnalysis` consent blocks analysis, not private upload finalisation.
+- No mobile image picker, mobile Firebase Storage upload, mobile AI provider call, or client-side wardrobe lifecycle tampering exists yet.
 
 ## Test Gaps
 
+- Upload UI implementation tests do not exist yet because the UI is intentionally unbuilt.
+- Manual upload QA must be run in an installed development build after adding image picker/native config.
+- Automatic Storage finalize delivery needs non-production deployed verification before production enablement.
 - Admin allow-path rules tests through `adminUsers` role documents.
 - Firestore field-level validation tests for user profile, consent, style profile, avatar profile, and recommendation payloads.
-- Firestore or Storage outage drills for the deletion processor.
-- Installed-development-build manual QA for the new wardrobe onboarding screens and empty state.
-- End-to-end mobile rerun after the schema/doc review changes.
-- Automatic v2 Storage event delivery in the local emulator path. Current QA covers registration plus finalized handler execution against emulator state.
+- Additional production-like outage drills for deletion and upload finalisation.
 
 ## Verification
 
-The requested pnpm gate suite passed on 2026-06-15 using the project fallback pnpm binary and bundled Node runtime. Storage trigger QA also passed with 9/9 tests. The Firebase CLI emitted the known Java 21 future-requirement warning; pnpm install also repeated the known ignored `re2` build-script warning. Neither blocked the current gates.
+The required pnpm gate suite passed on 2026-06-15 using the project fallback pnpm binary with the bundled Node runtime on PATH:
+
+- install, root typecheck, root lint, and root tests
+- Firestore rules, Storage rules, and combined Firebase rules
+- wardrobe upload trigger QA
+- Functions typecheck and build
+- mobile typecheck and tests
+- admin typecheck
+
+The first Firestore rules attempt failed before test execution because a stale orphaned Firestore emulator process was holding port `8085`. After clearing that stale process, the Firestore rules command passed with 42 tests. Firebase Tools repeated the known Java 21 future-requirement warning, `pnpm install` repeated the existing ignored `re2` build-script warning, and the Functions emulator reported the local Node 20 vs host Node 24 mismatch during emulator loading. None blocked the readiness decision.
 
 ## Recommended Next Agent
 
-Recommended next agent: Mobile Wardrobe Manual QA Rerun Agent, followed by Upload UI Readiness Agent.
+Recommended next agent: Wardrobe Image Upload UI Agent.
 
-The QA pass should verify the setup flow and disabled upload CTA in an installed development build. The later Upload UI Readiness Agent should add no image UI until Storage trigger QA remains green, installed-development-build QA passes, automatic Storage event delivery is rechecked, and retention/cleanup approval is complete.
+The agent should follow `docs/WARDROBE_UPLOAD_UI_PLAN.md`, add `expo-image-picker` if needed, rebuild the installed development build after native config changes, and keep AI/avatar/payment/shopping/affiliate/public-sharing/destructive-cleanup work out of scope.

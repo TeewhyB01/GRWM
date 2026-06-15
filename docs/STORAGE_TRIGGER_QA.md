@@ -70,6 +70,6 @@ Destructive cleanup remains disabled.
 
 ## Still Blocked
 
-Real wardrobe image upload UI remains blocked until wardrobe onboarding manual QA passes in an installed development build and upload UI readiness is explicitly approved. The mobile app still must not add image picker or Firebase Storage upload UI in this phase.
+Real wardrobe image upload UI is now approved for the next Wardrobe Image Upload UI Agent after installed-development-build wardrobe onboarding manual QA and upload UI readiness both passed on 2026-06-15. The current mobile app still has no image picker or Firebase Storage upload UI; those belong only to the next approved MVP scope.
 
 The local emulator delivery limitation should be rechecked when Firebase Tools or the Functions runtime changes. Before production enablement, verify deployed Storage events in a non-production Firebase project.
