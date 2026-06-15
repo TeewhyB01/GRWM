@@ -1,22 +1,37 @@
 # Mobile Wardrobe Onboarding QA Report
 
-Date/time: 2026-06-15 16:43:05 BST
+Date/time: 2026-06-15 19:45 BST
 
 ## Scope
 
-Manual QA was rerun for the wardrobe onboarding foundation on an installed `com.grwm.mobile` iOS development build against Firebase emulators. Expo Go was not used. No image picker, Firebase Storage upload UI, AI, avatar, payment, shopping, affiliate, or upload work was built.
+Manual QA was rerun for the wardrobe onboarding foundation on the installed `com.grwm.mobile` iOS development build against local Firebase emulators. The dev-only local QA access harness was used only to bypass unreliable simulator account text entry; the wardrobe onboarding flow itself was not skipped.
 
-This rerun focused on finding a controllable manual QA route after the previous iPhone 17 Simulator input/focus blocker. A fresh Route A simulator was created and the installed development build launched successfully, but manual input still could not be controlled reliably enough to complete account creation or the wardrobe onboarding A-J flow.
+No Expo Go, image picker, Firebase Storage upload UI, AI, avatar, payment, shopping, affiliate, or upload work was built.
 
 ## Target
 
-- Route attempted: Route A, cleaner iOS simulator.
 - Simulator: `GRWM Wardrobe QA iPhone 16`
 - iOS: 26.5
 - Simulator UDID: `9D80B63A-D2F4-4C73-8962-754514A862AE`
-- App: installed `com.grwm.mobile` development build copied from the already-installed simulator build bundle.
+- App: installed `com.grwm.mobile` development build
 - Metro: `http://127.0.0.1:8081`
-- Expo Go: not used.
+- Expo Go: not used; the booted simulator app list showed `com.grwm.mobile` and no Expo Go bundle.
+
+## Local QA Access Setup
+
+- `apps/mobile/.env.local` exists locally.
+- `.env.local` is ignored by `.gitignore` via `.env.*`.
+- `git ls-files apps/mobile/.env.local .env.local '**/.env.local'` returned no tracked files.
+- `GRWM_ENABLE_QA_ACCESS=true` is set locally.
+- `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` is set locally.
+- Firebase emulator mode is enabled with `EXPO_PUBLIC_USE_FIREBASE_EMULATORS=true`.
+- Firebase config is local/demo safe:
+  - project ID: `demo-grwm`
+  - auth domain: `demo-grwm.firebaseapp.com`
+  - storage bucket: `demo-grwm.appspot.com`
+  - demo placeholder API/app config only
+- Production mode is not active.
+- QA access remains guarded in code by explicit flags, development/local/test runtime, emulator mode, React Native non-production runtime, and safe local Firebase config.
 
 ## Emulator Ports
 
@@ -27,133 +42,219 @@ This rerun focused on finding a controllable manual QA route after the previous 
 - Storage: `127.0.0.1:9195`
 - Emulator hub: `127.0.0.1:4410`
 - Logging: `127.0.0.1:4505`
-- Firestore websocket: `127.0.0.1:9150`
+- Metro/dev-client: `127.0.0.1:8081`
+
+The Emulator UI responded at `http://127.0.0.1:4001`, and Metro returned `packager-status:running`.
 
 ## Environment Preparation
 
-- `pnpm` was not on PATH, so the documented fallback pnpm was used with the bundled Codex Node runtime on PATH.
-- `apps/mobile/.env.local` already pointed the app at isolated Auth `9100` and Firestore `8085`.
-- `pnpm qa:mobile:emulators:isolated` started Auth, Firestore, Storage, Functions, Emulator UI, hub, logging, and Firestore websocket services.
-- `pnpm mobile:start:dev-client` started Metro and loaded the isolated emulator env values.
-- The iPhone 16 simulator was created with `xcrun simctl create`, booted, and had `com.grwm.mobile` installed with `xcrun simctl install`.
-- The installed development build launched and loaded the Metro bundle via the development-client URL.
+- `pnpm` was not on PATH, so `/Users/olutayooladeinbo/Documents/IAttend 2/.tools/bin/pnpm` was used with the bundled Codex Node runtime on PATH.
+- The isolated mobile QA Firebase emulator command was already running for Auth, Firestore, Storage, Functions, UI, hub, and logging.
+- Metro/dev-client was already running from the existing mobile dev-client command.
+- Auth and Firestore emulator state were cleared before the rerun.
+- The installed `com.grwm.mobile` development build was relaunched and loaded the Metro bundle through the development-client URL.
+- Simulator input was corrected by mapping CoreGraphics events to the actual Simulator window bounds.
 
-## Test Account
+## QA Access Harness Result
 
-- Account type: none created.
-- Seeded account: not used.
-- Fresh account: not created.
-- Reason: manual input/tap control remained unreliable before account creation.
+The login screen showed:
 
-## Manual Result
+- `Local emulator QA only. Hidden in production.`
+- `Continue with local QA account`
 
-Manual QA was attempted but not completed. The fresh iPhone 16 simulator, isolated Firebase emulators, Metro, and installed `com.grwm.mobile` development build all launched successfully. The app reached the unauthenticated Welcome screen in the installed development build.
+Tapping `Continue with local QA account` signed in the local QA user and created only:
 
-The A-J wardrobe onboarding flow could not be completed because desktop input/focus control did not reliably reach the Simulator window. Attempts included a fresh simulator, app relaunch to clear the dev-client menu, Simulator window repositioning through accessibility, AppleScript click/key events, CoreGraphics click events, Space switching attempts, and checking for physical-device or native simulator input tooling. A physical iPhone was visible to Xcode but offline, so Route C was not available. No product bug was confirmed inside the wardrobe onboarding flow.
+- Auth emulator user: `wardrobe-qa+20260615180217+ul6dyf4d3m@example.test`
+- `users/YlZ8aYawPV2bwxo5TC4QHlHP63sC`
+- `userProfiles/YlZ8aYawPV2bwxo5TC4QHlHP63sC`
+
+Immediately after the QA access button:
+
+- `privacyConsents`: 0
+- `wardrobeSetupProfiles`: 0
+- `wardrobeItems`: 0
+- `styleProfiles`: 0
+- `outfitRecommendations`: 0
+- `avatarProfiles`: 0
+- Storage files: 0
+
+The harness did not create wardrobe setup, wardrobe items, Storage files, or AI side-effect records.
 
 ## A-J Checklist
 
 | Step | Result | Notes |
 | --- | --- | --- |
-| A. Fresh auth state | Blocked after partial verification | Fresh simulator and installed dev build reached the unauthenticated Welcome screen. Account creation/sign-in was blocked by desktop Simulator input/focus control. |
-| B. Wardrobe setup entry | Not run | Requires signed-in account and controllable UI input. |
-| C. Privacy explainer | Not run | Requires signed-in account and wardrobe setup navigation. |
-| D. Category preferences | Not run | Requires setup flow access. |
-| E. Style basics | Not run | Requires setup flow access. |
-| F. Summary and save | Not run | No `wardrobeSetupProfiles/{uid}` document was created by manual app QA. |
-| G. Wardrobe home empty state | Not run | Requires completed or resumed setup state. |
-| H. Persistence check | Not run | Requires completed setup state. |
-| I. Settings/privacy alignment | Not run | Requires signed-in account. |
-| J. Signed-out protection | Not run | Only unauthenticated Welcome state was observed. |
+| A. Fresh auth state | Pass | App opened to login, QA access signed in, protected app screens loaded. |
+| B. Wardrobe setup entry | Pass | `WardrobeSetupIntroScreen` appeared. Copy says GRWM styles clothes the user already owns, mentions privacy, and does not expose image upload or image picker. |
+| C. Privacy explainer | Pass | Explainer says wardrobe is private, AI wardrobe analysis requires consent, and privacy choices can be changed in Settings. No AI call or analysis job was created. |
+| D. Category preferences | Pass | Selected tops, trousers, dresses, shoes, bags, workwear, occasion wear, and traditional/cultural clothing. Toggle on/off behavior worked. Empty selection was safely accepted before final category selection. |
+| E. Style basics | Pass | Saved casual dress code, relaxed formality, black/navy/green favourites, purple/orange avoids, no modesty preference, workwear often, and occasionwear sometimes. Values displayed correctly. |
+| F. Summary and save | Pass | Summary showed the selected categories and style basics. Completing setup created/updated `wardrobeSetupProfiles/{uid}` with `setupStatus: completed`, `source: mobile`, timestamps, and matching `userId`. |
+| G. Wardrobe home empty state | Pass | Wardrobe home showed the empty state, stated real image upload is not active yet, and showed `Add wardrobe item soon` as disabled/coming soon. No Storage upload was attempted. |
+| H. Persistence check | Pass | After closing and reopening the app, the user remained authenticated and Wardrobe Home still showed completed setup. |
+| I. Settings/privacy alignment | Pass | Settings privacy controls loaded. `wardrobePhotoAnalysis` was toggled on and saved. No AI analysis, recommendation record, wardrobe item, or Storage file was created. |
+| J. Signed-out protection | Pass | Log out returned to the login screen. Tapping Wardrobe while signed out kept the app on unauthenticated login UI. |
 
-## Firestore Verification
+## Firestore Documents Observed
 
-Emulator-admin inspection after the attempted run observed:
+Auth user:
 
-- `users`: 0 documents.
-- `userProfiles`: 0 documents.
-- `privacyConsents`: 0 documents.
-- `wardrobeSetupProfiles`: 0 documents.
-- `wardrobeItems`: 0 documents.
-- `styleProfiles`: 0 documents.
-- `outfitRecommendations`: 0 documents.
-- `avatarProfiles`: 0 documents.
-- `subscriptions`: 0 documents.
-- `userDeletionRequests`: 0 documents.
-- Auth emulator users: 0.
+- UID: `YlZ8aYawPV2bwxo5TC4QHlHP63sC`
+- Email: `wardrobe-qa+20260615180217+ul6dyf4d3m@example.test`
+- Email verified: false
 
-No `wardrobeSetupProfiles/{uid}` document exists because the manual flow did not reach account creation or setup completion.
+`users/YlZ8aYawPV2bwxo5TC4QHlHP63sC`:
+
+- `email`: `wardrobe-qa+20260615180217+ul6dyf4d3m@example.test`
+- `authProvider`: `password`
+- `disabled`: false
+- `createdAtIso`, `updatedAtIso`, `lastLoginAtIso`: `2026-06-15T18:02:17.112Z`
+
+`userProfiles/YlZ8aYawPV2bwxo5TC4QHlHP63sC`:
+
+- `userId`: `YlZ8aYawPV2bwxo5TC4QHlHP63sC`
+- `locale`: `en`
+- `countryCode`: empty string
+- `subscriptionPlanId`: `free`
+- `privacyConsentVersion`: `2026-06-foundation`
+
+`privacyConsents/YlZ8aYawPV2bwxo5TC4QHlHP63sC`:
+
+- `source`: `mobile`
+- `version`: `2026-06-foundation`
+- `wardrobePhotoAnalysis`: true after Settings update
+- `stylePhotoAnalysis`: false
+- `avatarCreation`: false
+- `locationWeatherUse`: false
+- `aiRecommendationUse`: false
+- `marketingEmails`: false
+- `analytics`: false
+- `createdAtIso`: `2026-06-15T18:03:33.126Z`
+- `updatedAtIso`: `2026-06-15T18:43:15.092Z`
+
+`wardrobeSetupProfiles/YlZ8aYawPV2bwxo5TC4QHlHP63sC`:
+
+- `id`: `YlZ8aYawPV2bwxo5TC4QHlHP63sC`
+- `userId`: `YlZ8aYawPV2bwxo5TC4QHlHP63sC`
+- `source`: `mobile`
+- `setupStatus`: `completed`
+- `createdAt`: `2026-06-15T18:04:25.018Z`
+- `updatedAt`: `2026-06-15T18:27:59.953Z`
+- `completedAt`: `2026-06-15T18:27:59.953Z`
+- `selectedCategories`: `tops`, `trousers`, `dresses`, `shoes`, `bags`, `workwear`, `occasion_wear`, `traditional_cultural_clothing`
+- `styleBasics.typicalDressCode`: `casual`
+- `styleBasics.preferredOutfitFormality`: `relaxed`
+- `styleBasics.favouriteColourFamilies`: `black`, `navy`, `green`
+- `styleBasics.coloursToAvoid`: `purple`, `orange`
+- `styleBasics.modestyPreference`: `no_preference`
+- `styleBasics.workwearRelevance`: `often`
+- `styleBasics.occasionwearRelevance`: `sometimes`
+
+Final emulator collection counts:
+
+- `users`: 1
+- `userProfiles`: 1
+- `privacyConsents`: 1
+- `wardrobeSetupProfiles`: 1
+- `wardrobeItems`: 0
+- `styleProfiles`: 0
+- `outfitRecommendations`: 0
+- `avatarProfiles`: 0
+- `subscriptions`: 0
+- `userDeletionRequests`: 0
 
 ## Storage And AI Confirmation
 
 - Firebase Storage emulator files observed: 0.
-- No Storage upload was attempted from the mobile app during this rerun.
+- No Storage upload was attempted from the mobile app.
 - No image-backed `wardrobeItems` records were created.
 - No `outfitRecommendations` records were created.
-- The current shared collection constants do not include a live `aiJobs` collection; future `aiJobs` remains listed only in future collection planning.
-- No AI analysis job or recommendation-side document was created during manual app QA.
+- No `avatarProfiles` records were created.
+- The shared collection constants include future `aiJobs`, but no mobile AI provider call or AI job creation path ran during this QA.
+- Toggling wardrobe analysis consent in Settings did not trigger AI analysis.
 
-## Input/Focus Workarounds Attempted
+## Evidence Screenshots
 
-- Created and booted fresh `GRWM Wardrobe QA iPhone 16` simulator.
-- Installed `com.grwm.mobile` onto the fresh simulator from the existing installed development-build bundle.
-- Launched the installed development build directly with `xcrun simctl launch`.
-- Loaded Metro through `exp+grwm://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081`.
-- Accepted the dev-client open flow and relaunched the app to clear the dev menu.
-- Moved the Simulator window through macOS accessibility APIs.
-- Tried AppleScript click/key events.
-- Tried CoreGraphics click events.
-- Tried macOS Space switching events.
-- Checked for Appium, idb, applesimutils, WebDriverAgent, and native simulator tap helpers; none were available.
-- Checked for a physical iPhone; Xcode listed `Olutayo's Iphone` as offline.
+- `/tmp/grwm-wardrobe-qa-welcome.png`
+- `/tmp/grwm-wardrobe-qa-after-qa-click.png`
+- `/tmp/grwm-wardrobe-qa-after-consent.png`
+- `/tmp/grwm-wardrobe-qa-intro.png`
+- `/tmp/grwm-wardrobe-qa-privacy-explainer.png`
+- `/tmp/grwm-wardrobe-qa-categories-all-final.png`
+- `/tmp/grwm-wardrobe-qa-style-selected-top.png`
+- `/tmp/grwm-wardrobe-qa-style-bottom-final.png`
+- `/tmp/grwm-wardrobe-qa-summary-final.png`
+- `/tmp/grwm-wardrobe-qa-wardrobe-home.png`
+- `/tmp/grwm-wardrobe-qa-after-reopen.png`
+- `/tmp/grwm-wardrobe-qa-settings.png`
+- `/tmp/grwm-wardrobe-qa-settings-saved-consent.png`
+- `/tmp/grwm-wardrobe-qa-after-logout.png`
+- `/tmp/grwm-wardrobe-qa-signed-out-wardrobe-protection.png`
 
 ## Fixes Made
 
-None. The blocker remained environmental/manual-input related. No app-side keyboard, route, save, Firestore path, setup status, validation, i18n, stale copy, Storage, or AI product bug was confirmed.
+None. No app-side code blocker was found. The only interaction issue was simulator coordinate mapping on the host desktop; it was handled in the manual QA procedure.
 
-## Follow-Up QA Access Harness
+Because no code fix was made, the post-fix command suite was not rerun:
 
-After this blocked manual run, a dev-only local QA access harness was added to let emulator testers enter the authenticated app without typing an email/password in the Simulator. It is disabled by default and only appears when the app is running locally in Firebase emulator mode, both `GRWM_ENABLE_QA_ACCESS=true` and `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` are set in ignored local env, and the Firebase config is the safe demo project `demo-grwm`.
-
-The harness is not a production feature. It is blocked in production runtime and blocked for non-demo Firebase config even if a QA flag is accidentally set.
-
-The visible button creates a generated `example.test` Auth user and ensures only `users/{uid}` and `userProfiles/{uid}` are present. It does not create `privacyConsents/{uid}` from the button, does not create `wardrobeSetupProfiles/{uid}`, does not create `wardrobeItems`, does not upload Firebase Storage files, and does not create AI jobs. The next manual rerun should use the button only to bypass account text input, then save privacy consent through the app and complete the wardrobe onboarding screens normally.
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm test`
+- `pnpm test:firestore-rules`
+- `pnpm test:storage-rules`
+- `pnpm test:firebase-rules`
+- `pnpm --filter mobile typecheck`
+- `pnpm --filter mobile test`
+- `pnpm --filter functions typecheck`
+- `pnpm --filter functions build`
+- `pnpm --filter admin typecheck`
 
 ## Safety Scan
 
-- Expo Go was not used.
-- No `.env.local` file was modified or committed.
-- No image picker was added or used.
-- No Firebase Storage upload path was added or used.
-- No AI, avatar, payment, shopping, affiliate, or upload UI work was built.
+- `.env.local` is ignored and untracked.
+- No hardcoded OpenAI/Anthropic private key or service-account private key was found in `apps`, `firebase`, or `packages`.
+- QA access is guarded against production runtime, disabled emulator mode, and non-demo Firebase config.
+- No image picker usage was found in `apps/mobile`.
+- No mobile Firebase Storage upload API usage was found in `apps/mobile/src`.
+- No mobile AI provider call was found in `apps/mobile/src`.
+- QA helper default behavior is covered by tests asserting no `wardrobeSetupProfiles`, `wardrobeItems`, `storage:upload`, or `firestore:aiJobs` actions are created by default.
 
 ## Commands Run
 
-- `xcrun simctl create "GRWM Wardrobe QA iPhone 16" com.apple.CoreSimulator.SimDeviceType.iPhone-16 com.apple.CoreSimulator.SimRuntime.iOS-26-5`
-- `xcrun simctl boot 9D80B63A-D2F4-4C73-8962-754514A862AE`
-- `xcrun simctl install 9D80B63A-D2F4-4C73-8962-754514A862AE <installed GRWM.app bundle>`
-- `xcrun simctl get_app_container 9D80B63A-D2F4-4C73-8962-754514A862AE com.grwm.mobile app`
-- `pnpm qa:mobile:emulators:isolated` with fallback pnpm and bundled Node runtime.
-- `pnpm mobile:start:dev-client` with fallback pnpm and bundled Node runtime.
-- `xcrun simctl launch 9D80B63A-D2F4-4C73-8962-754514A862AE com.grwm.mobile`
-- `xcrun simctl openurl 9D80B63A-D2F4-4C73-8962-754514A862AE exp+grwm://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081`
-- `xcrun simctl io ... screenshot ...`
-- `xcrun xctrace list devices`
-- Emulator-admin Node inspection of Firestore, Auth, and Storage.
-
-No code fix was made, so the post-fix command suite was not rerun during this rerun. The previous automated suite remained green before this manual rerun, and this attempt changed only this QA report.
+- `git status --short`
+- `git check-ignore -v apps/mobile/.env.local`
+- `git ls-files apps/mobile/.env.local .env.local '**/.env.local'`
+- `lsof -nP -iTCP:4001 -iTCP:8085 -iTCP:9100 -iTCP:9195 -iTCP:5002 -iTCP:8081 -sTCP:LISTEN`
+- `curl http://127.0.0.1:4001`
+- `curl http://127.0.0.1:8081/status`
+- `curl -X DELETE http://127.0.0.1:9100/emulator/v1/projects/demo-grwm/accounts`
+- `curl -X DELETE http://127.0.0.1:8085/emulator/v1/projects/demo-grwm/databases/(default)/documents`
+- `xcrun simctl list devices booted`
+- `xcrun simctl listapps booted`
+- `xcrun simctl get_app_container booted com.grwm.mobile app`
+- `xcrun simctl terminate booted com.grwm.mobile`
+- `xcrun simctl uninstall booted com.grwm.mobile`
+- `xcrun simctl install booted /tmp/GRWM-QA-dev-build.app`
+- `xcrun simctl launch booted com.grwm.mobile`
+- `xcrun simctl openurl booted exp+grwm://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081`
+- `xcrun simctl io booted screenshot ...`
+- Swift/CoreGraphics mapped click and drag scripts for simulator manual input.
+- Emulator-backed Admin SDK inspection of Auth, Firestore, and Storage.
+- `rg -n "ImagePicker|expo-image-picker|launchImageLibrary|launchCamera|react-native-image-picker|DocumentPicker" apps/mobile`
+- `rg -n "firebase/storage|getStorage|uploadBytes|uploadString|uploadBytesResumable|putFile|getDownloadURL|ref\\(" apps/mobile/src apps/mobile/App.tsx`
+- `rg -n "openai|anthropic|gemini|aiJobs|analysis job|outfitRecommendations|avatarProfiles|fetch\\(" apps/mobile/src functions/src packages/shared/src`
+- `rg -n "wardrobeSetupProfiles|wardrobeItems|storage|aiJobs|recordPrivacyConsent|outfitRecommendations|avatarProfiles" apps/mobile/src/qa apps/mobile/src/index.test.ts`
 
 ## Blockers
 
-- Desktop Simulator input/focus control remained unreliable even on a fresh iPhone 16 simulator.
-- The physical iPhone listed by Xcode was offline and could not be used for Route C.
-- No native simulator tap/type helper such as Appium, idb, applesimutils, or WebDriverAgent was available in the environment.
-- Because account creation/sign-in could not be controlled during this run, the protected wardrobe setup flow and A-J manual checklist were not manually verified. The local QA access harness is now the recommended rerun path for this same blocker.
+None remaining for wardrobe onboarding manual QA. Simulator input required mapped desktop coordinates, but the app flow itself completed.
 
 ## Verification Decision
 
-Wardrobe onboarding foundation is implemented and the installed development build can launch against isolated Firebase emulators, but the A-J wardrobe onboarding checklist is still not manually verified by this rerun.
+Wardrobe onboarding foundation is manually verified on the installed `com.grwm.mobile` development build using Firebase emulators and the dev-only local QA access harness.
 
-The project is not ready to treat wardrobe onboarding as having passed installed-development-build manual QA. The local QA access harness makes the rerun feasible without unreliable Simulator text input, but the A-J wardrobe onboarding checklist still needs to pass before upload UI readiness. Storage trigger integration QA can proceed as a backend/emulator task, but real wardrobe image upload UI should remain blocked until wardrobe onboarding manual QA and full Storage trigger integration QA both pass.
+The project is ready for the Upload UI Readiness Agent.
 
-Next recommended agent: Mobile Wardrobe Manual QA Rerun Agent using the local QA access harness in an installed development build, followed by the Upload UI Readiness Agent only after the onboarding manual gate passes.
+The project is not yet ready for real wardrobe image upload UI implementation; that should remain gated until the Upload UI Readiness Agent confirms the upload surface, privacy copy, retention/cleanup expectations, and Storage-trigger integration readiness.
+
+Next recommended agent: Upload UI Readiness Agent.
