@@ -64,5 +64,14 @@ export {
 export {
   createAsyncStorageAuthPersistence
 } from "./firebase/client.ts";
+export {
+  continueWithLocalQaAccount,
+  createLocalQaCredentials,
+  createLocalQaEmail,
+  createLocalQaPassword,
+  getLocalQaEmailPrefix,
+  getQaAccessState,
+  isQaAccessEnabled
+} from "./qa/qaAccess.ts";
 export { mobileRoutes } from "./navigation/routes.ts";
 export { themes } from "./theme/index.ts";

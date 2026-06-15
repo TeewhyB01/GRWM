@@ -61,6 +61,25 @@ The full A-J wardrobe onboarding flow was not completed because desktop Simulato
 
 Status: implemented and automated checks are green, but the wardrobe onboarding foundation is not yet manually verified.
 
+## Local QA Access Harness
+
+A dev-only mobile QA access harness is available to unblock local emulator testers when Simulator text input cannot complete account creation. It is disabled by default and must never be treated as a product feature.
+
+The harness only appears in an installed development build when local emulator mode is enabled, `GRWM_ENABLE_QA_ACCESS=true` and `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` are set in ignored local env, the runtime is not production, and the Firebase client config is the safe demo project `demo-grwm`.
+
+The visible QA button creates/signs in a generated `example.test` Auth user and ensures the required `users/{uid}` and `userProfiles/{uid}` documents exist. The button does not create `privacyConsents/{uid}`, `wardrobeSetupProfiles/{uid}`, `wardrobeItems`, Storage files, or AI jobs. Because consent is not created by the button, the app should still route through Privacy Consent before onboarding. Because setup is not created by the button, the wardrobe onboarding screens remain valid for manual QA.
+
+To rerun the A-J wardrobe onboarding checklist with the harness:
+
+1. Start mobile Firebase emulators with the demo local config.
+2. Start Metro for the installed development build; do not use Expo Go.
+3. Enable the two QA flags only in `apps/mobile/.env.local`.
+4. Tap "Continue with local QA account" on Welcome or Login.
+5. Save privacy consent through the app UI.
+6. Complete Wardrobe Setup Intro, Privacy Explainer, Category Preferences, Style Basics, Summary, and Wardrobe Home.
+7. Confirm `wardrobeSetupProfiles/{uid}` is created only after completing the setup flow, not by the QA button.
+8. Confirm no `wardrobeItems`, Storage files, or AI jobs are created.
+
 ## Still Blocked
 
 The foundation intentionally does not implement:
@@ -75,6 +94,6 @@ Real wardrobe image upload UI remains blocked until full Storage trigger emulato
 
 ## Next Step Before Upload UI
 
-Recommended next step: Mobile Wardrobe Manual QA Rerun Agent, then Upload UI Readiness Agent.
+Recommended next step: Mobile Wardrobe Manual QA Rerun Agent using the local QA access harness, then Upload UI Readiness Agent only after manual onboarding passes.
 
 The manual QA rerun should complete the A-J installed-development-build checklist with a fresh synthetic emulator account. Storage trigger handler QA is now covered separately in `docs/STORAGE_TRIGGER_QA.md`; after onboarding manual QA passes, upload readiness work should confirm non-destructive cleanup/retention decisions, recheck automatic Storage event delivery before production enablement, and rerun installed-development-build mobile manual QA before any real image picker or Storage upload UI is enabled.

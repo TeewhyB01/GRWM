@@ -37,7 +37,8 @@
 
 - Shared tests validate Firestore collection constants, model schemas, rejection of incomplete required payloads, privacy consent defaults, admin roles, and Storage path helpers.
 - Mobile tests validate Firebase client env detection, Auth user mapping, protected route helpers, profile default builders, privacy consent validation, deletion request validation, consent feature gates, style placeholders, wardrobe setup payload builders, wardrobe onboarding i18n keys, and the AsyncStorage Auth persistence adapter.
-- Mobile tests also validate local emulator placeholder config, consent-required route decisions before protected screens, Settings consent choice merging, and privacy-first deletion request payloads.
+- Mobile tests also validate local emulator placeholder config, consent-required route decisions before protected screens, Settings consent choice merging, privacy-first deletion request payloads, and the dev-only local QA access harness.
+- Local QA access tests cover disabled-by-default behavior, development/emulator-only enablement, production runtime blocking, production Firebase config blocking, generated local credentials, required `users/{uid}` and `userProfiles/{uid}` creation, optional-only privacy consent creation, and no `wardrobeSetupProfiles`, `wardrobeItems`, Storage upload, or AI job actions.
 - Admin tests validate Firebase client env detection, placeholder login, and route role checks.
 - Functions tests validate runtime config helpers, auth/privacy placeholder registration, auth/privacy request contracts, deletion status helpers, Firestore deletion target selection, Storage deletion prefix selection, audit log payload shape, Auth user-not-found handling, and a fake-dependency deletion processor run.
 
@@ -83,6 +84,8 @@
 - Next manual rerun should use a new synthetic account and confirm the same A-G flow after any navigation, auth, profile, privacy, or rules changes.
 - Wardrobe onboarding manual QA should also verify Intro, Privacy Explainer, Category Preferences, Style Basics, Summary, and Wardrobe Home empty state using an installed development build. Confirm the "Add wardrobe item soon" CTA is disabled and no image picker or Storage upload occurs.
 - 2026-06-15 wardrobe onboarding run result: isolated emulators, Metro, and the installed `com.grwm.mobile` development build launched on iPhone 17 simulator, iOS 26.5. After app-data reset the unauthenticated Welcome state appeared, but the A-J wardrobe onboarding flow was blocked before account creation by desktop Simulator input/focus issues. Evidence: `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
+- A dev-only local QA access harness now exists to avoid simulator text input for account creation. Enable it only in ignored local env with `GRWM_ENABLE_QA_ACCESS=true` and `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` while using the demo Firebase emulator config. It is hidden by default, hidden outside emulator mode, hidden in production runtime, and hidden for non-`demo-grwm` Firebase config.
+- The next wardrobe onboarding manual rerun should tap "Continue with local QA account", save privacy consent through the app UI, then complete the wardrobe onboarding screens. The harness must not skip the wardrobe setup screens, and `wardrobeSetupProfiles/{uid}` must appear only after the setup flow saves it.
 
 ## Known Limitations
 
@@ -90,6 +93,7 @@
 - Check `xcrun simctl get_app_container booted com.grwm.mobile app` before starting iOS simulator manual QA.
 - `pnpm qa:mobile:install-check` runs the same iOS simulator app-container check.
 - If standard emulator ports are occupied, use `pnpm qa:mobile:emulators:isolated` and point `apps/mobile/.env.local` at Auth `9100` and Firestore `8085`.
+- Local QA access is not a production feature. Confirm it is disabled by default before release-facing runs by setting both QA flags to `false`, restarting Metro, and checking that Welcome/Login do not show the local QA button.
 - The local EAS config validation command does not create a build artifact; the EAS CLI config command still requires an Expo account or `EXPO_TOKEN`.
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
 - Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.

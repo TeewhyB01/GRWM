@@ -44,6 +44,32 @@ The mobile client reads:
 - `EXPO_PUBLIC_FIRESTORE_EMULATOR_HOST`
 - `EXPO_PUBLIC_FIRESTORE_EMULATOR_PORT`
 
+## Local QA Access Harness
+
+The mobile app includes a dev-only local QA access button for emulator testing when Simulator text input is unreliable. It exists only to create a synthetic Firebase Auth user without typing an email/password. It is not a production sign-in method.
+
+The button is hidden unless all of these are true:
+
+- The app runtime is development/local/test, not production.
+- `EXPO_PUBLIC_USE_FIREBASE_EMULATORS=true`.
+- `GRWM_ENABLE_QA_ACCESS=true` and `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` are set in ignored local env.
+- The Firebase client config is the safe local demo project `demo-grwm`.
+
+The example env keeps QA access off by default. To enable it locally, copy `apps/mobile/.env.emulators.example` to `apps/mobile/.env.local`, keep the demo Firebase values, then set:
+
+```bash
+GRWM_ENABLE_QA_ACCESS=true
+EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true
+GRWM_QA_EMAIL_PREFIX=wardrobe-qa
+EXPO_PUBLIC_GRWM_QA_EMAIL_PREFIX=wardrobe-qa
+```
+
+Restart Metro after changing env values. The button text is "Continue with local QA account" and the guard copy says "Local emulator QA only. Hidden in production."
+
+The helper creates a generated `example.test` email and generated local password at runtime. Do not write a real password into docs, source, or committed env files. The visible button creates/signs in the local Auth user and ensures only `users/{uid}` and `userProfiles/{uid}` exist. It does not create `privacyConsents/{uid}` from the button, does not create `wardrobeSetupProfiles/{uid}`, does not create `wardrobeItems`, does not upload Storage files, and does not create AI jobs.
+
+To confirm the harness is disabled by default, leave both QA flags as `false`, restart Metro, and confirm the QA button is absent from Welcome/Login. It also remains hidden if emulator mode is off, the runtime is production, or the Firebase project is not `demo-grwm`.
+
 ## Commands
 
 Install dependencies:
@@ -142,7 +168,7 @@ Do not use Expo Go for this QA path.
 - Launch the app through an installed development build, then connect it to Metro with `pnpm qa:mobile:start`.
 - If iOS launch reports `No development build (com.grwm.mobile)`, install a simulator development build first.
 - If `xcrun simctl get_app_container booted com.grwm.mobile app` fails, install a simulator development build first.
-- Create a new account with a synthetic email and password.
+- Create a new account with a synthetic email and password, or enable the local QA access harness and tap "Continue with local QA account" to avoid simulator text input.
 - Confirm the Auth emulator contains the new user.
 - Confirm `/users/{uid}` is created in Firestore.
 - Confirm `/userProfiles/{uid}` is created in Firestore.

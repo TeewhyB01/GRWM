@@ -13,15 +13,19 @@ import {
   createPrivacyConsentChoices,
   createPlaceholderSignedInAuthState,
   createSignedOutAuthState,
+  continueWithLocalQaAccount,
   createDefaultWardrobeStyleBasics,
+  createLocalQaCredentials,
   createStylePreferencePlaceholder,
   createUserDeletionRequestDocument,
   createUserFoundationDocuments,
   createWardrobeSetupProfileDocument,
+  getQaAccessState,
   getMobileFirebaseConfig,
   getMobileFirebaseEmulatorConfig,
   getNextRouteForAuthAndConsent,
   getMessages,
+  isQaAccessEnabled,
   isMobileFirebaseConfigured,
   mergePrivacyConsentChoices,
   mergeWardrobeStyleBasics,
@@ -88,6 +92,38 @@ interface MobileEasJson {
 
 function readMobileConfigFile<T>(fileName: string): T {
   return JSON.parse(readFileSync(fileURLToPath(new URL(`../${fileName}`, import.meta.url)), "utf8")) as T;
+}
+
+function createSafeLocalFirebaseConfig(useEmulators = true) {
+  return {
+    apiKey: "demo-api-key",
+    authDomain: "demo-grwm.firebaseapp.com",
+    projectId: "demo-grwm",
+    storageBucket: "demo-grwm.appspot.com",
+    messagingSenderId: "000000000000",
+    appId: "demo-grwm-mobile",
+    useEmulators,
+    emulators: {
+      auth: {
+        host: "127.0.0.1",
+        port: 9099,
+        url: "http://127.0.0.1:9099"
+      },
+      firestore: {
+        host: "127.0.0.1",
+        port: 8080
+      }
+    }
+  };
+}
+
+function createQaEnabledEnv(overrides: Record<string, string | undefined> = {}) {
+  return {
+    GRWM_APP_ENV: "development",
+    GRWM_ENABLE_QA_ACCESS: "true",
+    NODE_ENV: "development",
+    ...overrides
+  };
 }
 
 test("@grwm/mobile requires a development build instead of Expo Go", () => {
@@ -198,6 +234,231 @@ test("@grwm/mobile accepts safe local emulator Firebase placeholders", () => {
   }
 });
 
+test("@grwm/mobile keeps local QA access disabled by default", () => {
+  const state = getQaAccessState({
+    env: {
+      GRWM_APP_ENV: "development",
+      NODE_ENV: "development"
+    },
+    firebaseConfig: createSafeLocalFirebaseConfig()
+  });
+
+  assert.equal(state.enabled, false);
+  assert.equal(state.reason, "missing_explicit_flag");
+  assert.equal(
+    isQaAccessEnabled({
+      env: {
+        GRWM_APP_ENV: "development",
+        NODE_ENV: "development"
+      },
+      firebaseConfig: createSafeLocalFirebaseConfig()
+    }),
+    false
+  );
+});
+
+test("@grwm/mobile enables local QA access only in development emulator mode", () => {
+  assert.deepEqual(
+    getQaAccessState({
+      env: createQaEnabledEnv(),
+      firebaseConfig: createSafeLocalFirebaseConfig()
+    }),
+    {
+      enabled: true,
+      reason: "enabled"
+    }
+  );
+  assert.deepEqual(
+    getQaAccessState({
+      env: createQaEnabledEnv(),
+      firebaseConfig: createSafeLocalFirebaseConfig(false)
+    }),
+    {
+      enabled: false,
+      reason: "firebase_emulators_disabled"
+    }
+  );
+});
+
+test("@grwm/mobile blocks local QA access in production even when flagged on", () => {
+  assert.deepEqual(
+    getQaAccessState({
+      env: createQaEnabledEnv({
+        GRWM_APP_ENV: "production",
+        NODE_ENV: "production"
+      }),
+      firebaseConfig: createSafeLocalFirebaseConfig()
+    }),
+    {
+      enabled: false,
+      reason: "production_runtime"
+    }
+  );
+  assert.deepEqual(
+    getQaAccessState({
+      env: createQaEnabledEnv(),
+      firebaseConfig: {
+        ...createSafeLocalFirebaseConfig(),
+        authDomain: "grwm-prod.firebaseapp.com",
+        projectId: "grwm-prod",
+        storageBucket: "grwm-prod.appspot.com"
+      }
+    }),
+    {
+      enabled: false,
+      reason: "production_firebase_config"
+    }
+  );
+});
+
+test("@grwm/mobile blocks local QA access when React Native production flag is active", () => {
+  const runtimeGlobal = globalThis as typeof globalThis & { __DEV__?: boolean };
+  const previousDevFlag = runtimeGlobal.__DEV__;
+
+  try {
+    runtimeGlobal.__DEV__ = false;
+
+    assert.deepEqual(
+      getQaAccessState({
+        env: createQaEnabledEnv(),
+        firebaseConfig: createSafeLocalFirebaseConfig()
+      }),
+      {
+        enabled: false,
+        reason: "production_runtime"
+      }
+    );
+  } finally {
+    if (previousDevFlag === undefined) {
+      delete runtimeGlobal.__DEV__;
+    } else {
+      runtimeGlobal.__DEV__ = previousDevFlag;
+    }
+  }
+});
+
+test("@grwm/mobile generates safe local QA credentials without a stored real password", () => {
+  const credentials = createLocalQaCredentials({
+    env: {
+      GRWM_QA_EMAIL_PREFIX: " Wardrobe QA! "
+    },
+    now: new Date("2026-06-15T10:20:30.000Z"),
+    randomToken: "ABC-123"
+  });
+
+  assert.equal(credentials.email, "wardrobeqa+20260615102030+abc123@example.test");
+  assert.equal(credentials.password, "local-qa-20260615102030-abc123");
+  assert.doesNotMatch(credentials.password, /secret|credential|token|password/i);
+});
+
+test("@grwm/mobile local QA helper creates only auth and foundation profile documents", async () => {
+  const actions: string[] = [];
+  const now = new Date("2026-06-15T10:20:30.000Z");
+  const result = await continueWithLocalQaAccount(
+    {
+      env: createQaEnabledEnv(),
+      firebaseConfig: createSafeLocalFirebaseConfig(),
+      now,
+      randomToken: "qa1"
+    },
+    {
+      async createAuthUser(credentials) {
+        actions.push("auth:create-user");
+
+        return {
+          id: "local-qa-user",
+          email: credentials.email,
+          emailVerified: false
+        };
+      },
+      async ensureUserDocuments({ authUser, nowIso }) {
+        actions.push("firestore:users");
+        actions.push("firestore:userProfiles");
+
+        return createUserFoundationDocuments({
+          authUser,
+          nowIso
+        });
+      },
+      async recordPrivacyConsent({ choices, userId }) {
+        actions.push("firestore:privacyConsents");
+
+        return createPrivacyConsentDocument({
+          choices,
+          userId,
+          nowIso: now.toISOString()
+        });
+      }
+    }
+  );
+
+  assert.equal(result.user.id, "local-qa-user");
+  assert.deepEqual(actions, ["auth:create-user", "firestore:users", "firestore:userProfiles"]);
+  assert.equal(actions.includes("firestore:wardrobeSetupProfiles"), false);
+  assert.equal(actions.includes("firestore:wardrobeItems"), false);
+  assert.equal(actions.includes("storage:upload"), false);
+  assert.equal(actions.includes("firestore:aiJobs"), false);
+  assert.equal(result.privacyConsent, null);
+});
+
+test("@grwm/mobile local QA helper records privacy consent only when explicitly requested", async () => {
+  const actions: string[] = [];
+  const now = new Date("2026-06-15T10:20:30.000Z");
+  const result = await continueWithLocalQaAccount(
+    {
+      createPrivacyConsent: true,
+      env: createQaEnabledEnv(),
+      firebaseConfig: createSafeLocalFirebaseConfig(),
+      now,
+      privacyConsentChoices: {
+        analytics: true
+      },
+      randomToken: "qa2"
+    },
+    {
+      async createAuthUser(credentials) {
+        actions.push("auth:create-user");
+
+        return {
+          id: "local-qa-user",
+          email: credentials.email,
+          emailVerified: false
+        };
+      },
+      async ensureUserDocuments({ authUser, nowIso }) {
+        actions.push("firestore:users");
+        actions.push("firestore:userProfiles");
+
+        return createUserFoundationDocuments({
+          authUser,
+          nowIso
+        });
+      },
+      async recordPrivacyConsent({ choices, userId }) {
+        actions.push("firestore:privacyConsents");
+
+        return createPrivacyConsentDocument({
+          choices,
+          userId,
+          nowIso: now.toISOString()
+        });
+      }
+    }
+  );
+
+  assert.deepEqual(actions, [
+    "auth:create-user",
+    "firestore:users",
+    "firestore:userProfiles",
+    "firestore:privacyConsents"
+  ]);
+  assert.equal(result.privacyConsent?.analytics, true);
+  assert.equal(actions.includes("firestore:wardrobeSetupProfiles"), false);
+  assert.equal(actions.includes("firestore:wardrobeItems"), false);
+  assert.equal(actions.includes("storage:upload"), false);
+  assert.equal(actions.includes("firestore:aiJobs"), false);
+});
+
 test("@grwm/mobile guards protected routes until auth exists", () => {
   assert.equal(canAccessMobileRoute("wardrobe", createCheckingAuthState()), false);
   assert.equal(canAccessMobileRoute("wardrobe", createSignedOutAuthState()), false);
@@ -264,6 +525,9 @@ test("@grwm/mobile routes signed-in users through privacy consent before protect
 test("@grwm/mobile keeps wardrobe setup i18n keys present", () => {
   const messages = getMessages();
 
+  assert.equal(messages.screens.qaAccess.action, "Continue with local QA account");
+  assert.match(messages.screens.qaAccess.copy, /Local emulator QA only/);
+  assert.match(messages.screens.qaAccess.copy, /Hidden in production/);
   assert.equal(messages.screens.wardrobeSetupIntro.privateTitle, "Your wardrobe is private.");
   assert.match(messages.screens.wardrobeSetupIntro.consentBody, /will not analyse wardrobe photos/);
   assert.match(messages.screens.wardrobeSetupIntro.consentBody, /Photo upload will be added/);

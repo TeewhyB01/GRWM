@@ -5,6 +5,7 @@ import { loginWithEmailPassword } from "../auth/authService";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { Screen } from "../components/Screen";
 import type { MobileScreenProps } from "../navigation/types";
+import { LocalQaAccessButton } from "../qa/LocalQaAccessButton";
 
 export function LoginScreen({ messages, navigate, theme }: MobileScreenProps) {
   const [email, setEmail] = useState("");
@@ -60,6 +61,7 @@ export function LoginScreen({ messages, navigate, theme }: MobileScreenProps) {
       <PrimaryButton disabled={isSubmitting} onPress={submitLogin} theme={theme}>
         {isSubmitting ? messages.screens.login.loadingAction : messages.screens.login.action}
       </PrimaryButton>
+      <LocalQaAccessButton messages={messages} theme={theme} />
     </Screen>
   );
 }

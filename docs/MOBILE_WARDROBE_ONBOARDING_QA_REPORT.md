@@ -111,6 +111,14 @@ No `wardrobeSetupProfiles/{uid}` document exists because the manual flow did not
 
 None. The blocker remained environmental/manual-input related. No app-side keyboard, route, save, Firestore path, setup status, validation, i18n, stale copy, Storage, or AI product bug was confirmed.
 
+## Follow-Up QA Access Harness
+
+After this blocked manual run, a dev-only local QA access harness was added to let emulator testers enter the authenticated app without typing an email/password in the Simulator. It is disabled by default and only appears when the app is running locally in Firebase emulator mode, both `GRWM_ENABLE_QA_ACCESS=true` and `EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true` are set in ignored local env, and the Firebase config is the safe demo project `demo-grwm`.
+
+The harness is not a production feature. It is blocked in production runtime and blocked for non-demo Firebase config even if a QA flag is accidentally set.
+
+The visible button creates a generated `example.test` Auth user and ensures only `users/{uid}` and `userProfiles/{uid}` are present. It does not create `privacyConsents/{uid}` from the button, does not create `wardrobeSetupProfiles/{uid}`, does not create `wardrobeItems`, does not upload Firebase Storage files, and does not create AI jobs. The next manual rerun should use the button only to bypass account text input, then save privacy consent through the app and complete the wardrobe onboarding screens normally.
+
 ## Safety Scan
 
 - Expo Go was not used.
@@ -140,12 +148,12 @@ No code fix was made, so the post-fix command suite was not rerun during this re
 - Desktop Simulator input/focus control remained unreliable even on a fresh iPhone 16 simulator.
 - The physical iPhone listed by Xcode was offline and could not be used for Route C.
 - No native simulator tap/type helper such as Appium, idb, applesimutils, or WebDriverAgent was available in the environment.
-- Because account creation/sign-in could not be controlled, the protected wardrobe setup flow and A-J manual checklist were not manually verified.
+- Because account creation/sign-in could not be controlled during this run, the protected wardrobe setup flow and A-J manual checklist were not manually verified. The local QA access harness is now the recommended rerun path for this same blocker.
 
 ## Verification Decision
 
 Wardrobe onboarding foundation is implemented and the installed development build can launch against isolated Firebase emulators, but the A-J wardrobe onboarding checklist is still not manually verified by this rerun.
 
-The project is not ready to treat wardrobe onboarding as having passed installed-development-build manual QA. Storage trigger integration QA can proceed as a backend/emulator task, but real wardrobe image upload UI should remain blocked until wardrobe onboarding manual QA and full Storage trigger integration QA both pass.
+The project is not ready to treat wardrobe onboarding as having passed installed-development-build manual QA. The local QA access harness makes the rerun feasible without unreliable Simulator text input, but the A-J wardrobe onboarding checklist still needs to pass before upload UI readiness. Storage trigger integration QA can proceed as a backend/emulator task, but real wardrobe image upload UI should remain blocked until wardrobe onboarding manual QA and full Storage trigger integration QA both pass.
 
-Next recommended agent: Mobile Wardrobe Manual QA Rerun Agent on a physically controllable iPhone development build or a simulator environment with working tap/type automation, followed by the Upload UI Readiness Agent only after the onboarding manual gate passes.
+Next recommended agent: Mobile Wardrobe Manual QA Rerun Agent using the local QA access harness in an installed development build, followed by the Upload UI Readiness Agent only after the onboarding manual gate passes.

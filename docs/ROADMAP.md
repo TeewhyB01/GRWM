@@ -22,6 +22,7 @@
 - Mobile emulator QA documentation, safe demo env placeholders, configurable Auth/Firestore emulator hosts, and EAS development-build validation scripts.
 - Mobile native development-build identifiers and isolated emulator config for port-conflict QA.
 - Mobile development-build installer scripts and documentation for iOS simulator, Android emulator, EAS simulator builds, Metro dev-client start, and installed app checks.
+- Dev-only local mobile QA access harness for Firebase emulator runs, disabled by default and blocked in production/non-demo Firebase config.
 - Functions TypeScript build output generation for Firebase emulator definition loading.
 - Trusted backend account/data deletion processor with audit logging, status lifecycle tracking, Firestore/Storage/Auth deletion helpers, and emulator-safe unit tests.
 - Functions emulator trigger integration for trusted account/data deletion, including completion, controlled failure, idempotency, audit, and unaffected-user checks.
@@ -51,7 +52,7 @@
 - Weather context integration.
 - Occasion-based styling inputs.
 
-Phase 2 status after the 2026-06-15 wardrobe onboarding implementation and Storage trigger QA: onboarding foundation is implemented, setup preferences persist to `wardrobeSetupProfiles/{userId}`, and Wardrobe Home shows a non-upload empty state. Storage trigger registration and backend finalisation lifecycle are covered in emulators with synthetic uploads and finalized handler payloads. Installed-development-build manual QA was attempted on 2026-06-15 but blocked before account creation by Simulator input/focus issues, so the foundation is not manually verified yet. Real wardrobe image upload UI must wait for wardrobe onboarding manual QA, automatic Storage event delivery recheck before production enablement, and explicit approval of non-destructive cleanup/retention operations.
+Phase 2 status after the 2026-06-15 wardrobe onboarding implementation and Storage trigger QA: onboarding foundation is implemented, setup preferences persist to `wardrobeSetupProfiles/{userId}`, and Wardrobe Home shows a non-upload empty state. Storage trigger registration and backend finalisation lifecycle are covered in emulators with synthetic uploads and finalized handler payloads. Installed-development-build manual QA was attempted on 2026-06-15 but blocked before account creation by Simulator input/focus issues, so the foundation is not manually verified yet. A dev-only local QA access harness now lets emulator testers create a synthetic Auth user without text input, but it does not create wardrobe setup data, wardrobe items, Storage files, or AI jobs. Real wardrobe image upload UI must wait for wardrobe onboarding manual QA, automatic Storage event delivery recheck before production enablement, and explicit approval of non-destructive cleanup/retention operations.
 
 ## Phase 3: Intelligence
 

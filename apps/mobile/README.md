@@ -72,9 +72,26 @@ Full checklist: `docs/MOBILE_EMULATOR_QA.md`.
 
 Development build creation and install guide: `docs/MOBILE_DEVELOPMENT_BUILD_INSTALL.md`.
 
+## Local QA Access
+
+When Simulator text input is unreliable, local emulator testers can enable a dev-only QA access button on Welcome/Login. It is disabled by default and must never be used as a production feature.
+
+Enable it only in ignored local env while using the demo Firebase emulator config:
+
+```bash
+GRWM_ENABLE_QA_ACCESS=true
+EXPO_PUBLIC_GRWM_ENABLE_QA_ACCESS=true
+GRWM_QA_EMAIL_PREFIX=wardrobe-qa
+EXPO_PUBLIC_GRWM_QA_EMAIL_PREFIX=wardrobe-qa
+```
+
+Restart Metro after changing env values. The button is hidden unless the app is running locally, Firebase emulator mode is on, both QA flags are true, and the Firebase project is `demo-grwm`. To confirm the default disabled state, leave both flags as `false`, restart Metro, and confirm Welcome/Login do not show "Continue with local QA account."
+
+The QA button creates a generated `example.test` Auth user and ensures only `users/{uid}` and `userProfiles/{uid}` exist. It does not create privacy consent from the visible button, does not create `wardrobeSetupProfiles`, does not create `wardrobeItems`, does not upload Storage files, and does not create AI jobs. Wardrobe onboarding manual QA must still save privacy consent through the app and complete the wardrobe setup screens.
+
 Latest manual result: on 2026-06-14, the installed `com.grwm.mobile` development build passed A-G auth/profile/privacy/deletion QA on the iPhone 17 simulator against isolated Firebase emulators. Evidence and Firestore document snapshots are in `docs/MOBILE_MANUAL_QA_REPORT.md`.
 
-Latest wardrobe onboarding manual result: on 2026-06-15, isolated emulators, Metro, and the installed `com.grwm.mobile` development build launched on the iPhone 17 simulator. After resetting app data, the unauthenticated Welcome state appeared, but the A-J wardrobe onboarding flow was blocked before account creation by Simulator input/focus issues. Evidence is in `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
+Latest wardrobe onboarding manual result: on 2026-06-15, isolated emulators, Metro, and the installed `com.grwm.mobile` development build launched on the iPhone 17 simulator. After resetting app data, the unauthenticated Welcome state appeared, but the A-J wardrobe onboarding flow was blocked before account creation by Simulator input/focus issues. A local QA access harness is now available for the rerun, but the A-J checklist has not passed yet. Evidence is in `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
 
 ## Wardrobe Onboarding Foundation
 

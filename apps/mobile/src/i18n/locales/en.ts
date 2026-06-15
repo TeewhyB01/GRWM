@@ -31,6 +31,12 @@ export const en = {
       action: "Log in",
       loadingAction: "Logging in..."
     },
+    qaAccess: {
+      action: "Continue with local QA account",
+      loadingAction: "Creating local QA account...",
+      copy: "Local emulator QA only. Hidden in production.",
+      error: "Unable to continue with local QA account."
+    },
     signUp: {
       title: "Create your GRWM account",
       body: "Create an email and password account, then review privacy consent before using protected GRWM screens.",
