@@ -101,6 +101,24 @@ export async function finaliseWardrobeUpload(params: {
     });
   }
 
+  if (wardrobeItem.uploadStatus === "uploaded") {
+    params.deps.logger.info("Wardrobe upload finalisation skipped for already uploaded item.", {
+      itemId: verification.itemId,
+      userId: verification.userId
+    });
+
+    return {
+      ok: true,
+      userId: verification.userId,
+      itemId: verification.itemId,
+      storagePath: verification.storagePath,
+      uploadStatus: "uploaded",
+      failureReason: "",
+      analysisStatus,
+      auditLogId: ""
+    };
+  }
+
   if (wardrobeItem.uploadStatus === "deleted") {
     return markWardrobeUploadFailed(params.deps, {
       analysisStatus,

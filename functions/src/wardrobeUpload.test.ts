@@ -174,6 +174,33 @@ test("valid Storage object finalises wardrobe upload without creating analysis w
   assert.equal(JSON.stringify(fake.auditLogs).includes("users/user_1/wardrobe/item_1/original"), false);
 });
 
+test("duplicate Storage object finalisation leaves uploaded wardrobe item stable", async () => {
+  const item = {
+    ...createWardrobeItem({
+      itemId: "item_1",
+      userId: "user_1"
+    }),
+    uploadStatus: "uploaded" as const,
+    uploadedAtIso: "2026-06-15T09:00:00.000Z",
+    updatedAtIso: "2026-06-15T09:00:00.000Z"
+  };
+  const fake = createFakeWardrobeUploadDeps([item]);
+
+  const result = await finaliseWardrobeUpload({
+    deps: fake.deps,
+    storageObject: createStorageObject({
+      itemId: "item_1",
+      userId: "user_1"
+    })
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.uploadStatus, "uploaded");
+  assert.equal(result.auditLogId, "");
+  assert.equal(fake.wardrobeItems.get("item_1")?.uploadedAtIso, "2026-06-15T09:00:00.000Z");
+  assert.equal(fake.auditLogs.length, 0);
+});
+
 test("metadata mismatch marks existing wardrobe upload failed safely", async () => {
   const item = createWardrobeItem({
     itemId: "item_1",
@@ -236,6 +263,7 @@ test("wardrobe record user mismatch fails safely", async () => {
 
   assert.equal(result.ok, false);
   assert.equal(result.failureReason, "user_mismatch");
+  assert.equal(fake.wardrobeItems.get("item_1")?.uploadStatus, "upload_pending");
 });
 
 test("invalid content type and oversized wardrobe objects fail verification", () => {

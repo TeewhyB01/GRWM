@@ -39,6 +39,19 @@ export const wardrobeUploadAuditActions = {
 export type WardrobeUploadAuditAction =
   (typeof wardrobeUploadAuditActions)[keyof typeof wardrobeUploadAuditActions];
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null ? value as Record<string, unknown> : {};
+}
+
+function existingWardrobeItemBelongsToUser(
+  snapshot: FirestoreDocumentSnapshotLike,
+  userId: string
+): boolean {
+  const data = asRecord(snapshot.data());
+
+  return data.userId === userId && data.ownerId === userId;
+}
+
 export async function writeWardrobeUploadAuditLog(
   deps: WardrobeUploadFinalisationDependencies,
   params: {
@@ -91,7 +104,10 @@ export async function markWardrobeUploadFailed(
         .doc(params.itemId);
       const snapshot = await documentReference.get?.();
 
-      if (snapshot === undefined || snapshot.exists) {
+      if (
+        snapshot === undefined ||
+        (snapshot.exists && existingWardrobeItemBelongsToUser(snapshot, params.userId))
+      ) {
         await documentReference.set(getWardrobeUploadFailurePayload({
           nowIso,
           reason: params.failureReason

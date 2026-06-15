@@ -44,7 +44,9 @@ The service in `functions/src/wardrobeUpload/` provides:
 - `evaluateWardrobeAnalysisRequest()`
 - `wardrobeUploadFinalisation` Storage `onObjectFinalized` trigger
 
-The trigger is bucket-scoped through `FIREBASE_STORAGE_BUCKET`, with an emulator-safe demo fallback for local tests. Helper-level tests cover the finalisation behaviour; full Storage trigger emulator integration remains a recommended follow-up before real upload UI.
+The trigger is bucket-scoped through `FIREBASE_STORAGE_BUCKET`, with an emulator-safe demo fallback for local tests. Helper-level tests cover the finalisation behaviour, and `firebase/tests/wardrobeUploadTrigger.integration.test.ts` now verifies trigger endpoint registration plus upload finalisation lifecycle behaviour against Auth, Firestore, Storage, and Functions emulators.
+
+Local emulator note: Firebase Tools loaded `wardrobeUploadFinalisation` as a Storage function, but Storage emulator writes did not auto-deliver v2 finalize events in this environment. The integration test writes synthetic objects to the Storage emulator and invokes the registered exported handler with the finalized object payload. Recheck automatic delivery when Firebase Tools or runtime versions change.
 
 ## Orphan Detection
 
@@ -64,7 +66,7 @@ Safe now:
 
 - Wardrobe onboarding foundation work that collects explicit user-provided preferences.
 - Firestore draft record creation design.
-- Storage upload security boundary and backend finalisation helper tests.
+- Storage upload security boundary, backend finalisation helper tests, and emulator-backed trigger handler QA.
 - Consent-gated future analysis request helper.
 - Non-destructive orphan detection.
 
@@ -74,4 +76,5 @@ Still blocked:
 - AI analysis jobs.
 - Avatar, payment, shopping, and recommendation workflows.
 - Destructive orphan cleanup.
-- Full Storage trigger emulator integration and mobile manual QA after upload-adjacent changes.
+- Wardrobe onboarding installed-development-build manual QA after upload-adjacent changes.
+- Production-like automatic Storage event delivery verification in a non-production Firebase project before enabling real uploads.

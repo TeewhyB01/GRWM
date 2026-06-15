@@ -17,6 +17,9 @@
 - `pnpm test:functions-emulator`: builds Functions, confirms `functions/lib/index.js`, starts Auth/Firestore/Storage/Functions emulators, and runs deletion trigger integration.
 - `pnpm test:deletion-trigger`: alias for deletion trigger integration.
 - `pnpm qa:deletion:functions-emulator`: QA alias for deletion trigger integration.
+- `pnpm test:storage-trigger`: builds Functions, confirms `functions/lib/index.js`, starts isolated Auth/Firestore/Storage/Functions emulators, and runs wardrobe upload trigger handler integration.
+- `pnpm test:wardrobe-upload-trigger`: alias for wardrobe upload trigger handler integration.
+- `pnpm qa:wardrobe-upload:functions-emulator`: QA alias for wardrobe upload trigger handler integration.
 - `pnpm qa:mobile:eas:config`: validates local EAS development-build config assertions without starting a cloud build or requiring an Expo account.
 - `pnpm qa:mobile:install-check`: confirms `com.grwm.mobile` is installed on the booted iOS simulator.
 - `pnpm qa:mobile:emulators:isolated`: starts mobile Auth, Firestore, Storage, and Functions emulators on conflict-free local ports when another project owns the standard Firebase ports.
@@ -54,6 +57,7 @@
 - Shared upload policy constants, private path builders, invalid path IDs, consent gates, wardrobe upload draft creation, metadata validation, backend-owned field detection, upload failure payloads, and wardrobe item schema validation.
 - Shared wardrobe setup profile validation, category preference validation, and style basics validation.
 - Functions helper tests for wardrobe upload finalisation, including valid Storage object finalisation, metadata mismatch, missing Firestore record, user mismatch, invalid content type, oversized object, and consent-blocked analysis requests.
+- Storage trigger handler integration verifies Functions emulator registration, private wardrobe path filtering, valid upload finalisation, missing analysis consent, metadata mismatch, missing record, cross-user collision protection, unsafe object rejection, idempotency, ignored non-wardrobe paths, audit logs, and no AI job creation.
 
 ## Firebase Emulator Tests Needed Next
 
@@ -62,7 +66,7 @@
 - Storage moderation/malware checks and byte-level content verification before production wardrobe upload.
 - Full Functions emulator trigger tests for future auth/privacy workflows beyond deletion.
 - Additional production-like deletion failure tests for Firestore or Storage outages. Current trigger integration forces an Auth deletion failure safely inside emulators.
-- Full Storage trigger emulator integration for `wardrobeUploadFinalisation`; helper-level finalisation tests are in place.
+- Recheck automatic v2 Storage finalize event delivery when Firebase Tools/runtime versions change. Current QA uploads to the Storage emulator and invokes the registered handler with finalized payloads because local emulator writes did not auto-deliver events.
 - Destructive orphan cleanup tests remain future work; current orphan detection is non-destructive.
 
 ## Manual Mobile Testing Needed Next
@@ -90,7 +94,7 @@
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
 - Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.
 - Architecture review status on 2026-06-15 remains amber. Wardrobe onboarding foundation work can proceed.
-- Wardrobe onboarding foundation, setup profile rules, upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, and non-destructive orphan detection are now implemented and tested at helper/rules level. The 2026-06-15 installed-development-build wardrobe onboarding manual run was blocked before account creation, so real wardrobe upload UI remains blocked until wardrobe onboarding manual QA and full Storage trigger emulator coverage are complete.
+- Wardrobe onboarding foundation, setup profile rules, upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, non-destructive orphan detection, and wardrobe trigger handler QA are now implemented and tested. The 2026-06-15 installed-development-build wardrobe onboarding manual run was blocked before account creation, so real wardrobe upload UI remains blocked until wardrobe onboarding manual QA passes and upload UI readiness is separately approved.
 
 ## MVP Test Areas
 

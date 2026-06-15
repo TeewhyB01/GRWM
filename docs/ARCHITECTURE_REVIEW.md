@@ -4,7 +4,7 @@ Date: 2026-06-15
 
 Architecture health rating: amber.
 
-GRWM now has a wardrobe onboarding foundation that collects explicit user-provided category and style basics without uploading images. The wardrobe upload lifecycle foundation is defined and helper-tested, but GRWM is still not ready for real wardrobe image upload UI until the release blockers below are addressed.
+GRWM now has a wardrobe onboarding foundation that collects explicit user-provided category and style basics without uploading images. The wardrobe upload lifecycle foundation is defined, helper-tested, rules-tested, and covered by Storage trigger handler QA in Firebase emulators, but GRWM is still not ready for real wardrobe image upload UI until the release blockers below are addressed.
 
 ## What Is Solid
 
@@ -19,6 +19,7 @@ GRWM now has a wardrobe onboarding foundation that collects explicit user-provid
 - Wardrobe upload lifecycle now uses Firestore draft first, exact private Storage upload second, and trusted backend finalisation third.
 - Shared helpers now create upload drafts, build/validate required metadata, detect backend-owned wardrobe fields, create safe upload failure payloads, and block analysis requests without `wardrobePhotoAnalysis` consent.
 - Functions helpers now verify wardrobe Storage objects, mark existing uploads uploaded or failed, write safe audit entries, and keep AI analysis unstarted.
+- Storage trigger QA now confirms `functions/lib/index.js` generation, Functions emulator definition loading, `wardrobeUploadFinalisation` registration, private wardrobe path filtering, valid finalisation, consent-separated upload behaviour, failure paths, cross-user collision protection, idempotency, and no AI job creation.
 - Orphan detection now reports missing records/files, stale `upload_pending` records, `upload_failed` records, and metadata mismatches without deleting anything.
 - Mobile wardrobe onboarding now includes intro, privacy explainer, category preferences, style basics, setup summary, and Wardrobe Home empty state without image picker or Storage upload.
 - `wardrobeSetupProfiles/{userId}` stores private setup preferences with owner-bound rules, field validation, setup status, mobile source, and deletion-plan coverage.
@@ -32,6 +33,7 @@ GRWM now has a wardrobe onboarding foundation that collects explicit user-provid
 - Admin access is still a placeholder local session. Real admin access requires Firebase Auth, custom claims or trusted role issuance, and owner bootstrap.
 - User-owned `users/{uid}` writes are currently client writable for the signed-in owner. That is acceptable for the foundation, but production should move sensitive lifecycle fields to trusted backend writes.
 - Wardrobe upload lifecycle plumbing is implemented, but real wardrobe image upload UI is intentionally not implemented. AI, avatar, payments, shopping, and recommendation flows remain intentionally not implemented.
+- Local Firebase Tools registered the v2 Storage trigger but did not auto-deliver Storage emulator write events in this run. QA invokes the registered handler with finalized payloads after emulator uploads; automatic event delivery should be rechecked before production enablement.
 - Wardrobe onboarding creates setup preferences only. It does not prove the future image upload UI is ready.
 - The existing untracked `functions/src/placeholders/userDataDeletion.ts` duplicates the active trigger name conceptually. It is not exported, but it should be removed or renamed by the owner before it becomes confusing.
 
@@ -41,7 +43,8 @@ GRWM now has a wardrobe onboarding foundation that collects explicit user-provid
 - Firestore field-level validation for `wardrobeItems`, including `userId`, `storagePath`, private visibility, timestamps, source, analysis status, and allowed enum values is implemented and emulator-tested.
 - Storage paths under `users/{uid}/wardrobe/{itemId}/original` now deny oversized files, disallowed content types, mismatched owner metadata, mismatched item metadata, unauthenticated writes, and cross-user writes.
 - Keep the selected lifecycle: Firestore draft first, Storage object second, trusted Function finalisation third.
-- Add full Storage trigger emulator integration for `wardrobeUploadFinalisation`.
+- Keep `pnpm test:storage-trigger` green for `wardrobeUploadFinalisation` registration and backend lifecycle coverage.
+- Recheck automatic Storage event delivery in a non-production Firebase project or upgraded emulator runtime before real upload enablement.
 - Operationally approve server-side retention and deletion behavior for failed or orphaned upload objects before enabling destructive cleanup.
 - Rerun installed-development-build mobile manual QA after upload-adjacent changes.
 
@@ -57,9 +60,9 @@ GRWM now has a wardrobe onboarding foundation that collects explicit user-provid
 
 ## Release Blockers
 
-- Full Storage trigger emulator coverage for wardrobe upload finalisation is not complete.
 - Real wardrobe image upload UI remains blocked until installed-development-build mobile QA is rerun after these upload-adjacent changes.
 - Wardrobe onboarding manual QA should be run in an installed development build after this navigation/rules change.
+- Automatic Storage event delivery should be rechecked before production upload enablement.
 - Firestore field validation is incomplete for sensitive non-wardrobe user-owned data.
 - Real admin authentication and role issuance are not implemented.
 - Production Firebase project configuration and trusted owner bootstrap are not verified.
@@ -89,14 +92,14 @@ GRWM now has a wardrobe onboarding foundation that collects explicit user-provid
 - Firestore or Storage outage drills for the deletion processor.
 - Installed-development-build manual QA for the new wardrobe onboarding screens and empty state.
 - End-to-end mobile rerun after the schema/doc review changes.
-- Full trigger integration tests across Auth, Firestore, Storage, finalisation, and cleanup.
+- Automatic v2 Storage event delivery in the local emulator path. Current QA covers registration plus finalized handler execution against emulator state.
 
 ## Verification
 
-The requested pnpm gate suite passed on 2026-06-15 using the project fallback pnpm binary and bundled Node runtime. The Firebase CLI emitted the known Java 21 future-requirement warning; pnpm install also repeated the known ignored `re2` build-script warning. Neither blocked the current gates.
+The requested pnpm gate suite passed on 2026-06-15 using the project fallback pnpm binary and bundled Node runtime. Storage trigger QA also passed with 9/9 tests. The Firebase CLI emitted the known Java 21 future-requirement warning; pnpm install also repeated the known ignored `re2` build-script warning. Neither blocked the current gates.
 
 ## Recommended Next Agent
 
-Recommended next agent: Mobile Manual QA Agent for wardrobe onboarding, followed by Upload UI Readiness Agent.
+Recommended next agent: Mobile Wardrobe Manual QA Rerun Agent, followed by Upload UI Readiness Agent.
 
-The QA pass should verify the setup flow and disabled upload CTA in an installed development build. The later Upload UI Readiness Agent should add no image UI until full Storage trigger emulator coverage, installed development-build QA, and retention/cleanup approval are complete.
+The QA pass should verify the setup flow and disabled upload CTA in an installed development build. The later Upload UI Readiness Agent should add no image UI until Storage trigger QA remains green, installed-development-build QA passes, automatic Storage event delivery is rechecked, and retention/cleanup approval is complete.

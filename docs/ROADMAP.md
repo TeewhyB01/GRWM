@@ -45,13 +45,13 @@
 
 - Wardrobe onboarding for explicit user-provided category, dress code, formality, colour, modesty, workwear, and occasionwear preferences. Foundation completed on 2026-06-15 without image upload.
 - Wardrobe upload security boundary: Storage MIME/size checks, required upload metadata, `wardrobeItems` field validation, consent gates, orphan cleanup plan, and emulator tests. Rule-level boundary completed on 2026-06-15.
-- Wardrobe upload lifecycle coordination: Firestore draft first, exact private Storage upload second, trusted backend finalisation third, consent-gated future analysis request helper, and non-destructive orphan detection. Helper/rules coverage completed on 2026-06-15; full Storage trigger emulator coverage and mobile QA remain before upload UI.
+- Wardrobe upload lifecycle coordination: Firestore draft first, exact private Storage upload second, trusted backend finalisation third, consent-gated future analysis request helper, and non-destructive orphan detection. Helper/rules coverage and Storage trigger handler QA completed on 2026-06-15; mobile wardrobe onboarding QA and upload UI readiness remain before upload UI.
 - User image upload to Firebase Storage after the upload boundary is green.
 - Wardrobe item management.
 - Weather context integration.
 - Occasion-based styling inputs.
 
-Phase 2 status after the 2026-06-15 wardrobe onboarding implementation: onboarding foundation is implemented, setup preferences persist to `wardrobeSetupProfiles/{userId}`, and Wardrobe Home shows a non-upload empty state. Installed-development-build manual QA was attempted on 2026-06-15 but blocked before account creation by Simulator input/focus issues, so the foundation is not manually verified yet. Real wardrobe image upload UI must wait for wardrobe onboarding manual QA, full trigger integration coverage, and explicit approval of non-destructive cleanup/retention operations.
+Phase 2 status after the 2026-06-15 wardrobe onboarding implementation and Storage trigger QA: onboarding foundation is implemented, setup preferences persist to `wardrobeSetupProfiles/{userId}`, and Wardrobe Home shows a non-upload empty state. Storage trigger registration and backend finalisation lifecycle are covered in emulators with synthetic uploads and finalized handler payloads. Installed-development-build manual QA was attempted on 2026-06-15 but blocked before account creation by Simulator input/focus issues, so the foundation is not manually verified yet. Real wardrobe image upload UI must wait for wardrobe onboarding manual QA, automatic Storage event delivery recheck before production enablement, and explicit approval of non-destructive cleanup/retention operations.
 
 ## Phase 3: Intelligence
 

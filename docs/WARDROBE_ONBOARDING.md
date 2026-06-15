@@ -77,4 +77,4 @@ Real wardrobe image upload UI remains blocked until full Storage trigger emulato
 
 Recommended next step: Mobile Wardrobe Manual QA Rerun Agent, then Upload UI Readiness Agent.
 
-The manual QA rerun should complete the A-J installed-development-build checklist with a fresh synthetic emulator account. After that passes, the upload readiness work should verify the Storage finalisation trigger end to end in emulators, confirm non-destructive cleanup/retention decisions, and rerun installed-development-build mobile manual QA before any real image picker or Storage upload UI is enabled.
+The manual QA rerun should complete the A-J installed-development-build checklist with a fresh synthetic emulator account. Storage trigger handler QA is now covered separately in `docs/STORAGE_TRIGGER_QA.md`; after onboarding manual QA passes, upload readiness work should confirm non-destructive cleanup/retention decisions, recheck automatic Storage event delivery before production enablement, and rerun installed-development-build mobile manual QA before any real image picker or Storage upload UI is enabled.

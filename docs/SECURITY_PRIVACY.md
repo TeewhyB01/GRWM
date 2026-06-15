@@ -27,6 +27,7 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 - Functions emulator integration verifies the deletion trigger deletes only the requesting user's data, preserves admin collections, writes audit logs, deletes private Storage files, deletes the Auth emulator user, and leaves unaffected users intact.
 - Shared consent gates now distinguish private wardrobe photo upload from wardrobe photo analysis, avatar creation, and location/weather use.
 - Wardrobe upload finalisation writes safe audit entries without exposing image bytes or private object names.
+- Storage trigger handler QA verifies valid finalisation, safe failure paths, cross-user collision protection, idempotency, ignored non-wardrobe paths, and no AI job creation against Firebase emulators.
 
 ## Current Rule Limitations
 
@@ -45,7 +46,7 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 - Final lifecycle is Firestore draft first, exact private Storage upload second, trusted backend finalisation third.
 - AI analysis remains separate from private upload. Future analysis requests are blocked unless `wardrobePhotoAnalysis` consent is true.
 - Server-side orphan detection is expanded but remains non-destructive.
-- Real wardrobe image upload UI is still blocked until full trigger emulator coverage and mobile manual emulator QA are rerun in an installed development build.
+- Real wardrobe image upload UI is still blocked until wardrobe onboarding manual emulator QA passes in an installed development build, automatic Storage event delivery is rechecked before production enablement, and cleanup/retention behavior is approved.
 - Keep generated avatar outputs backend-owned; do not expose client avatar generation writes.
 
 ## Future Work
@@ -59,5 +60,6 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 See `docs/USER_DATA_DELETION.md` for deletion coverage, audit events, emulator-safe tests, and production readiness checks.
 See `docs/ARCHITECTURE_REVIEW.md` for the latest architecture gate and wardrobe upload blockers.
 See `docs/STORAGE_UPLOAD_SECURITY.md` for the current upload policy, metadata contract, and emulator coverage.
+See `docs/STORAGE_TRIGGER_QA.md` for Storage trigger registration and backend finalisation lifecycle QA.
 See `docs/WARDROBE_UPLOAD_LIFECYCLE.md` for the wardrobe upload lifecycle.
 See `docs/WARDROBE_ONBOARDING.md` for the current non-image wardrobe setup foundation.

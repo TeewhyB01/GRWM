@@ -167,8 +167,21 @@ Firestore rules tests cover:
 
 Backend helper tests cover valid finalisation, metadata mismatch, missing records, user mismatch, content type and size failures, and consent-blocked analysis request decisions.
 
+Storage trigger QA covers:
+
+- generated `functions/lib/index.js` before emulator startup
+- Functions emulator definition loading
+- `wardrobeUploadFinalisation` registered as a v2 Storage finalize function
+- private wardrobe original path processing only
+- ignored style photo, generated avatar, outfit, public, and unrelated Storage paths
+- valid upload finalisation to `uploaded`
+- missing `wardrobePhotoAnalysis` consent preserving upload finalisation while creating no AI job
+- metadata mismatch, missing record, cross-user collision, invalid content type, oversized object, and duplicate finalise behaviour
+
+See `docs/STORAGE_TRIGGER_QA.md`.
+
 ## Current Status
 
-The upload lifecycle foundation is defined and helper-tested. Real wardrobe image upload UI is still blocked until full Storage trigger emulator integration and mobile manual emulator QA are rerun in a development build, and destructive orphan cleanup remains blocked until separately tested and approved.
+The upload lifecycle foundation is defined, helper-tested, rules-tested, and covered by emulator-backed trigger handler QA. Real wardrobe image upload UI is still blocked until wardrobe onboarding manual emulator QA passes in an installed development build, automatic Storage event delivery is rechecked before production enablement, and destructive orphan cleanup is separately tested and approved.
 
 See `docs/WARDROBE_UPLOAD_LIFECYCLE.md` for the end-to-end lifecycle and readiness boundary.
