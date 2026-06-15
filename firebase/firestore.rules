@@ -234,6 +234,185 @@ service cloud.firestore {
         && validWardrobeUserEditableUpdateOnly();
     }
 
+    function validWardrobeSetupStatus(value) {
+      return value in ["not_started", "in_progress", "completed"];
+    }
+
+    function validWardrobeSetupSource(value) {
+      return value == "mobile";
+    }
+
+    function validWardrobeCategoryPreferenceList(value) {
+      return value is list
+        && value.size() <= 18
+        && value.hasOnly([
+          "tops",
+          "trousers",
+          "jeans",
+          "skirts",
+          "dresses",
+          "jackets",
+          "coats",
+          "blazers",
+          "shoes",
+          "bags",
+          "jewellery",
+          "belts",
+          "scarves",
+          "hats",
+          "activewear",
+          "workwear",
+          "occasion_wear",
+          "traditional_cultural_clothing"
+        ]);
+    }
+
+    function validWardrobeColourFamilyList(value) {
+      return value is list
+        && value.size() <= 30
+        && value.hasOnly([
+          "black",
+          "white",
+          "grey",
+          "navy",
+          "blue",
+          "green",
+          "red",
+          "pink",
+          "purple",
+          "yellow",
+          "orange",
+          "brown",
+          "cream",
+          "metallics",
+          "pastels",
+          "brights",
+          "neutrals"
+        ]);
+    }
+
+    function validOptionalTypicalDressCode(value) {
+      return value == "" || value in [
+        "casual",
+        "smart_casual",
+        "business_casual",
+        "formal",
+        "varied"
+      ];
+    }
+
+    function validOptionalOutfitFormality(value) {
+      return value == "" || value in ["relaxed", "balanced", "polished", "formal"];
+    }
+
+    function validOptionalModestyPreference(value) {
+      return value == "" || value in [
+        "no_preference",
+        "more_coverage",
+        "high_coverage",
+        "varies"
+      ];
+    }
+
+    function validWardrobeSetupRelevance(value) {
+      return value in ["not_relevant", "sometimes", "often"];
+    }
+
+    function validWardrobeStyleBasics(value) {
+      return value is map
+        && value.keys().hasOnly([
+          "typicalDressCode",
+          "preferredOutfitFormality",
+          "favouriteColourFamilies",
+          "coloursToAvoid",
+          "modestyPreference",
+          "workwearRelevance",
+          "occasionwearRelevance"
+        ])
+        && value.keys().hasAll([
+          "typicalDressCode",
+          "preferredOutfitFormality",
+          "favouriteColourFamilies",
+          "coloursToAvoid",
+          "modestyPreference",
+          "workwearRelevance",
+          "occasionwearRelevance"
+        ])
+        && value.typicalDressCode is string
+        && validOptionalTypicalDressCode(value.typicalDressCode)
+        && value.preferredOutfitFormality is string
+        && validOptionalOutfitFormality(value.preferredOutfitFormality)
+        && validWardrobeColourFamilyList(value.favouriteColourFamilies)
+        && validWardrobeColourFamilyList(value.coloursToAvoid)
+        && value.modestyPreference is string
+        && validOptionalModestyPreference(value.modestyPreference)
+        && value.workwearRelevance is string
+        && validWardrobeSetupRelevance(value.workwearRelevance)
+        && value.occasionwearRelevance is string
+        && validWardrobeSetupRelevance(value.occasionwearRelevance);
+    }
+
+    function validWardrobeSetupProfileKeys() {
+      return request.resource.data.keys().hasOnly([
+          "id",
+          "userId",
+          "selectedCategories",
+          "styleBasics",
+          "setupStatus",
+          "source",
+          "createdAt",
+          "updatedAt",
+          "completedAt"
+        ])
+        && request.resource.data.keys().hasAll([
+          "id",
+          "userId",
+          "selectedCategories",
+          "styleBasics",
+          "setupStatus",
+          "source",
+          "createdAt",
+          "updatedAt",
+          "completedAt"
+        ]);
+    }
+
+    function validWardrobeSetupProfileShape(profileId) {
+      return signedIn()
+        && validWardrobeSetupProfileKeys()
+        && profileId == request.auth.uid
+        && request.resource.data.id == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && isSafeLifecycleId(request.resource.data.id)
+        && isSafeLifecycleId(request.resource.data.userId)
+        && validWardrobeCategoryPreferenceList(request.resource.data.selectedCategories)
+        && validWardrobeStyleBasics(request.resource.data.styleBasics)
+        && request.resource.data.setupStatus is string
+        && validWardrobeSetupStatus(request.resource.data.setupStatus)
+        && request.resource.data.source is string
+        && validWardrobeSetupSource(request.resource.data.source)
+        && isIsoString(request.resource.data.createdAt)
+        && isIsoString(request.resource.data.updatedAt)
+        && request.resource.data.completedAt is string
+        && (
+          request.resource.data.setupStatus != "completed"
+          || isIsoString(request.resource.data.completedAt)
+        );
+    }
+
+    function createsOwnWardrobeSetupProfile(profileId) {
+      return validWardrobeSetupProfileShape(profileId);
+    }
+
+    function updatesOwnWardrobeSetupProfile(profileId) {
+      return readsOwnUserOwnedDocument()
+        && validWardrobeSetupProfileShape(profileId)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.source == resource.data.source
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
     function deletionRequestHasExpectedClientFields() {
       return request.resource.data.keys().hasOnly([
           "id",
@@ -292,6 +471,16 @@ service cloud.firestore {
       );
       allow list, delete: if readsOwnUserOwnedDocument();
       allow update: if updatesOwnUserOwnedDocument();
+    }
+
+    match /wardrobeSetupProfiles/{profileId} {
+      allow create: if createsOwnWardrobeSetupProfile(profileId);
+      allow get: if readsOwnUserOwnedDocumentOrOwnMissing(
+        /databases/$(database)/documents/wardrobeSetupProfiles/$(profileId),
+        profileId
+      );
+      allow list, delete: if readsOwnUserOwnedDocument();
+      allow update: if updatesOwnWardrobeSetupProfile(profileId);
     }
 
     match /wardrobeItems/{itemId} {

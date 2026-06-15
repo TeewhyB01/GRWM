@@ -13,14 +13,18 @@ import {
   createPrivacyConsentChoices,
   createPlaceholderSignedInAuthState,
   createSignedOutAuthState,
+  createDefaultWardrobeStyleBasics,
   createStylePreferencePlaceholder,
   createUserDeletionRequestDocument,
   createUserFoundationDocuments,
+  createWardrobeSetupProfileDocument,
   getMobileFirebaseConfig,
   getMobileFirebaseEmulatorConfig,
   getNextRouteForAuthAndConsent,
+  getMessages,
   isMobileFirebaseConfigured,
   mergePrivacyConsentChoices,
+  mergeWardrobeStyleBasics,
   mobileFirebaseEmulatorEnvKeys,
   mapFirebaseAuthUser,
   mobileFirebaseEnvKeys,
@@ -32,6 +36,7 @@ import {
   themes,
   validatePrivacyConsentDocument,
   validateStylePreferencePlaceholder,
+  validateWardrobeSetupProfileDocument,
   validateUserDeletionRequestDocument,
   validateUserFoundationDocuments
 } from "./index.ts";
@@ -127,6 +132,11 @@ test("@grwm/mobile defines the Phase 1 route shell", () => {
       "country",
       "privacy",
       "onboarding",
+      "wardrobeSetupIntro",
+      "wardrobeSetupPrivacy",
+      "wardrobeSetupCategories",
+      "wardrobeSetupStyle",
+      "wardrobeSetupSummary",
       "wardrobe",
       "today",
       "settings"
@@ -192,6 +202,8 @@ test("@grwm/mobile guards protected routes until auth exists", () => {
   assert.equal(canAccessMobileRoute("wardrobe", createCheckingAuthState()), false);
   assert.equal(canAccessMobileRoute("wardrobe", createSignedOutAuthState()), false);
   assert.equal(canAccessMobileRoute("wardrobe", createPlaceholderSignedInAuthState()), true);
+  assert.equal(canAccessMobileRoute("wardrobeSetupIntro", createPlaceholderSignedInAuthState()), true);
+  assert.equal(canAccessMobileRoute("wardrobeSetupStyle", createSignedOutAuthState()), false);
   assert.equal(canAccessMobileRoute("privacy", createSignedOutAuthState()), false);
   assert.equal(canAccessMobileRoute("login", createSignedOutAuthState()), true);
 });
@@ -247,6 +259,17 @@ test("@grwm/mobile routes signed-in users through privacy consent before protect
     }),
     null
   );
+});
+
+test("@grwm/mobile keeps wardrobe setup i18n keys present", () => {
+  const messages = getMessages();
+
+  assert.equal(messages.screens.wardrobeSetupIntro.privateTitle, "Your wardrobe is private.");
+  assert.match(messages.screens.wardrobeSetupIntro.consentBody, /will not analyse wardrobe photos/);
+  assert.match(messages.screens.wardrobeSetupIntro.consentBody, /Photo upload will be added/);
+  assert.match(messages.screens.wardrobePrivacyExplainer.consentBody, /Settings/);
+  assert.equal(messages.screens.wardrobeSetupCategories.categoryLabels.traditional_cultural_clothing, "Traditional or cultural clothing");
+  assert.equal(messages.screens.wardrobe.addSoonAction, "Add wardrobe item soon");
 });
 
 test("@grwm/mobile builds profile defaults after email signup", () => {
@@ -337,6 +360,53 @@ test("@grwm/mobile validates deletion request and style placeholder payloads", (
   assert.equal(deletionRequest.failureReason, "");
   assert.equal(validateStylePreferencePlaceholder(styleProfile), true);
   assert.deepEqual(styleProfile.styleKeywords, []);
+});
+
+test("@grwm/mobile builds wardrobe setup profile payloads without image upload fields", () => {
+  const styleBasics = mergeWardrobeStyleBasics(createDefaultWardrobeStyleBasics(), {
+    typicalDressCode: "smart_casual",
+    preferredOutfitFormality: "balanced",
+    favouriteColourFamilies: ["black", "green"],
+    workwearRelevance: "often"
+  });
+  const profile = createWardrobeSetupProfileDocument({
+    nowIso: "2026-06-15T00:00:00.000Z",
+    selectedCategories: ["tops", "jeans", "jackets"],
+    setupStatus: "completed",
+    styleBasics,
+    userId: "user_1"
+  });
+
+  assert.equal(validateWardrobeSetupProfileDocument(profile), true);
+  assert.equal(profile.id, "user_1");
+  assert.equal(profile.userId, "user_1");
+  assert.equal(profile.source, "mobile");
+  assert.equal(profile.setupStatus, "completed");
+  assert.equal(profile.completedAt, "2026-06-15T00:00:00.000Z");
+  assert.deepEqual(profile.selectedCategories, ["tops", "jeans", "jackets"]);
+  assert.equal("storagePath" in profile, false);
+  assert.equal("uploadStatus" in profile, false);
+  assert.equal("analysisStatus" in profile, false);
+});
+
+test("@grwm/mobile preserves wardrobe setup createdAt during draft updates", () => {
+  const existingProfile = createWardrobeSetupProfileDocument({
+    nowIso: "2026-06-15T00:00:00.000Z",
+    selectedCategories: ["tops"],
+    userId: "user_1"
+  });
+  const updatedProfile = createWardrobeSetupProfileDocument({
+    existingProfile,
+    nowIso: "2026-06-15T00:05:00.000Z",
+    selectedCategories: ["tops", "shoes"],
+    userId: "user_1"
+  });
+
+  assert.equal(updatedProfile.setupStatus, "in_progress");
+  assert.equal(updatedProfile.createdAt, existingProfile.createdAt);
+  assert.equal(updatedProfile.updatedAt, "2026-06-15T00:05:00.000Z");
+  assert.equal(updatedProfile.completedAt, "");
+  assert.deepEqual(updatedProfile.selectedCategories, ["tops", "shoes"]);
 });
 
 test("@grwm/mobile adapts AsyncStorage for Firebase Auth persistence", async () => {

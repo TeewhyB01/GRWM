@@ -10,6 +10,9 @@ export const firestorePathBuilders = {
   privacyConsent(consentId: string): string {
     return `${firestoreCollections.privacyConsents}/${consentId}`;
   },
+  wardrobeSetupProfile(userId: string): string {
+    return `${firestoreCollections.wardrobeSetupProfiles}/${userId}`;
+  },
   styleProfile(userId: string): string {
     return `${firestoreCollections.styleProfiles}/${userId}`;
   },

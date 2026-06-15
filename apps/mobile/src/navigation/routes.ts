@@ -6,6 +6,11 @@ export type MobileRouteId =
   | "country"
   | "privacy"
   | "onboarding"
+  | "wardrobeSetupIntro"
+  | "wardrobeSetupPrivacy"
+  | "wardrobeSetupCategories"
+  | "wardrobeSetupStyle"
+  | "wardrobeSetupSummary"
   | "wardrobe"
   | "today"
   | "settings";
@@ -15,6 +20,7 @@ export interface MobileRoute {
   labelKey: MobileRouteId;
   requiresAuth: boolean;
   group: "entry" | "onboarding" | "main";
+  visibleInNavigation?: boolean;
 }
 
 export const mobileRoutes: readonly MobileRoute[] = [
@@ -25,6 +31,41 @@ export const mobileRoutes: readonly MobileRoute[] = [
   { id: "country", labelKey: "country", requiresAuth: false, group: "onboarding" },
   { id: "privacy", labelKey: "privacy", requiresAuth: true, group: "onboarding" },
   { id: "onboarding", labelKey: "onboarding", requiresAuth: true, group: "onboarding" },
+  {
+    id: "wardrobeSetupIntro",
+    labelKey: "wardrobeSetupIntro",
+    requiresAuth: true,
+    group: "onboarding",
+    visibleInNavigation: false
+  },
+  {
+    id: "wardrobeSetupPrivacy",
+    labelKey: "wardrobeSetupPrivacy",
+    requiresAuth: true,
+    group: "onboarding",
+    visibleInNavigation: false
+  },
+  {
+    id: "wardrobeSetupCategories",
+    labelKey: "wardrobeSetupCategories",
+    requiresAuth: true,
+    group: "onboarding",
+    visibleInNavigation: false
+  },
+  {
+    id: "wardrobeSetupStyle",
+    labelKey: "wardrobeSetupStyle",
+    requiresAuth: true,
+    group: "onboarding",
+    visibleInNavigation: false
+  },
+  {
+    id: "wardrobeSetupSummary",
+    labelKey: "wardrobeSetupSummary",
+    requiresAuth: true,
+    group: "onboarding",
+    visibleInNavigation: false
+  },
   { id: "wardrobe", labelKey: "wardrobe", requiresAuth: true, group: "main" },
   { id: "today", labelKey: "today", requiresAuth: true, group: "main" },
   { id: "settings", labelKey: "settings", requiresAuth: true, group: "main" }

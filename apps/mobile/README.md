@@ -74,6 +74,23 @@ Development build creation and install guide: `docs/MOBILE_DEVELOPMENT_BUILD_INS
 
 Latest manual result: on 2026-06-14, the installed `com.grwm.mobile` development build passed A-G auth/profile/privacy/deletion QA on the iPhone 17 simulator against isolated Firebase emulators. Evidence and Firestore document snapshots are in `docs/MOBILE_MANUAL_QA_REPORT.md`.
 
+## Wardrobe Onboarding Foundation
+
+Wardrobe setup is available to signed-in users after privacy consent. It stores private setup preferences at `wardrobeSetupProfiles/{userId}` and does not upload images.
+
+Screens:
+
+- `WardrobeSetupIntroScreen`
+- `WardrobePrivacyExplainerScreen`
+- `WardrobeCategoryPreferencesScreen`
+- `WardrobeStyleBasicsScreen`
+- `WardrobeSetupSummaryScreen`
+- `WardrobeHomeScreen` empty state
+
+The Wardrobe Home empty state shows "Add wardrobe item soon" as a disabled placeholder CTA. The app must not open an image picker, write Firebase Storage objects, create image-backed `wardrobeItems`, or request AI analysis in this phase.
+
+Manual QA after this change should use an installed development build, not Expo Go. Verify setup save/resume, completion, Settings privacy link, and the disabled upload CTA.
+
 Account/data deletion remains a client request flow in mobile: Settings creates `userDeletionRequests/{uid}` with `status: requested`, `requestedBy: user`, and `source: mobile`. The mobile client must not directly delete private Firestore records, Firebase Storage files, or Firebase Auth users. The trusted backend `userDataDeletion` trigger processes deletion securely and may sign the user out after completion.
 
 Deletion copy shown in Settings should continue to communicate:
@@ -122,6 +139,11 @@ pnpm functions:build
 - Language Selection
 - Country Selection
 - Onboarding Start
+- Wardrobe Setup Intro
+- Wardrobe Privacy Explainer
+- Wardrobe Category Preferences
+- Wardrobe Style Basics
+- Wardrobe Setup Summary
 - Wardrobe Home
 - Today's Outfit
 - Settings

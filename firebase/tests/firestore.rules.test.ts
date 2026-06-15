@@ -15,12 +15,14 @@ import {
   createSeedPrivacyConsent,
   createSeedUserProfile,
   createSeedWardrobeItem,
+  createSeedWardrobeSetupProfile,
   localSeedAdminUsers,
   localSeedUsers,
   sampleDeletionRequest,
   samplePrivacyConsent,
   sampleUserProfile,
-  sampleWardrobeItem
+  sampleWardrobeItem,
+  sampleWardrobeSetupProfile
 } from "./helpers/seedData.ts";
 import { testDocumentIds, testEmails, testUserIds } from "./helpers/ids.ts";
 import {
@@ -151,6 +153,118 @@ test("user cannot read or write another user's privacyConsents", async () => {
 
   await assertFails(userADb.doc(firestorePathBuilders.privacyConsent(userBConsent.id)).get());
   await assertFails(userADb.doc(firestorePathBuilders.privacyConsent(userBConsent.id)).set(asDocumentData(userBConsent)));
+});
+
+test("user can read missing own wardrobeSetupProfile as not found", async () => {
+  await assertSucceeds(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA))
+      .get()
+  );
+});
+
+test("user can create and update their own wardrobeSetupProfile", async () => {
+  const db = firestoreFor(testUserIds.userA);
+  const setupPath = firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA);
+
+  await assertSucceeds(db.doc(setupPath).set(asDocumentData(sampleWardrobeSetupProfile)));
+  await assertSucceeds(db.doc(setupPath).update({
+    completedAt: "2026-06-08T00:10:00.000Z",
+    setupStatus: "completed",
+    updatedAt: "2026-06-08T00:10:00.000Z"
+  }));
+  await assertSucceeds(db.doc(setupPath).get());
+});
+
+test("user cannot create wardrobeSetupProfile for another user", async () => {
+  const userBProfile = createSeedWardrobeSetupProfile({
+    userId: testUserIds.userB
+  });
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeSetupProfile(testUserIds.userB))
+      .set(asDocumentData(userBProfile))
+  );
+});
+
+test("wardrobeSetupProfile create with userId mismatch is denied", async () => {
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA))
+      .set({
+        ...asDocumentData(sampleWardrobeSetupProfile),
+        userId: testUserIds.userB
+      })
+  );
+});
+
+test("wardrobeSetupProfile create without required fields is denied", async () => {
+  const missingStyleBasics = { ...asDocumentData(sampleWardrobeSetupProfile) };
+
+  delete missingStyleBasics.styleBasics;
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA))
+      .set(missingStyleBasics)
+  );
+});
+
+test("wardrobeSetupProfile create with invalid enum values is denied", async () => {
+  const db = firestoreFor(testUserIds.userA);
+  const setupPath = firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA);
+
+  await assertFails(db.doc(setupPath).set({
+    ...asDocumentData(sampleWardrobeSetupProfile),
+    setupStatus: "done"
+  }));
+  await assertFails(db.doc(setupPath).set({
+    ...asDocumentData(sampleWardrobeSetupProfile),
+    selectedCategories: ["tops", "underwear"]
+  }));
+  await assertFails(db.doc(setupPath).set({
+    ...asDocumentData(sampleWardrobeSetupProfile),
+    styleBasics: {
+      ...sampleWardrobeSetupProfile.styleBasics,
+      preferredOutfitFormality: "chaotic"
+    }
+  }));
+});
+
+test("wardrobeSetupProfile update cannot change owner fields", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA),
+      data: asDocumentData(sampleWardrobeSetupProfile)
+    }
+  ]);
+
+  const db = firestoreFor(testUserIds.userA);
+  const setupPath = firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA);
+
+  await assertFails(db.doc(setupPath).update({
+    userId: testUserIds.userB,
+    updatedAt: "2026-06-08T00:10:00.000Z"
+  }));
+  await assertFails(db.doc(setupPath).update({
+    id: testUserIds.userB,
+    updatedAt: "2026-06-08T00:10:00.000Z"
+  }));
+  await assertFails(db.doc(setupPath).update({
+    source: "admin",
+    updatedAt: "2026-06-08T00:10:00.000Z"
+  }));
+});
+
+test("unauthenticated user cannot read or write wardrobeSetupProfile", async () => {
+  const db = unauthenticatedTestContext(testEnv).firestore();
+
+  await assertFails(db.doc(firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA)).get());
+  await assertFails(
+    db.doc(firestorePathBuilders.wardrobeSetupProfile(testUserIds.userA))
+      .set(asDocumentData(sampleWardrobeSetupProfile))
+  );
 });
 
 test("user can create their own userDeletionRequest", async () => {

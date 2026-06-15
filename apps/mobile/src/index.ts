@@ -52,6 +52,16 @@ export {
   validateUserDeletionRequestDocument
 } from "./privacy/privacyService.ts";
 export {
+  completeWardrobeSetup,
+  createDefaultWardrobeStyleBasics,
+  createWardrobeSetupProfileDocument,
+  getWardrobeSetupProfile,
+  mergeWardrobeStyleBasics,
+  resetWardrobeSetup,
+  saveWardrobeSetupDraft,
+  validateWardrobeSetupProfileDocument
+} from "./wardrobe/wardrobeSetupService.ts";
+export {
   createAsyncStorageAuthPersistence
 } from "./firebase/client.ts";
 export { mobileRoutes } from "./navigation/routes.ts";

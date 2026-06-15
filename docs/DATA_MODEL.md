@@ -5,6 +5,7 @@
 - `users`: Firebase Auth-linked user records.
 - `userProfiles`: user profile, locale, country, and plan metadata.
 - `privacyConsents`: versioned consent choices for sensitive data use, including `source: mobile`.
+- `wardrobeSetupProfiles`: private wardrobe onboarding preferences, setup status, and style basics before upload is enabled.
 - `wardrobeItems`: wardrobe metadata and Firebase Storage references.
 - `styleProfiles`: user preference, fit, modesty preference placeholder, weather/location preference placeholder, and private body-shape notes.
 - `outfitRecommendations`: future recommendation records, currently placeholders.
@@ -53,11 +54,13 @@ Email/password signup creates:
 
 `privacyConsents/{userId}` stores all consent purposes as booleans, `version: 2026-06-foundation`, `source: mobile`, `createdAtIso`, and `updatedAtIso`.
 
+`wardrobeSetupProfiles/{userId}` stores the non-image wardrobe setup profile. It contains `id`, `userId`, `selectedCategories`, `styleBasics`, `setupStatus`, `source: mobile`, `createdAt`, `updatedAt`, and `completedAt`. The setup status is `not_started`, `in_progress`, or `completed`. The style basics contain only bounded enum choices for dress code, formality, colour families, modesty preference, workwear relevance, and occasionwear relevance. It does not store wardrobe photos, Storage paths, AI analysis state, body-shape notes, shopping data, or payment data.
+
 `userDeletionRequests/{userId}` stores the deletion lifecycle tombstone: `id`, `userId`, `requestedAtIso`, `status`, `processingStartedAtIso`, `completedAtIso`, `failedAtIso`, `failureReason`, `requestedBy`, `source`, `consentVersionAtRequest`, and `auditLogId`.
 
 Allowed deletion statuses are `requested`, `processing`, `completed`, `failed`, and `cancelled`. The mobile client creates only `requested` records with `requestedBy: user` and `source: mobile`. Trusted backend code owns all later status transitions.
 
-The backend deletion processor deletes private user-owned data from current owner-keyed documents (`users`, `userProfiles`, `privacyConsents`, `styleProfiles`, `avatarProfiles`, and `subscriptions`), current `userId` query collections (`wardrobeItems` and `outfitRecommendations`), and prepared future `userId` query collections (`savedOutfits`, `wornOutfits`, `outfitPhotos`, `avatarGenerations`, `shoppingRecommendations`, `affiliateClicks`, `payments`, `aiJobs`, `aiUsageLogs`, `userFeedback`, and `reports`). It keeps a minimal `userDeletionRequests/{userId}` tombstone and never deletes `adminAuditLogs` or `adminUsers`.
+The backend deletion processor deletes private user-owned data from current owner-keyed documents (`users`, `userProfiles`, `privacyConsents`, `wardrobeSetupProfiles`, `styleProfiles`, `avatarProfiles`, and `subscriptions`), current `userId` query collections (`wardrobeItems` and `outfitRecommendations`), and prepared future `userId` query collections (`savedOutfits`, `wornOutfits`, `outfitPhotos`, `avatarGenerations`, `shoppingRecommendations`, `affiliateClicks`, `payments`, `aiJobs`, `aiUsageLogs`, `userFeedback`, and `reports`). It keeps a minimal `userDeletionRequests/{userId}` tombstone and never deletes `adminAuditLogs` or `adminUsers`.
 
 ## Placeholder Preference Persistence
 
@@ -68,6 +71,7 @@ The current onboarding start step can create `styleProfiles/{userId}` with `id`,
 - `User`: owner-keyed by Auth UID with email, provider, disabled flag, and ISO lifecycle timestamps. Production should move sensitive lifecycle updates to trusted backend code.
 - `UserProfile`: owner-keyed by user ID with locale, country, plan ID, consent version, and timestamps.
 - `PrivacyConsent`: owner-keyed by user ID with explicit boolean purposes, version, source, and timestamps. It does not store free-form sensitive notes.
+- `WardrobeSetupProfile`: owner-keyed by user ID with selected future wardrobe categories, bounded style basics, setup status, mobile source, and timestamps. It intentionally avoids images, Storage paths, free-form personal notes, and AI analysis fields.
 - `WardrobeItem`: queryable by `userId`, includes duplicate owner binding (`userId` and `ownerId`), duplicate item binding (`id` and `itemId`), private `storagePath`, `primaryColour`, visibility, user-provided tags, source, upload lifecycle status, safe upload failure fields, analysis status, analysis consent reference, and timestamps. Client creates are limited to private, manual/import records with `uploadStatus: draft` or `upload_pending` and `analysisStatus: not_requested`. Backend finalisation owns `uploaded` and `upload_failed`; backend-owned analysis transitions are not active.
 - `StyleProfile`: owner-keyed by user ID, includes placeholder arrays/strings and timestamps. Body-shape notes remain private and should stay user-controlled.
 - `OutfitRecommendation`: queryable by `userId`, includes item IDs, generated text, status, and timestamps. AI generation is not implemented.

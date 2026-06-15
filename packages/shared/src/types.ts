@@ -12,6 +12,58 @@ export type WardrobeAnalysisStatus =
   | "completed"
   | "failed";
 export type WardrobeItemAnalysisStatus = WardrobeAnalysisStatus;
+export type WardrobeSetupStatus = "not_started" | "in_progress" | "completed";
+export type WardrobeSetupSource = "mobile";
+export type WardrobeCategoryPreference =
+  | "tops"
+  | "trousers"
+  | "jeans"
+  | "skirts"
+  | "dresses"
+  | "jackets"
+  | "coats"
+  | "blazers"
+  | "shoes"
+  | "bags"
+  | "jewellery"
+  | "belts"
+  | "scarves"
+  | "hats"
+  | "activewear"
+  | "workwear"
+  | "occasion_wear"
+  | "traditional_cultural_clothing";
+export type WardrobeTypicalDressCode =
+  | "casual"
+  | "smart_casual"
+  | "business_casual"
+  | "formal"
+  | "varied";
+export type WardrobeOutfitFormality = "relaxed" | "balanced" | "polished" | "formal";
+export type WardrobeColourFamily =
+  | "black"
+  | "white"
+  | "grey"
+  | "navy"
+  | "blue"
+  | "green"
+  | "red"
+  | "pink"
+  | "purple"
+  | "yellow"
+  | "orange"
+  | "brown"
+  | "cream"
+  | "metallics"
+  | "pastels"
+  | "brights"
+  | "neutrals";
+export type WardrobeModestyPreference =
+  | "no_preference"
+  | "more_coverage"
+  | "high_coverage"
+  | "varies";
+export type WardrobeSetupRelevance = "not_relevant" | "sometimes" | "often";
 export type WardrobeUploadFailureReason =
   | "invalid_storage_path"
   | "missing_required_metadata"
@@ -116,6 +168,28 @@ export interface WardrobeItem {
   analysisConsentVersion: string;
   createdAtIso: string;
   updatedAtIso: string;
+}
+
+export interface WardrobeStyleBasics {
+  typicalDressCode: WardrobeTypicalDressCode | "";
+  preferredOutfitFormality: WardrobeOutfitFormality | "";
+  favouriteColourFamilies: readonly WardrobeColourFamily[];
+  coloursToAvoid: readonly WardrobeColourFamily[];
+  modestyPreference: WardrobeModestyPreference | "";
+  workwearRelevance: WardrobeSetupRelevance;
+  occasionwearRelevance: WardrobeSetupRelevance;
+}
+
+export interface WardrobeSetupProfile {
+  id: string;
+  userId: string;
+  selectedCategories: readonly WardrobeCategoryPreference[];
+  styleBasics: WardrobeStyleBasics;
+  setupStatus: WardrobeSetupStatus;
+  source: WardrobeSetupSource;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string;
 }
 
 export interface WardrobeUploadMetadata {

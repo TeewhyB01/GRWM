@@ -21,7 +21,12 @@ import { PrivacyConsentScreen } from "../screens/PrivacyConsentScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { SignUpScreen } from "../screens/SignUpScreen";
 import { TodaysOutfitScreen } from "../screens/TodaysOutfitScreen";
+import { WardrobeCategoryPreferencesScreen } from "../screens/WardrobeCategoryPreferencesScreen";
 import { WardrobeHomeScreen } from "../screens/WardrobeHomeScreen";
+import { WardrobePrivacyExplainerScreen } from "../screens/WardrobePrivacyExplainerScreen";
+import { WardrobeSetupIntroScreen } from "../screens/WardrobeSetupIntroScreen";
+import { WardrobeSetupSummaryScreen } from "../screens/WardrobeSetupSummaryScreen";
+import { WardrobeStyleBasicsScreen } from "../screens/WardrobeStyleBasicsScreen";
 import { WelcomeScreen } from "../screens/WelcomeScreen";
 import { darkTheme, lightTheme } from "../theme";
 import { initialMobileRoute, mobileRoutes, type MobileRouteId } from "./routes";
@@ -37,6 +42,11 @@ const screenComponents: Record<MobileRouteId, ScreenComponent> = {
   country: CountrySelectionScreen,
   privacy: PrivacyConsentScreen,
   onboarding: OnboardingStartScreen,
+  wardrobeSetupIntro: WardrobeSetupIntroScreen,
+  wardrobeSetupPrivacy: WardrobePrivacyExplainerScreen,
+  wardrobeSetupCategories: WardrobeCategoryPreferencesScreen,
+  wardrobeSetupStyle: WardrobeStyleBasicsScreen,
+  wardrobeSetupSummary: WardrobeSetupSummaryScreen,
   wardrobe: WardrobeHomeScreen,
   today: TodaysOutfitScreen,
   settings: SettingsScreen
@@ -160,7 +170,7 @@ export function NavigationShell() {
         showsHorizontalScrollIndicator={false}
         style={[styles.nav, { backgroundColor: theme.surface, borderColor: theme.border }]}
       >
-        {mobileRoutes.map((route) => {
+        {mobileRoutes.filter((route) => route.visibleInNavigation !== false).map((route) => {
           const isActive = route.id === activeRoute;
 
           return (

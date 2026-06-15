@@ -18,6 +18,7 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 - Storage rules now allow access only under the authenticated user's own `users/{userId}` path and enforce upload MIME type, max size, required owner metadata, category metadata, path ID metadata, and consent version metadata for client-writable image paths.
 - Wardrobe Storage rules also require `storagePath` metadata to match the exact private object path.
 - Wardrobe upload lifecycle helpers now require Firestore draft creation before Storage upload, then trusted backend finalisation before `uploadStatus: uploaded`.
+- Wardrobe onboarding preferences are stored under `wardrobeSetupProfiles/{userId}` with owner-bound Firestore rules, required fields, mobile source, setup status enums, and bounded category/style enums.
 - Environment variables are documented but not committed with secrets.
 - Privacy consent starts from opt-in false for wardrobe photo analysis, style photo analysis, avatar creation, location/weather use, AI recommendations, marketing emails, and analytics.
 - Account deletion requests are modeled so deletion can be verified and audited.
@@ -39,6 +40,8 @@ Wardrobe images, body-shape preferences, style preferences, and location-derived
 
 ## Wardrobe Upload Security Status
 
+- Wardrobe onboarding foundation is implemented without image picker UI, Storage upload, AI analysis, avatar, payment, or shopping features.
+- Setup preferences are private, owner-keyed, and included in the trusted account deletion plan.
 - Final lifecycle is Firestore draft first, exact private Storage upload second, trusted backend finalisation third.
 - AI analysis remains separate from private upload. Future analysis requests are blocked unless `wardrobePhotoAnalysis` consent is true.
 - Server-side orphan detection is expanded but remains non-destructive.
@@ -57,3 +60,4 @@ See `docs/USER_DATA_DELETION.md` for deletion coverage, audit events, emulator-s
 See `docs/ARCHITECTURE_REVIEW.md` for the latest architecture gate and wardrobe upload blockers.
 See `docs/STORAGE_UPLOAD_SECURITY.md` for the current upload policy, metadata contract, and emulator coverage.
 See `docs/WARDROBE_UPLOAD_LIFECYCLE.md` for the wardrobe upload lifecycle.
+See `docs/WARDROBE_ONBOARDING.md` for the current non-image wardrobe setup foundation.

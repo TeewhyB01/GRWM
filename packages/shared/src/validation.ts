@@ -11,8 +11,18 @@ import type {
   UserProfile,
   WardrobeAnalysisRequestPayload,
   WardrobeAnalysisStatus,
+  WardrobeCategoryPreference,
+  WardrobeColourFamily,
   WardrobeCategory,
   WardrobeItem,
+  WardrobeModestyPreference,
+  WardrobeOutfitFormality,
+  WardrobeSetupProfile,
+  WardrobeSetupRelevance,
+  WardrobeSetupSource,
+  WardrobeSetupStatus,
+  WardrobeStyleBasics,
+  WardrobeTypicalDressCode,
   WardrobeUploadFailureReason,
   WardrobeUploadFinalisationResult,
   WardrobeUploadMetadata,
@@ -57,6 +67,75 @@ export const WARDROBE_ANALYSIS_STATUSES = [
   "failed"
 ] as const satisfies readonly WardrobeAnalysisStatus[];
 export const WARDROBE_ITEM_ANALYSIS_STATUSES = WARDROBE_ANALYSIS_STATUSES;
+export const WARDROBE_SETUP_STATUSES = [
+  "not_started",
+  "in_progress",
+  "completed"
+] as const satisfies readonly WardrobeSetupStatus[];
+export const WARDROBE_SETUP_SOURCES = ["mobile"] as const satisfies readonly WardrobeSetupSource[];
+export const WARDROBE_CATEGORY_PREFERENCES = [
+  "tops",
+  "trousers",
+  "jeans",
+  "skirts",
+  "dresses",
+  "jackets",
+  "coats",
+  "blazers",
+  "shoes",
+  "bags",
+  "jewellery",
+  "belts",
+  "scarves",
+  "hats",
+  "activewear",
+  "workwear",
+  "occasion_wear",
+  "traditional_cultural_clothing"
+] as const satisfies readonly WardrobeCategoryPreference[];
+export const WARDROBE_TYPICAL_DRESS_CODES = [
+  "casual",
+  "smart_casual",
+  "business_casual",
+  "formal",
+  "varied"
+] as const satisfies readonly WardrobeTypicalDressCode[];
+export const WARDROBE_OUTFIT_FORMALITIES = [
+  "relaxed",
+  "balanced",
+  "polished",
+  "formal"
+] as const satisfies readonly WardrobeOutfitFormality[];
+export const WARDROBE_COLOUR_FAMILIES = [
+  "black",
+  "white",
+  "grey",
+  "navy",
+  "blue",
+  "green",
+  "red",
+  "pink",
+  "purple",
+  "yellow",
+  "orange",
+  "brown",
+  "cream",
+  "metallics",
+  "pastels",
+  "brights",
+  "neutrals"
+] as const satisfies readonly WardrobeColourFamily[];
+export const WARDROBE_MODESTY_PREFERENCES = [
+  "no_preference",
+  "more_coverage",
+  "high_coverage",
+  "varies"
+] as const satisfies readonly WardrobeModestyPreference[];
+export const WARDROBE_SETUP_RELEVANCE_VALUES = [
+  "not_relevant",
+  "sometimes",
+  "often"
+] as const satisfies readonly WardrobeSetupRelevance[];
 export const WARDROBE_UPLOAD_FAILURE_REASONS = [
   "invalid_storage_path",
   "missing_required_metadata",
@@ -84,7 +163,7 @@ export const WARDROBE_ITEM_USER_EDITABLE_FIELDS = [
 export interface FieldRule<T> {
   field: keyof T;
   required: boolean;
-  kind: "string" | "number" | "boolean" | "string-array";
+  kind: "string" | "number" | "boolean" | "string-array" | "object";
 }
 
 export type ValidationSchema<T> = readonly FieldRule<T>[];
@@ -160,6 +239,28 @@ export const wardrobeUploadMetadataSchema = [
   { field: "consentVersion", required: true, kind: "string" },
   { field: "storagePath", required: true, kind: "string" }
 ] satisfies ValidationSchema<WardrobeUploadMetadata>;
+
+export const wardrobeStyleBasicsSchema = [
+  { field: "typicalDressCode", required: true, kind: "string" },
+  { field: "preferredOutfitFormality", required: true, kind: "string" },
+  { field: "favouriteColourFamilies", required: true, kind: "string-array" },
+  { field: "coloursToAvoid", required: true, kind: "string-array" },
+  { field: "modestyPreference", required: true, kind: "string" },
+  { field: "workwearRelevance", required: true, kind: "string" },
+  { field: "occasionwearRelevance", required: true, kind: "string" }
+] satisfies ValidationSchema<WardrobeStyleBasics>;
+
+export const wardrobeSetupProfileSchema = [
+  { field: "id", required: true, kind: "string" },
+  { field: "userId", required: true, kind: "string" },
+  { field: "selectedCategories", required: true, kind: "string-array" },
+  { field: "styleBasics", required: true, kind: "object" },
+  { field: "setupStatus", required: true, kind: "string" },
+  { field: "source", required: true, kind: "string" },
+  { field: "createdAt", required: true, kind: "string" },
+  { field: "updatedAt", required: true, kind: "string" },
+  { field: "completedAt", required: true, kind: "string" }
+] satisfies ValidationSchema<WardrobeSetupProfile>;
 
 export const wardrobeUploadFinalisationResultSchema = [
   { field: "ok", required: true, kind: "boolean" },
@@ -273,6 +374,8 @@ export const validationSchemas = {
   userProfile: userProfileSchema,
   wardrobeAnalysisRequestPayload: wardrobeAnalysisRequestPayloadSchema,
   wardrobeItem: wardrobeItemSchema,
+  wardrobeSetupProfile: wardrobeSetupProfileSchema,
+  wardrobeStyleBasics: wardrobeStyleBasicsSchema,
   wardrobeUploadFinalisationResult: wardrobeUploadFinalisationResultSchema,
   wardrobeUploadMetadata: wardrobeUploadMetadataSchema
 } as const;
@@ -290,6 +393,10 @@ export function hasRequiredFields<T extends object>(
 
     if (rule.kind === "string-array") {
       return Array.isArray(fieldValue) && fieldValue.every((item) => typeof item === "string");
+    }
+
+    if (rule.kind === "object") {
+      return isStringRecord(fieldValue);
     }
 
     return typeof fieldValue === rule.kind;
@@ -328,6 +435,38 @@ export function isWardrobeItemAnalysisStatus(
   value: string
 ): value is WardrobeItem["analysisStatus"] {
   return WARDROBE_ITEM_ANALYSIS_STATUSES.includes(value as WardrobeItem["analysisStatus"]);
+}
+
+export function isWardrobeSetupStatus(value: string): value is WardrobeSetupStatus {
+  return WARDROBE_SETUP_STATUSES.includes(value as WardrobeSetupStatus);
+}
+
+export function isWardrobeSetupSource(value: string): value is WardrobeSetupSource {
+  return WARDROBE_SETUP_SOURCES.includes(value as WardrobeSetupSource);
+}
+
+export function isWardrobeCategoryPreference(value: string): value is WardrobeCategoryPreference {
+  return WARDROBE_CATEGORY_PREFERENCES.includes(value as WardrobeCategoryPreference);
+}
+
+export function isWardrobeTypicalDressCode(value: string): value is WardrobeTypicalDressCode {
+  return WARDROBE_TYPICAL_DRESS_CODES.includes(value as WardrobeTypicalDressCode);
+}
+
+export function isWardrobeOutfitFormality(value: string): value is WardrobeOutfitFormality {
+  return WARDROBE_OUTFIT_FORMALITIES.includes(value as WardrobeOutfitFormality);
+}
+
+export function isWardrobeColourFamily(value: string): value is WardrobeColourFamily {
+  return WARDROBE_COLOUR_FAMILIES.includes(value as WardrobeColourFamily);
+}
+
+export function isWardrobeModestyPreference(value: string): value is WardrobeModestyPreference {
+  return WARDROBE_MODESTY_PREFERENCES.includes(value as WardrobeModestyPreference);
+}
+
+export function isWardrobeSetupRelevance(value: string): value is WardrobeSetupRelevance {
+  return WARDROBE_SETUP_RELEVANCE_VALUES.includes(value as WardrobeSetupRelevance);
 }
 
 export function isWardrobeAnalysisStatus(value: string): value is WardrobeAnalysisStatus {
@@ -372,6 +511,69 @@ function hasOnlyKeys(value: Record<string, unknown>, allowedKeys: readonly strin
 
 function isTagList(value: unknown): value is readonly string[] {
   return Array.isArray(value) && value.length <= 30 && value.every((item) => typeof item === "string");
+}
+
+function isStringListFromAllowedValues(
+  value: unknown,
+  allowedValues: readonly string[],
+  maxItems: number
+): boolean {
+  return (
+    Array.isArray(value) &&
+    value.length <= maxItems &&
+    value.every((item) => typeof item === "string" && allowedValues.includes(item))
+  );
+}
+
+function isOptionalEnumValue(
+  value: unknown,
+  validator: (candidate: string) => boolean
+): boolean {
+  return typeof value === "string" && (value === "" || validator(value));
+}
+
+export function isWardrobeStyleBasics(value: unknown): value is WardrobeStyleBasics {
+  if (!isStringRecord(value) || !hasRequiredFields(value, wardrobeStyleBasicsSchema)) {
+    return false;
+  }
+
+  return (
+    isOptionalEnumValue(value.typicalDressCode, isWardrobeTypicalDressCode) &&
+    isOptionalEnumValue(value.preferredOutfitFormality, isWardrobeOutfitFormality) &&
+    isStringListFromAllowedValues(value.favouriteColourFamilies, WARDROBE_COLOUR_FAMILIES, 30) &&
+    isStringListFromAllowedValues(value.coloursToAvoid, WARDROBE_COLOUR_FAMILIES, 30) &&
+    isOptionalEnumValue(value.modestyPreference, isWardrobeModestyPreference) &&
+    typeof value.workwearRelevance === "string" &&
+    isWardrobeSetupRelevance(value.workwearRelevance) &&
+    typeof value.occasionwearRelevance === "string" &&
+    isWardrobeSetupRelevance(value.occasionwearRelevance)
+  );
+}
+
+export function isWardrobeSetupProfile(value: unknown): value is WardrobeSetupProfile {
+  if (!isStringRecord(value) || !hasRequiredFields(value, wardrobeSetupProfileSchema)) {
+    return false;
+  }
+
+  return (
+    typeof value.id === "string" &&
+    typeof value.userId === "string" &&
+    isSafeWardrobeLifecycleId(value.id) &&
+    isSafeWardrobeLifecycleId(value.userId) &&
+    value.id === value.userId &&
+    isStringListFromAllowedValues(value.selectedCategories, WARDROBE_CATEGORY_PREFERENCES, 18) &&
+    isWardrobeStyleBasics(value.styleBasics) &&
+    typeof value.setupStatus === "string" &&
+    isWardrobeSetupStatus(value.setupStatus) &&
+    typeof value.source === "string" &&
+    isWardrobeSetupSource(value.source) &&
+    typeof value.createdAt === "string" &&
+    value.createdAt.length > 0 &&
+    typeof value.updatedAt === "string" &&
+    value.updatedAt.length > 0 &&
+    typeof value.completedAt === "string" &&
+    (value.setupStatus === "completed" ? value.completedAt.length > 0 : true)
+  );
 }
 
 export function isExpectedWardrobeUploadStoragePath(params: {

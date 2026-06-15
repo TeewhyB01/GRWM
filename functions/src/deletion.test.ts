@@ -177,6 +177,7 @@ test("Firestore deletion plan selects user-owned data and excludes admin collect
   assert.ok(plan.ownerDocumentPaths.includes("users/user_1"));
   assert.ok(plan.ownerDocumentPaths.includes("userProfiles/user_1"));
   assert.ok(plan.ownerDocumentPaths.includes("privacyConsents/user_1"));
+  assert.ok(plan.ownerDocumentPaths.includes("wardrobeSetupProfiles/user_1"));
   assert.ok(plan.ownerDocumentPaths.includes("styleProfiles/user_1"));
   assert.ok(plan.ownerDocumentPaths.includes("avatarProfiles/user_1"));
   assert.ok(plan.ownerDocumentPaths.includes("subscriptions/user_1"));

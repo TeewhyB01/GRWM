@@ -16,6 +16,7 @@ const ownerDocumentCollections = [
   firestoreCollections.users,
   firestoreCollections.userProfiles,
   firestoreCollections.privacyConsents,
+  firestoreCollections.wardrobeSetupProfiles,
   firestoreCollections.styleProfiles,
   firestoreCollections.avatarProfiles,
   firestoreCollections.subscriptions

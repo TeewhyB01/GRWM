@@ -11,7 +11,8 @@ import {
   type User,
   type UserDeletionRequest,
   type UserProfile,
-  type WardrobeItem
+  type WardrobeItem,
+  type WardrobeSetupProfile
 } from "@grwm/shared";
 
 import { testDocumentIds, testEmails, testUserIds } from "./ids.ts";
@@ -168,6 +169,33 @@ export function createSeedWardrobeItem(params: {
   };
 }
 
+export function createSeedWardrobeSetupProfile(params: {
+  setupStatus?: WardrobeSetupProfile["setupStatus"];
+  userId: string;
+}): WardrobeSetupProfile {
+  const setupStatus = params.setupStatus ?? "in_progress";
+
+  return {
+    id: params.userId,
+    userId: params.userId,
+    selectedCategories: ["tops", "trousers", "jackets", "shoes"],
+    styleBasics: {
+      typicalDressCode: "smart_casual",
+      preferredOutfitFormality: "balanced",
+      favouriteColourFamilies: ["black", "navy", "neutrals"],
+      coloursToAvoid: [],
+      modestyPreference: "no_preference",
+      workwearRelevance: "often",
+      occasionwearRelevance: "sometimes"
+    },
+    setupStatus,
+    source: "mobile",
+    createdAt: seedNowIso,
+    updatedAt: seedNowIso,
+    completedAt: setupStatus === "completed" ? seedNowIso : ""
+  };
+}
+
 export function createSeedOutfitRecommendation(params: {
   id: string;
   userId: string;
@@ -288,6 +316,10 @@ export const samplePrivacyConsent = createSeedPrivacyConsent({
 
 export const sampleWardrobeItem = createSeedWardrobeItem({
   id: testDocumentIds.wardrobeItemA,
+  userId: testUserIds.userA
+});
+
+export const sampleWardrobeSetupProfile = createSeedWardrobeSetupProfile({
   userId: testUserIds.userA
 });
 

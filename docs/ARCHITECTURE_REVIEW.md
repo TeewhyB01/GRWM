@@ -4,7 +4,7 @@ Date: 2026-06-15
 
 Architecture health rating: amber.
 
-GRWM is clean enough to begin wardrobe onboarding foundation work, provided that onboarding continues to collect explicit user-provided preferences and does not upload images yet. The wardrobe upload lifecycle foundation is now defined and helper-tested, but GRWM is still not ready for real wardrobe image upload UI until the release blockers below are addressed.
+GRWM now has a wardrobe onboarding foundation that collects explicit user-provided category and style basics without uploading images. The wardrobe upload lifecycle foundation is defined and helper-tested, but GRWM is still not ready for real wardrobe image upload UI until the release blockers below are addressed.
 
 ## What Is Solid
 
@@ -20,6 +20,8 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 - Shared helpers now create upload drafts, build/validate required metadata, detect backend-owned wardrobe fields, create safe upload failure payloads, and block analysis requests without `wardrobePhotoAnalysis` consent.
 - Functions helpers now verify wardrobe Storage objects, mark existing uploads uploaded or failed, write safe audit entries, and keep AI analysis unstarted.
 - Orphan detection now reports missing records/files, stale `upload_pending` records, `upload_failed` records, and metadata mismatches without deleting anything.
+- Mobile wardrobe onboarding now includes intro, privacy explainer, category preferences, style basics, setup summary, and Wardrobe Home empty state without image picker or Storage upload.
+- `wardrobeSetupProfiles/{userId}` stores private setup preferences with owner-bound rules, field validation, setup status, mobile source, and deletion-plan coverage.
 - Emulator rules and deletion trigger tests cover cross-user denial, public Storage denial, deletion tombstone retention, audit logs, Auth deletion, and unaffected-user protection.
 - Shared TypeScript contracts cover the foundation model set and now include consistent IDs/timestamps on style, avatar, and recommendation records.
 
@@ -30,6 +32,7 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 - Admin access is still a placeholder local session. Real admin access requires Firebase Auth, custom claims or trusted role issuance, and owner bootstrap.
 - User-owned `users/{uid}` writes are currently client writable for the signed-in owner. That is acceptable for the foundation, but production should move sensitive lifecycle fields to trusted backend writes.
 - Wardrobe upload lifecycle plumbing is implemented, but real wardrobe image upload UI is intentionally not implemented. AI, avatar, payments, shopping, and recommendation flows remain intentionally not implemented.
+- Wardrobe onboarding creates setup preferences only. It does not prove the future image upload UI is ready.
 - The existing untracked `functions/src/placeholders/userDataDeletion.ts` duplicates the active trigger name conceptually. It is not exported, but it should be removed or renamed by the owner before it becomes confusing.
 
 ## Must Be Fixed Before Wardrobe Upload
@@ -56,6 +59,7 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 
 - Full Storage trigger emulator coverage for wardrobe upload finalisation is not complete.
 - Real wardrobe image upload UI remains blocked until installed-development-build mobile QA is rerun after these upload-adjacent changes.
+- Wardrobe onboarding manual QA should be run in an installed development build after this navigation/rules change.
 - Firestore field validation is incomplete for sensitive non-wardrobe user-owned data.
 - Real admin authentication and role issuance are not implemented.
 - Production Firebase project configuration and trusted owner bootstrap are not verified.
@@ -83,6 +87,7 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 - Admin allow-path rules tests through `adminUsers` role documents.
 - Firestore field-level validation tests for user profile, consent, style profile, avatar profile, and recommendation payloads.
 - Firestore or Storage outage drills for the deletion processor.
+- Installed-development-build manual QA for the new wardrobe onboarding screens and empty state.
 - End-to-end mobile rerun after the schema/doc review changes.
 - Full trigger integration tests across Auth, Firestore, Storage, finalisation, and cleanup.
 
@@ -92,6 +97,6 @@ The requested pnpm gate suite passed on 2026-06-15 using the project fallback pn
 
 ## Recommended Next Agent
 
-Recommended next agent: Wardrobe Onboarding Foundation Agent.
+Recommended next agent: Mobile Manual QA Agent for wardrobe onboarding, followed by Upload UI Readiness Agent.
 
-That agent should build non-image wardrobe onboarding foundations only: explicit user-provided style, fit, modesty, and context preference capture. Real wardrobe image upload UI should wait for a later Upload UI Readiness Agent after full Storage trigger emulator coverage, installed development-build QA, and retention/cleanup approval.
+The QA pass should verify the setup flow and disabled upload CTA in an installed development build. The later Upload UI Readiness Agent should add no image UI until full Storage trigger emulator coverage, installed development-build QA, and retention/cleanup approval are complete.

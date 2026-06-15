@@ -34,9 +34,14 @@ import {
   isSafeWardrobeLifecycleId,
   isSubscriptionPlanId,
   isValidWardrobeUploadMetadata,
+  isWardrobeCategoryPreference,
+  isWardrobeColourFamily,
   isWardrobeAnalysisRequestPayload,
   isWardrobeItemAnalysisStatus,
   isWardrobeItemUserEditableUpdatePayload,
+  isWardrobeSetupProfile,
+  isWardrobeSetupStatus,
+  isWardrobeStyleBasics,
   isWardrobeUploadFailureReason,
   parseWardrobeUploadStoragePath,
   privacyConsentSchema,
@@ -45,7 +50,10 @@ import {
   userDeletionRequestSchema,
   userProfileSchema,
   validationSchemas,
-  type WardrobeItem
+  WARDROBE_CATEGORY_PREFERENCES,
+  type WardrobeItem,
+  type WardrobeSetupProfile,
+  type WardrobeStyleBasics
 } from "./index.ts";
 
 test("@grwm/shared keeps English as the launch locale", () => {
@@ -168,6 +176,7 @@ test("@grwm/shared defines the Firestore collection contract", () => {
     "users",
     "userProfiles",
     "privacyConsents",
+    "wardrobeSetupProfiles",
     "wardrobeItems",
     "styleProfiles",
     "outfitRecommendations",
@@ -190,6 +199,68 @@ test("@grwm/shared defines the Firestore collection contract", () => {
     "userFeedback",
     "reports"
   ]);
+});
+
+test("@grwm/shared validates wardrobe setup categories and style basics", () => {
+  const styleBasics: WardrobeStyleBasics = {
+    typicalDressCode: "smart_casual",
+    preferredOutfitFormality: "balanced",
+    favouriteColourFamilies: ["black", "green", "neutrals"],
+    coloursToAvoid: ["orange"],
+    modestyPreference: "more_coverage",
+    workwearRelevance: "often",
+    occasionwearRelevance: "sometimes"
+  };
+
+  assert.equal(WARDROBE_CATEGORY_PREFERENCES.includes("traditional_cultural_clothing"), true);
+  assert.equal(isWardrobeCategoryPreference("tops"), true);
+  assert.equal(isWardrobeCategoryPreference("underwear"), false);
+  assert.equal(isWardrobeColourFamily("neutrals"), true);
+  assert.equal(isWardrobeColourFamily("invisible"), false);
+  assert.equal(isWardrobeSetupStatus("completed"), true);
+  assert.equal(isWardrobeSetupStatus("done"), false);
+  assert.equal(isWardrobeStyleBasics(styleBasics), true);
+  assert.equal(isWardrobeStyleBasics({
+    ...styleBasics,
+    favouriteColourFamilies: ["not-a-colour"]
+  }), false);
+});
+
+test("@grwm/shared validates wardrobe setup profile ownership and completion state", () => {
+  const profile: WardrobeSetupProfile = {
+    id: "user_1",
+    userId: "user_1",
+    selectedCategories: ["tops", "trousers", "jackets", "shoes"],
+    styleBasics: {
+      typicalDressCode: "business_casual",
+      preferredOutfitFormality: "polished",
+      favouriteColourFamilies: ["black", "navy", "cream"],
+      coloursToAvoid: [],
+      modestyPreference: "no_preference",
+      workwearRelevance: "often",
+      occasionwearRelevance: "sometimes"
+    },
+    setupStatus: "completed",
+    source: "mobile",
+    createdAt: "2026-06-15T00:00:00.000Z",
+    updatedAt: "2026-06-15T00:01:00.000Z",
+    completedAt: "2026-06-15T00:01:00.000Z"
+  };
+
+  assert.equal(hasRequiredFields(profile, validationSchemas.wardrobeSetupProfile), true);
+  assert.equal(hasRequiredFields(profile.styleBasics, validationSchemas.wardrobeStyleBasics), true);
+  assert.equal(isWardrobeSetupProfile(profile), true);
+  assert.equal(isWardrobeSetupProfile({ ...profile, userId: "user_2" }), false);
+  assert.equal(isWardrobeSetupProfile({ ...profile, completedAt: "" }), false);
+  assert.equal(isWardrobeSetupProfile({
+    ...profile,
+    setupStatus: "in_progress",
+    completedAt: ""
+  }), true);
+  assert.equal(isWardrobeSetupProfile({
+    ...profile,
+    selectedCategories: ["tops", "unknown_category"]
+  }), false);
 });
 
 test("@grwm/shared defines private Firebase Storage paths", () => {
