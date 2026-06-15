@@ -78,6 +78,7 @@
 - Manual evidence and emulator document snapshots: `docs/MOBILE_MANUAL_QA_REPORT.md`.
 - Next manual rerun should use a new synthetic account and confirm the same A-G flow after any navigation, auth, profile, privacy, or rules changes.
 - Wardrobe onboarding manual QA should also verify Intro, Privacy Explainer, Category Preferences, Style Basics, Summary, and Wardrobe Home empty state using an installed development build. Confirm the "Add wardrobe item soon" CTA is disabled and no image picker or Storage upload occurs.
+- 2026-06-15 wardrobe onboarding run result: isolated emulators, Metro, and the installed `com.grwm.mobile` development build launched on iPhone 17 simulator, iOS 26.5. After app-data reset the unauthenticated Welcome state appeared, but the A-J wardrobe onboarding flow was blocked before account creation by desktop Simulator input/focus issues. Evidence: `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
 
 ## Known Limitations
 
@@ -89,7 +90,7 @@
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
 - Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.
 - Architecture review status on 2026-06-15 remains amber. Wardrobe onboarding foundation work can proceed.
-- Wardrobe onboarding foundation, setup profile rules, upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, and non-destructive orphan detection are now implemented and tested at helper/rules level. Real wardrobe upload UI remains blocked until full Storage trigger emulator coverage and manual mobile QA are complete.
+- Wardrobe onboarding foundation, setup profile rules, upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, and non-destructive orphan detection are now implemented and tested at helper/rules level. The 2026-06-15 installed-development-build wardrobe onboarding manual run was blocked before account creation, so real wardrobe upload UI remains blocked until wardrobe onboarding manual QA and full Storage trigger emulator coverage are complete.
 
 ## MVP Test Areas
 

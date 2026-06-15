@@ -53,6 +53,14 @@ Firestore rules enforce that authenticated users can read and write only `wardro
 
 Account deletion includes `wardrobeSetupProfiles/{userId}` in the trusted backend Firestore deletion plan.
 
+## Manual QA Status
+
+2026-06-15 installed-development-build wardrobe onboarding QA was attempted against isolated Firebase emulators on the iPhone 17 simulator. The installed `com.grwm.mobile` build, emulator startup, Metro startup, development-client launch, and fresh unauthenticated Welcome state after app-data reset were confirmed.
+
+The full A-J wardrobe onboarding flow was not completed because desktop Simulator input/focus automation blocked test account creation before protected wardrobe screens could be reached. No app fixes were made. Evidence is in `docs/MOBILE_WARDROBE_ONBOARDING_QA_REPORT.md`.
+
+Status: implemented and automated checks are green, but the wardrobe onboarding foundation is not yet manually verified.
+
 ## Still Blocked
 
 The foundation intentionally does not implement:
@@ -67,6 +75,6 @@ Real wardrobe image upload UI remains blocked until full Storage trigger emulato
 
 ## Next Step Before Upload UI
 
-Recommended next step: Upload UI Readiness Agent.
+Recommended next step: Mobile Wardrobe Manual QA Rerun Agent, then Upload UI Readiness Agent.
 
-That agent should verify the Storage finalisation trigger end to end in emulators, confirm non-destructive cleanup/retention decisions, and rerun installed-development-build mobile manual QA before any real image picker or Storage upload UI is enabled.
+The manual QA rerun should complete the A-J installed-development-build checklist with a fresh synthetic emulator account. After that passes, the upload readiness work should verify the Storage finalisation trigger end to end in emulators, confirm non-destructive cleanup/retention decisions, and rerun installed-development-build mobile manual QA before any real image picker or Storage upload UI is enabled.

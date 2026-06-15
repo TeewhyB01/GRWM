@@ -51,7 +51,7 @@
 - Weather context integration.
 - Occasion-based styling inputs.
 
-Phase 2 status after the 2026-06-15 wardrobe onboarding pass: onboarding foundation is implemented, setup preferences persist to `wardrobeSetupProfiles/{userId}`, and Wardrobe Home shows a non-upload empty state. Real wardrobe image upload UI must wait for full trigger integration coverage, installed-development-build mobile QA, and explicit approval of non-destructive cleanup/retention operations.
+Phase 2 status after the 2026-06-15 wardrobe onboarding implementation: onboarding foundation is implemented, setup preferences persist to `wardrobeSetupProfiles/{userId}`, and Wardrobe Home shows a non-upload empty state. Installed-development-build manual QA was attempted on 2026-06-15 but blocked before account creation by Simulator input/focus issues, so the foundation is not manually verified yet. Real wardrobe image upload UI must wait for wardrobe onboarding manual QA, full trigger integration coverage, and explicit approval of non-destructive cleanup/retention operations.
 
 ## Phase 3: Intelligence
 
