@@ -49,8 +49,9 @@
 - User deletion request status reads by owner.
 - Client denial for backend-owned deletion status updates.
 - Storage upload MIME type, max file size, required owner metadata, required path ID metadata, unauthenticated denial, cross-user denial, broad list denial, generated avatar client-write denial, and owner delete policy.
-- Firestore `wardrobeItems` required fields, owner consistency, immutable owner/path/source fields, allowed category/source/status values, private visibility, backend-owned analysis field denial, and valid non-AI user updates.
-- Shared upload policy constants, private path builders, invalid path IDs, consent gates, and wardrobe item schema validation.
+- Firestore `wardrobeItems` required fields, owner consistency, immutable owner/path/source fields, allowed category/source/status values, private visibility, backend-owned upload lifecycle field denial, backend-owned analysis field denial, and valid non-AI user updates.
+- Shared upload policy constants, private path builders, invalid path IDs, consent gates, wardrobe upload draft creation, metadata validation, backend-owned field detection, upload failure payloads, and wardrobe item schema validation.
+- Functions helper tests for wardrobe upload finalisation, including valid Storage object finalisation, metadata mismatch, missing Firestore record, user mismatch, invalid content type, oversized object, and consent-blocked analysis requests.
 
 ## Firebase Emulator Tests Needed Next
 
@@ -59,7 +60,8 @@
 - Storage moderation/malware checks and byte-level content verification before production wardrobe upload.
 - Full Functions emulator trigger tests for future auth/privacy workflows beyond deletion.
 - Additional production-like deletion failure tests for Firestore or Storage outages. Current trigger integration forces an Auth deletion failure safely inside emulators.
-- Upload lifecycle tests for orphaned Storage files and deletion cleanup after wardrobe upload is designed.
+- Full Storage trigger emulator integration for `wardrobeUploadFinalisation`; helper-level finalisation tests are in place.
+- Destructive orphan cleanup tests remain future work; current orphan detection is non-destructive.
 
 ## Manual Mobile Testing Needed Next
 
@@ -84,7 +86,7 @@
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
 - Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.
 - Architecture review status on 2026-06-15 remains amber. Wardrobe onboarding foundation work can proceed.
-- Upload-security rule constraints and `wardrobeItems` validation are now implemented and emulator-tested. Real wardrobe upload UI remains blocked until upload lifecycle coordination, consent wiring at the request point, server-side orphan cleanup, and manual mobile QA are complete.
+- Upload-security rule constraints, `wardrobeItems` validation, shared lifecycle helpers, consent-blocked analysis decisions, backend finalisation helpers, and non-destructive orphan detection are now implemented and tested at helper/rules level. Real wardrobe upload UI remains blocked until full Storage trigger emulator coverage and manual mobile QA are complete.
 
 ## MVP Test Areas
 

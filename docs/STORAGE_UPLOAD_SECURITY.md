@@ -46,7 +46,7 @@ All client-writable uploads require:
 
 Path-specific metadata:
 
-- Wardrobe: `itemId` must equal `{itemId}`.
+- Wardrobe: `itemId` must equal `{itemId}`, and `storagePath` must equal `users/{userId}/wardrobe/{itemId}/original`.
 - Style photos: `photoId` must equal `{photoId}`.
 - Avatar source photos: `photoId` must equal `{photoId}`.
 - Outfits: `outfitId` must equal `{outfitId}`.
@@ -60,7 +60,9 @@ Storage rules can validate request metadata, MIME type, file size, and path owne
 Required fields:
 
 - `id`
+- `itemId`
 - `userId`
+- `ownerId`
 - `name`
 - `category`
 - `primaryColour`
@@ -70,6 +72,10 @@ Required fields:
 - `storagePath`
 - `visibility`
 - `source`
+- `uploadStatus`
+- `uploadFailureReason`
+- `uploadedAtIso`
+- `uploadFailedAtIso`
 - `analysisStatus`
 - `analysisConsentVersion`
 - `createdAtIso`
@@ -78,14 +84,26 @@ Required fields:
 Client-created wardrobe records must use:
 
 - `id == {itemId}`
+- `itemId == {itemId}`
 - `userId == request.auth.uid`
+- `ownerId == request.auth.uid`
 - `storagePath == users/{userId}/wardrobe/{itemId}/original`
 - `visibility == private`
 - `source == manual` or `import`
+- `uploadStatus == draft` or `upload_pending`
+- `uploadFailureReason == ""`
+- `uploadedAtIso == ""`
+- `uploadFailedAtIso == ""`
 - `analysisStatus == not_requested`
 - `analysisConsentVersion == ""`
 
-Client updates cannot change `id`, `userId`, `storagePath`, `source`, `createdAtIso`, `analysisStatus`, or `analysisConsentVersion`. Backend-owned analysis lifecycle changes remain blocked until a trusted function is implemented and consent-gated.
+Client updates cannot change `id`, `itemId`, `userId`, `ownerId`, `storagePath`, `source`, `createdAtIso`, upload lifecycle fields, `analysisStatus`, or `analysisConsentVersion`. Backend-owned upload lifecycle changes now flow through the wardrobe upload finalisation service. Backend-owned analysis lifecycle changes remain blocked until a trusted analysis workflow is implemented and consent-gated.
+
+## Upload Lifecycle Coordination
+
+The Firestore document is created first, then the private Storage object is uploaded to the exact generated path. The backend finalisation helper verifies path, metadata, MIME type, size, owner fields, item ID, stored `storagePath`, and matching `wardrobeItems/{itemId}` before marking `uploadStatus: uploaded`.
+
+If verification fails, an existing item can be marked `upload_failed` with a safe failure reason. Missing Firestore records are audited without creating partial records. The finaliser does not start AI analysis.
 
 ## Consent Gates
 
@@ -104,6 +122,9 @@ The scaffold in `functions/src/storage/orphanCleanup.ts` detects:
 
 - Storage objects under wardrobe original paths with no matching `wardrobeItems.storagePath`.
 - `wardrobeItems` records whose `storagePath` has no matching Storage object.
+- `upload_pending` records older than the safe threshold.
+- `upload_failed` records that need review.
+- Storage objects whose metadata does not match the path.
 
 No destructive cleanup is active. Cleanup must run server-side because it compares private Storage and Firestore state, needs trusted Admin SDK access, should be audit logged, and must be retry-safe. A future worker should quarantine or delete failed uploads only after a retention window and after verifying the user-owned Firestore record state.
 
@@ -118,6 +139,7 @@ Storage rules tests cover:
 - cross-user upload denial
 - owner metadata mismatch denial
 - item metadata mismatch denial
+- storage path metadata mismatch denial
 - own read allowed
 - cross-user read denied
 - broad list denied
@@ -129,8 +151,13 @@ Firestore rules tests cover:
 
 - valid wardrobe item create
 - userId mismatch denial
+- ownerId mismatch denial
+- client-created `uploaded` denial
+- client-created completed analysis denial
 - missing required field denial
 - immutable owner denial
+- immutable path/source denial
+- backend-owned upload lifecycle field denial
 - backend-owned analysis field denial
 - own read allowed
 - cross-user read/write denied
@@ -138,6 +165,10 @@ Firestore rules tests cover:
 - invalid analysis status denial
 - valid non-AI user update allowed
 
+Backend helper tests cover valid finalisation, metadata mismatch, missing records, user mismatch, content type and size failures, and consent-blocked analysis request decisions.
+
 ## Current Status
 
-The rule-level upload security boundary is hardened enough for the next backend coordination design step. Real wardrobe image upload UI is still blocked until the upload lifecycle is finalized, consent checks are wired at the request point, orphan cleanup is implemented or operationally accepted, and mobile emulator QA is rerun in a development build.
+The upload lifecycle foundation is defined and helper-tested. Real wardrobe image upload UI is still blocked until full Storage trigger emulator integration and mobile manual emulator QA are rerun in a development build, and destructive orphan cleanup remains blocked until separately tested and approved.
+
+See `docs/WARDROBE_UPLOAD_LIFECYCLE.md` for the end-to-end lifecycle and readiness boundary.

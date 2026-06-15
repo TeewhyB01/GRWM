@@ -32,13 +32,13 @@
 
 All paths are private and user-scoped. Admin service code may access files through trusted server credentials, but client-side Storage rules do not make private user files public.
 
-Client-writable image uploads must include owner-bound custom metadata and must fit the allowed MIME type and size policy in `packages/shared/src/uploadPolicy.ts`. Generated avatar outputs are modeled as private user-scoped objects but are backend-owned and not client-writable.
+Client-writable wardrobe image uploads must include owner-bound custom metadata, `itemId`, `consentVersion`, and the exact `storagePath` value. They must fit the allowed MIME type and size policy in `packages/shared/src/uploadPolicy.ts`. Generated avatar outputs are modeled as private user-scoped objects but are backend-owned and not client-writable.
 
 ## Validation
 
 Shared TypeScript schemas live in `packages/shared/src/validation.ts`. They are lightweight field-presence checks for foundation testing and are not a replacement for Firestore rules or server-side validation in Cloud Functions.
 
-The shared schemas now require owner fields, array fields, wardrobe upload fields, analysis lifecycle fields, and timestamp fields that are present in the TypeScript contracts. `wardrobeItems` Firestore rules validate allowed enum values, immutable owner fields, private visibility, client-writable source values, analysis status, and Storage path consistency.
+The shared schemas now require owner fields, array fields, wardrobe upload fields, analysis lifecycle fields, and timestamp fields that are present in the TypeScript contracts. `wardrobeItems` Firestore rules validate allowed enum values, immutable owner/path/source fields, private visibility, client-writable source values, upload status, analysis status, and Storage path consistency.
 
 ## Mobile Auth/Profile Documents
 
@@ -68,7 +68,7 @@ The current onboarding start step can create `styleProfiles/{userId}` with `id`,
 - `User`: owner-keyed by Auth UID with email, provider, disabled flag, and ISO lifecycle timestamps. Production should move sensitive lifecycle updates to trusted backend code.
 - `UserProfile`: owner-keyed by user ID with locale, country, plan ID, consent version, and timestamps.
 - `PrivacyConsent`: owner-keyed by user ID with explicit boolean purposes, version, source, and timestamps. It does not store free-form sensitive notes.
-- `WardrobeItem`: queryable by `userId`, includes private `storagePath`, `primaryColour`, visibility, user-provided tags, source, analysis status, analysis consent reference, and timestamps. Client writes are limited to private, manual/import records with `analysisStatus: not_requested`; backend-owned analysis transitions are not active.
+- `WardrobeItem`: queryable by `userId`, includes duplicate owner binding (`userId` and `ownerId`), duplicate item binding (`id` and `itemId`), private `storagePath`, `primaryColour`, visibility, user-provided tags, source, upload lifecycle status, safe upload failure fields, analysis status, analysis consent reference, and timestamps. Client creates are limited to private, manual/import records with `uploadStatus: draft` or `upload_pending` and `analysisStatus: not_requested`. Backend finalisation owns `uploaded` and `upload_failed`; backend-owned analysis transitions are not active.
 - `StyleProfile`: owner-keyed by user ID, includes placeholder arrays/strings and timestamps. Body-shape notes remain private and should stay user-controlled.
 - `OutfitRecommendation`: queryable by `userId`, includes item IDs, generated text, status, and timestamps. AI generation is not implemented.
 - `AvatarProfile`: owner-keyed by user ID, includes consent version, source image paths, status, and timestamps. Avatar processing is not implemented.

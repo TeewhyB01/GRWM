@@ -89,22 +89,69 @@ test("@grwm/functions scaffolds non-destructive wardrobe orphan detection", () =
   assert.equal(isWardrobeOriginalStoragePath(existingPath), true);
   assert.equal(isWardrobeOriginalStoragePath("users/user_1/public/item_1"), false);
   assert.equal(wardrobeOrphanCleanupPolicy.destructiveCleanupEnabled, false);
+  assert.equal(wardrobeOrphanCleanupPolicy.uploadPendingAgeThresholdMs, 24 * 60 * 60 * 1000);
 
   assert.deepEqual(
     detectWardrobeStorageOrphans({
+      nowIso: "2026-06-15T00:00:00.000Z",
       storageObjects: [
-        { name: existingPath },
-        { name: orphanPath },
+        {
+          name: existingPath,
+          metadata: {
+            ownerId: "user_1",
+            userId: "user_1",
+            itemId: "item_1",
+            uploadCategory: "wardrobe-original",
+            consentVersion: "2026-06-foundation",
+            storagePath: existingPath
+          }
+        },
+        {
+          name: orphanPath,
+          metadata: {
+            ownerId: "user_1",
+            userId: "user_1",
+            itemId: "item_wrong",
+            uploadCategory: "wardrobe-original",
+            consentVersion: "2026-06-foundation",
+            storagePath: orphanPath
+          }
+        },
         { name: "users/user_1/style-photos/photo_1/original" }
       ],
       wardrobeItems: [
-        { id: "item_1", userId: "user_1", storagePath: existingPath },
-        { id: "item_missing_file", userId: "user_1", storagePath: missingPath }
+        {
+          id: "item_1",
+          userId: "user_1",
+          storagePath: existingPath,
+          uploadStatus: "uploaded",
+          updatedAtIso: "2026-06-15T00:00:00.000Z"
+        },
+        {
+          id: "item_missing_file",
+          userId: "user_1",
+          storagePath: missingPath,
+          uploadStatus: "upload_pending",
+          updatedAtIso: "2026-06-13T00:00:00.000Z"
+        },
+        {
+          id: "item_failed",
+          userId: "user_1",
+          storagePath: expectedWardrobeOriginalPath({
+            id: "item_failed",
+            userId: "user_1"
+          }),
+          uploadStatus: "upload_failed",
+          updatedAtIso: "2026-06-15T00:00:00.000Z"
+        }
       ]
     }),
     {
+      failedWardrobeItemIdsNeedingReview: ["item_failed"],
+      metadataMismatchStorageObjectPaths: [orphanPath],
       orphanedStorageObjectPaths: [orphanPath],
-      wardrobeItemIdsMissingStorageObjects: ["item_missing_file"]
+      pendingWardrobeItemIdsPastThreshold: ["item_missing_file"],
+      wardrobeItemIdsMissingStorageObjects: ["item_missing_file", "item_failed"]
     }
   );
 });

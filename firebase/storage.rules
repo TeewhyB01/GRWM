@@ -34,7 +34,8 @@ service firebase.storage {
 
     function hasWardrobeMetadata(userId, itemId) {
       return hasOwnerMetadata(userId, "wardrobe-original")
-        && request.resource.metadata.itemId == itemId;
+        && request.resource.metadata.itemId == itemId
+        && request.resource.metadata.storagePath == "users/" + userId + "/wardrobe/" + itemId + "/original";
     }
 
     function hasStylePhotoMetadata(userId, photoId) {

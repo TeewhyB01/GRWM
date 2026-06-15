@@ -57,10 +57,57 @@ service cloud.firestore {
       return value is list && value.size() <= 30;
     }
 
+    function isSafeLifecycleId(value) {
+      return value is string && value.matches("^[A-Za-z0-9_-]{1,128}$");
+    }
+
+    function validWardrobeUploadStatus(value) {
+      return value in [
+        "draft",
+        "upload_pending",
+        "uploaded",
+        "upload_failed",
+        "deleted"
+      ];
+    }
+
+    function validClientCreateWardrobeUploadStatus(value) {
+      return value in ["draft", "upload_pending"];
+    }
+
+    function validWardrobeAnalysisStatus(value) {
+      return value in [
+        "not_requested",
+        "blocked_missing_consent",
+        "pending",
+        "completed",
+        "failed"
+      ];
+    }
+
+    function validWardrobeUploadFailureReason(value) {
+      return value == ""
+        || value in [
+          "invalid_storage_path",
+          "missing_required_metadata",
+          "metadata_mismatch",
+          "invalid_content_type",
+          "file_too_large",
+          "missing_wardrobe_item",
+          "user_mismatch",
+          "storage_path_mismatch",
+          "already_deleted",
+          "write_failed",
+          "unknown"
+        ];
+    }
+
     function validWardrobeItemKeys() {
       return request.resource.data.keys().hasOnly([
           "id",
+          "itemId",
           "userId",
+          "ownerId",
           "name",
           "category",
           "primaryColour",
@@ -70,6 +117,10 @@ service cloud.firestore {
           "storagePath",
           "visibility",
           "source",
+          "uploadStatus",
+          "uploadFailureReason",
+          "uploadedAtIso",
+          "uploadFailedAtIso",
           "analysisStatus",
           "analysisConsentVersion",
           "createdAtIso",
@@ -77,7 +128,9 @@ service cloud.firestore {
         ])
         && request.resource.data.keys().hasAll([
           "id",
+          "itemId",
           "userId",
+          "ownerId",
           "name",
           "category",
           "primaryColour",
@@ -87,6 +140,10 @@ service cloud.firestore {
           "storagePath",
           "visibility",
           "source",
+          "uploadStatus",
+          "uploadFailureReason",
+          "uploadedAtIso",
+          "uploadFailedAtIso",
           "analysisStatus",
           "analysisConsentVersion",
           "createdAtIso",
@@ -94,10 +151,16 @@ service cloud.firestore {
         ]);
     }
 
-    function validClientWardrobeItemShape(itemId) {
+    function validWardrobeItemBaseShape(itemId) {
       return validWardrobeItemKeys()
         && request.resource.data.id == itemId
+        && request.resource.data.itemId == itemId
         && request.resource.data.userId == request.auth.uid
+        && request.resource.data.ownerId == request.auth.uid
+        && isSafeLifecycleId(request.resource.data.id)
+        && isSafeLifecycleId(request.resource.data.itemId)
+        && isSafeLifecycleId(request.resource.data.userId)
+        && isSafeLifecycleId(request.resource.data.ownerId)
         && isNonEmptyString(request.resource.data.name)
         && request.resource.data.category in [
           "top",
@@ -115,26 +178,60 @@ service cloud.firestore {
         && request.resource.data.storagePath == wardrobeItemStoragePath(request.auth.uid, itemId)
         && request.resource.data.visibility == "private"
         && request.resource.data.source in ["manual", "import"]
-        && request.resource.data.analysisStatus == "not_requested"
-        && request.resource.data.analysisConsentVersion == ""
+        && validWardrobeUploadStatus(request.resource.data.uploadStatus)
+        && validWardrobeUploadFailureReason(request.resource.data.uploadFailureReason)
+        && request.resource.data.uploadedAtIso is string
+        && request.resource.data.uploadFailedAtIso is string
+        && validWardrobeAnalysisStatus(request.resource.data.analysisStatus)
+        && request.resource.data.analysisConsentVersion is string
         && isIsoString(request.resource.data.createdAtIso)
         && isIsoString(request.resource.data.updatedAtIso);
     }
 
+    function validClientWardrobeItemCreateShape(itemId) {
+      return validWardrobeItemBaseShape(itemId)
+        && validClientCreateWardrobeUploadStatus(request.resource.data.uploadStatus)
+        && request.resource.data.uploadFailureReason == ""
+        && request.resource.data.uploadedAtIso == ""
+        && request.resource.data.uploadFailedAtIso == ""
+        && request.resource.data.analysisStatus == "not_requested"
+        && request.resource.data.analysisConsentVersion == "";
+    }
+
+    function validWardrobeUserEditableUpdateOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "name",
+        "category",
+        "primaryColour",
+        "colorTags",
+        "seasonTags",
+        "occasionTags",
+        "visibility",
+        "updatedAtIso"
+      ]);
+    }
+
     function createsOwnWardrobeItem(itemId) {
-      return signedIn() && validClientWardrobeItemShape(itemId);
+      return signedIn() && validClientWardrobeItemCreateShape(itemId);
     }
 
     function updatesOwnWardrobeItem(itemId) {
       return readsOwnUserOwnedDocument()
-        && validClientWardrobeItemShape(itemId)
+        && validWardrobeItemBaseShape(itemId)
         && request.resource.data.id == resource.data.id
+        && request.resource.data.itemId == resource.data.itemId
         && request.resource.data.userId == resource.data.userId
+        && request.resource.data.ownerId == resource.data.ownerId
         && request.resource.data.storagePath == resource.data.storagePath
         && request.resource.data.source == resource.data.source
+        && request.resource.data.uploadStatus == resource.data.uploadStatus
+        && request.resource.data.uploadFailureReason == resource.data.uploadFailureReason
+        && request.resource.data.uploadedAtIso == resource.data.uploadedAtIso
+        && request.resource.data.uploadFailedAtIso == resource.data.uploadFailedAtIso
         && request.resource.data.analysisStatus == resource.data.analysisStatus
         && request.resource.data.analysisConsentVersion == resource.data.analysisConsentVersion
-        && request.resource.data.createdAtIso == resource.data.createdAtIso;
+        && request.resource.data.createdAtIso == resource.data.createdAtIso
+        && validWardrobeUserEditableUpdateOnly();
     }
 
     function deletionRequestHasExpectedClientFields() {

@@ -42,10 +42,17 @@ export type {
   UserDeletionRequest,
   UserDeletionRequestStatus,
   UserProfile,
+  WardrobeAnalysisRequestPayload,
+  WardrobeAnalysisStatus,
   WardrobeItemAnalysisStatus,
   WardrobeCategory,
   WardrobeItem,
   WardrobeItemSource,
+  WardrobeUploadDraft,
+  WardrobeUploadFailureReason,
+  WardrobeUploadFinalisationResult,
+  WardrobeUploadMetadata,
+  WardrobeUploadStatus,
   WardrobeVisibility
 } from "./types.ts";
 
@@ -126,16 +133,29 @@ export {
   adminAuditLogSchema,
   adminUserSchema,
   avatarProfileSchema,
+  CLIENT_CREATABLE_WARDROBE_UPLOAD_STATUSES,
   CLIENT_WRITABLE_WARDROBE_ITEM_SOURCES,
   CLIENT_WRITABLE_WARDROBE_VISIBILITIES,
   hasRequiredFields,
+  isClientCreatableWardrobeUploadStatus,
   isClientWritableWardrobeItem,
   isClientWritableWardrobeItemSource,
   isClientWritableWardrobeVisibility,
+  isExpectedWardrobeUploadStoragePath,
+  isSafeWardrobeLifecycleId,
   isSubscriptionPlanId,
+  isValidWardrobeUploadFinalisationResult,
+  isValidWardrobeUploadMetadata,
+  isValidWardrobeUploadObjectPolicy,
+  isWardrobeAnalysisRequestPayload,
+  isWardrobeAnalysisStatus,
   isWardrobeCategory,
   isWardrobeItemAnalysisStatus,
   isWardrobeItemSource,
+  isWardrobeItemUserEditableUpdatePayload,
+  isWardrobeUploadDraft,
+  isWardrobeUploadFailureReason,
+  isWardrobeUploadStatus,
   isWardrobeVisibility,
   outfitRecommendationSchema,
   privacyConsentSchema,
@@ -145,11 +165,38 @@ export {
   userProfileSchema,
   userSchema,
   validationSchemas,
+  wardrobeAnalysisRequestPayloadSchema,
+  WARDROBE_ANALYSIS_STATUSES,
   WARDROBE_CATEGORIES,
   WARDROBE_ITEM_ANALYSIS_STATUSES,
   WARDROBE_ITEM_SOURCES,
+  WARDROBE_ITEM_USER_EDITABLE_FIELDS,
+  WARDROBE_UPLOAD_FAILURE_REASONS,
+  WARDROBE_UPLOAD_STATUSES,
   WARDROBE_VISIBILITIES,
-  wardrobeItemSchema
+  wardrobeItemSchema,
+  wardrobeUploadFinalisationResultSchema,
+  wardrobeUploadMetadataSchema
 } from "./validation.ts";
 
 export type { FieldRule, ValidationSchema } from "./validation.ts";
+
+export {
+  buildWardrobeUploadMetadata,
+  buildWardrobeUploadMetadataForDraft,
+  canClientCreateWardrobeDraft,
+  canClientRequestWardrobeAnalysis,
+  createWardrobeUploadDraftData,
+  getWardrobeUploadFailurePayload,
+  getWardrobeUploadStoragePath,
+  isBackendOwnedWardrobeField,
+  validateWardrobeUploadMetadata
+} from "./wardrobeUploadLifecycle.ts";
+
+export {
+  parseWardrobeUploadStoragePath
+} from "./wardrobeUploadMetadata.ts";
+
+export type {
+  ParsedWardrobeUploadStoragePath
+} from "./wardrobeUploadMetadata.ts";

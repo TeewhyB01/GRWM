@@ -11,3 +11,4 @@ export { subscriptionWebhook } from "./placeholders/subscriptionWebhook.ts";
 export { userDataDeletion } from "./deletion/index.ts";
 export { validateAdminRole } from "./placeholders/validateAdminRole.ts";
 export { wardrobeAnalysis } from "./placeholders/wardrobeAnalysis.ts";
+export { wardrobeUploadFinalisation } from "./wardrobeUpload/index.ts";

@@ -145,7 +145,9 @@ export function createSeedWardrobeItem(params: {
 }): WardrobeItem {
   return {
     id: params.id,
+    itemId: params.id,
     userId: params.userId,
+    ownerId: params.userId,
     name: "Local test jacket",
     category: "outerwear",
     primaryColour: "navy",
@@ -155,6 +157,10 @@ export function createSeedWardrobeItem(params: {
     storagePath: storagePaths.wardrobeOriginal(params.userId, params.id).path,
     visibility: "private",
     source: "manual",
+    uploadStatus: "upload_pending",
+    uploadFailureReason: "",
+    uploadedAtIso: "",
+    uploadFailedAtIso: "",
     analysisStatus: "not_requested",
     analysisConsentVersion: "",
     createdAtIso: seedNowIso,

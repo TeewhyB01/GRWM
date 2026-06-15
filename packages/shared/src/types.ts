@@ -4,7 +4,26 @@ export type AdminRole = "owner" | "admin" | "moderator" | "support" | "analyst";
 export type WardrobeCategory = "top" | "bottom" | "dress" | "outerwear" | "shoes" | "accessory" | "other";
 export type WardrobeVisibility = "private" | "shared-with-stylist";
 export type WardrobeItemSource = "manual" | "import" | "future_ai";
-export type WardrobeItemAnalysisStatus = "not_requested" | "pending" | "completed" | "failed";
+export type WardrobeUploadStatus = "draft" | "upload_pending" | "uploaded" | "upload_failed" | "deleted";
+export type WardrobeAnalysisStatus =
+  | "not_requested"
+  | "blocked_missing_consent"
+  | "pending"
+  | "completed"
+  | "failed";
+export type WardrobeItemAnalysisStatus = WardrobeAnalysisStatus;
+export type WardrobeUploadFailureReason =
+  | "invalid_storage_path"
+  | "missing_required_metadata"
+  | "metadata_mismatch"
+  | "invalid_content_type"
+  | "file_too_large"
+  | "missing_wardrobe_item"
+  | "user_mismatch"
+  | "storage_path_mismatch"
+  | "already_deleted"
+  | "write_failed"
+  | "unknown";
 export type OutfitRecommendationStatus = "placeholder" | "draft" | "ready" | "archived";
 export type AvatarProfileStatus = "not-started" | "requested" | "processing" | "ready" | "failed";
 export type AuthProvider = "password";
@@ -77,7 +96,9 @@ export interface StyleProfile {
 
 export interface WardrobeItem {
   id: string;
+  itemId: string;
   userId: string;
+  ownerId: string;
   name: string;
   category: WardrobeCategory;
   primaryColour: string;
@@ -87,10 +108,51 @@ export interface WardrobeItem {
   storagePath: string;
   visibility: WardrobeVisibility;
   source: WardrobeItemSource;
+  uploadStatus: WardrobeUploadStatus;
+  uploadFailureReason: WardrobeUploadFailureReason | "";
+  uploadedAtIso: string;
+  uploadFailedAtIso: string;
   analysisStatus: WardrobeItemAnalysisStatus;
   analysisConsentVersion: string;
   createdAtIso: string;
   updatedAtIso: string;
+}
+
+export interface WardrobeUploadMetadata {
+  ownerId: string;
+  userId: string;
+  itemId: string;
+  uploadCategory: "wardrobe-original";
+  consentVersion: string;
+  storagePath: string;
+}
+
+export interface WardrobeUploadDraft extends WardrobeItem {
+  uploadStatus: "draft" | "upload_pending";
+  uploadFailureReason: "";
+  uploadedAtIso: "";
+  uploadFailedAtIso: "";
+  analysisStatus: "not_requested";
+  analysisConsentVersion: "";
+}
+
+export interface WardrobeUploadFinalisationResult {
+  ok: boolean;
+  userId: string;
+  itemId: string;
+  storagePath: string;
+  uploadStatus: "uploaded" | "upload_failed";
+  failureReason: WardrobeUploadFailureReason | "";
+  analysisStatus: WardrobeAnalysisStatus;
+  auditLogId: string;
+}
+
+export interface WardrobeAnalysisRequestPayload {
+  userId: string;
+  ownerId: string;
+  itemId: string;
+  requestedAtIso: string;
+  consentVersion: string;
 }
 
 export interface OutfitRecommendation {

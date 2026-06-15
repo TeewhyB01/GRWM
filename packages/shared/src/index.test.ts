@@ -16,18 +16,29 @@ import {
   PRIVACY_FIRST_PRODUCT_PRINCIPLE,
   canAccessAdminConsole,
   canCreateAvatar,
+  canClientRequestWardrobeAnalysis,
   canRequestWardrobePhotoAnalysis,
   canUploadWardrobePhoto,
   canUseLocationWeather,
+  createWardrobeUploadDraftData,
   createDefaultPrivacyConsent,
+  buildWardrobeUploadMetadataForDraft,
   firestoreCollections,
+  getWardrobeUploadFailurePayload,
   futureUserOwnedFirestoreCollections,
   hasRequiredFields,
+  isBackendOwnedWardrobeField,
   isAllowedWardrobeImageContentType,
   isAdminRole,
   isClientWritableWardrobeItem,
+  isSafeWardrobeLifecycleId,
   isSubscriptionPlanId,
+  isValidWardrobeUploadMetadata,
+  isWardrobeAnalysisRequestPayload,
   isWardrobeItemAnalysisStatus,
+  isWardrobeItemUserEditableUpdatePayload,
+  isWardrobeUploadFailureReason,
+  parseWardrobeUploadStoragePath,
   privacyConsentSchema,
   storagePaths,
   STORAGE_UPLOAD_CATEGORIES,
@@ -100,7 +111,9 @@ test("@grwm/shared rejects incomplete required schema payloads", () => {
 test("@grwm/shared validates wardrobe item upload metadata shape", () => {
   const item: WardrobeItem = {
     id: "item_1",
+    itemId: "item_1",
     userId: "user_1",
+    ownerId: "user_1",
     name: "Jacket",
     category: "outerwear",
     primaryColour: "navy",
@@ -110,6 +123,10 @@ test("@grwm/shared validates wardrobe item upload metadata shape", () => {
     storagePath: "users/user_1/wardrobe/item_1/original",
     visibility: "private",
     source: "manual",
+    uploadStatus: "upload_pending",
+    uploadFailureReason: "",
+    uploadedAtIso: "",
+    uploadFailedAtIso: "",
     analysisStatus: "not_requested",
     analysisConsentVersion: "",
     createdAtIso: "2026-06-08T00:00:00.000Z",
@@ -119,6 +136,7 @@ test("@grwm/shared validates wardrobe item upload metadata shape", () => {
   assert.equal(hasRequiredFields(item, validationSchemas.wardrobeItem), true);
   assert.equal(isClientWritableWardrobeItem(item), true);
   assert.equal(isWardrobeItemAnalysisStatus("completed"), true);
+  assert.equal(isWardrobeItemAnalysisStatus("blocked_missing_consent"), true);
   assert.equal(isWardrobeItemAnalysisStatus("unsafe"), false);
   assert.equal(
     isClientWritableWardrobeItem({
@@ -127,6 +145,22 @@ test("@grwm/shared validates wardrobe item upload metadata shape", () => {
     }),
     false
   );
+  assert.equal(
+    isClientWritableWardrobeItem({
+      ...item,
+      ownerId: "user_2"
+    }),
+    false
+  );
+  assert.equal(
+    isClientWritableWardrobeItem({
+      ...item,
+      uploadStatus: "uploaded"
+    }),
+    false
+  );
+  assert.equal(isWardrobeItemUserEditableUpdatePayload({ name: "Updated", updatedAtIso: item.updatedAtIso }), true);
+  assert.equal(isWardrobeItemUserEditableUpdatePayload({ uploadStatus: "uploaded" }), false);
 });
 
 test("@grwm/shared defines the Firestore collection contract", () => {
@@ -232,6 +266,83 @@ test("@grwm/shared gates upload-adjacent privacy decisions", () => {
   assert.equal(canUseLocationWeather({ ...consent, locationWeatherUse: true }), true);
   assert.equal(canCreateAvatar({ ...consent, avatarCreation: true }), true);
   assert.equal(canUploadWardrobePhoto(null), false);
+});
+
+test("@grwm/shared coordinates wardrobe upload lifecycle drafts and metadata", () => {
+  const consent = createDefaultPrivacyConsent({
+    id: "user_1",
+    userId: "user_1",
+    createdAtIso: "2026-06-08T00:00:00.000Z"
+  });
+  const draft = createWardrobeUploadDraftData({
+    consent,
+    itemId: "item_1",
+    nowIso: "2026-06-08T00:00:00.000Z",
+    userId: "user_1"
+  });
+  const metadata = buildWardrobeUploadMetadataForDraft({
+    consentVersion: consent.version,
+    draft
+  });
+
+  assert.equal(draft.uploadStatus, "upload_pending");
+  assert.equal(draft.storagePath, "users/user_1/wardrobe/item_1/original");
+  assert.equal(isValidWardrobeUploadMetadata(metadata), true);
+  assert.deepEqual(parseWardrobeUploadStoragePath(draft.storagePath), {
+    itemId: "item_1",
+    userId: "user_1"
+  });
+  assert.equal(isSafeWardrobeLifecycleId("../item"), false);
+  assert.throws(() =>
+    createWardrobeUploadDraftData({
+      consent: null,
+      itemId: "item_1",
+      nowIso: "2026-06-08T00:00:00.000Z",
+      userId: "user_1"
+    })
+  );
+  assert.equal(
+    isValidWardrobeUploadMetadata({
+      ...metadata,
+      storagePath: "../bad"
+    }),
+    false
+  );
+  assert.equal(isBackendOwnedWardrobeField("uploadStatus"), true);
+  assert.equal(isBackendOwnedWardrobeField("name"), false);
+  assert.equal(isWardrobeUploadFailureReason("metadata_mismatch"), true);
+  assert.deepEqual(getWardrobeUploadFailurePayload({
+    nowIso: "2026-06-08T00:05:00.000Z",
+    reason: "metadata_mismatch"
+  }), {
+    uploadStatus: "upload_failed",
+    uploadFailureReason: "metadata_mismatch",
+    uploadFailedAtIso: "2026-06-08T00:05:00.000Z",
+    updatedAtIso: "2026-06-08T00:05:00.000Z"
+  });
+});
+
+test("@grwm/shared blocks wardrobe analysis requests without explicit analysis consent", () => {
+  const consent = createDefaultPrivacyConsent({
+    id: "user_1",
+    userId: "user_1",
+    createdAtIso: "2026-06-08T00:00:00.000Z"
+  });
+  const payload = {
+    userId: "user_1",
+    ownerId: "user_1",
+    itemId: "item_1",
+    requestedAtIso: "2026-06-08T00:10:00.000Z",
+    consentVersion: consent.version
+  };
+
+  assert.equal(isWardrobeAnalysisRequestPayload(payload), true);
+  assert.equal(canClientRequestWardrobeAnalysis({ consent, payload }), false);
+  assert.equal(canClientRequestWardrobeAnalysis({
+    consent: { ...consent, wardrobePhotoAnalysis: true },
+    payload
+  }), true);
+  assert.equal(isWardrobeAnalysisRequestPayload({ ...payload, ownerId: "user_2" }), false);
 });
 
 test("@grwm/shared validates style preference placeholders", () => {

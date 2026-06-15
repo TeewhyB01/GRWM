@@ -26,6 +26,8 @@ Feature-specific consent choices must be accepted before the related feature use
 
 Marketing emails and analytics are optional controls and can remain off without blocking app access.
 
+Private wardrobe image upload and wardrobe photo analysis are separate decisions. A recorded privacy consent document is required before creating a wardrobe upload draft, but `wardrobePhotoAnalysis: true` is required before any future analysis job can be requested. Missing analysis consent returns `blocked_missing_consent`; upload finalisation does not call AI providers.
+
 ## Mobile Capture Flow
 
 After email/password signup, the protected privacy screen shows all consent purposes. The user can opt in or leave choices off, then the mobile client writes `privacyConsents/{userId}` using consent version `2026-06-foundation` and `source: mobile`.

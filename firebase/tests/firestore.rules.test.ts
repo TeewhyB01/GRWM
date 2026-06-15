@@ -6,7 +6,7 @@ import {
   type RulesTestEnvironment
 } from "@firebase/rules-unit-testing";
 
-import { firestorePathBuilders } from "./helpers/paths.ts";
+import { firestorePathBuilders, storagePathBuilders } from "./helpers/paths.ts";
 import {
   createSeedAdminAuditLog,
   createSeedAdminUser,
@@ -262,6 +262,19 @@ test("wardrobe item create with userId mismatch is denied", async () => {
   );
 });
 
+test("wardrobe item create with ownerId mismatch is denied", async () => {
+  const mismatchWardrobeItem = {
+    ...asDocumentData(sampleWardrobeItem),
+    ownerId: testUserIds.userB
+  };
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .set(mismatchWardrobeItem)
+  );
+});
+
 test("wardrobe item create without required fields is denied", async () => {
   const missingPrimaryColour = { ...asDocumentData(sampleWardrobeItem) };
 
@@ -274,6 +287,30 @@ test("wardrobe item create without required fields is denied", async () => {
   );
 });
 
+test("wardrobe item create cannot claim backend uploaded status", async () => {
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .set({
+        ...asDocumentData(sampleWardrobeItem),
+        uploadStatus: "uploaded",
+        uploadedAtIso: "2026-06-08T00:10:00.000Z"
+      })
+  );
+});
+
+test("wardrobe item create cannot claim completed analysis", async () => {
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .set({
+        ...asDocumentData(sampleWardrobeItem),
+        analysisStatus: "completed",
+        analysisConsentVersion: "2026-06-foundation"
+      })
+  );
+});
+
 test("wardrobe item create with invalid analysisStatus is denied", async () => {
   await assertFails(
     firestoreFor(testUserIds.userA)
@@ -282,6 +319,15 @@ test("wardrobe item create with invalid analysisStatus is denied", async () => {
         ...asDocumentData(sampleWardrobeItem),
         analysisStatus: "unsafe"
       })
+  );
+});
+
+test("unauthenticated user cannot create wardrobe item", async () => {
+  await assertFails(
+    unauthenticatedTestContext(testEnv)
+      .firestore()
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .set(asDocumentData(sampleWardrobeItem))
   );
 });
 
@@ -298,6 +344,50 @@ test("wardrobe item update cannot change owner userId", async () => {
       .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
       .update({
         userId: testUserIds.userB,
+        updatedAtIso: "2026-06-08T00:10:00.000Z"
+      })
+  );
+});
+
+test("wardrobe item update cannot change ownerId, storagePath, or source", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id),
+      data: asDocumentData(sampleWardrobeItem)
+    }
+  ]);
+
+  const db = firestoreFor(testUserIds.userA);
+  const path = firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id);
+
+  await assertFails(db.doc(path).update({
+    ownerId: testUserIds.userB,
+    updatedAtIso: "2026-06-08T00:10:00.000Z"
+  }));
+  await assertFails(db.doc(path).update({
+    storagePath: storagePathBuilders.wardrobeOriginal(testUserIds.userA, testDocumentIds.wardrobeItemB),
+    updatedAtIso: "2026-06-08T00:10:00.000Z"
+  }));
+  await assertFails(db.doc(path).update({
+    source: "future_ai",
+    updatedAtIso: "2026-06-08T00:10:00.000Z"
+  }));
+});
+
+test("wardrobe item update cannot change backend-owned upload lifecycle fields", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id),
+      data: asDocumentData(sampleWardrobeItem)
+    }
+  ]);
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .update({
+        uploadStatus: "uploaded",
+        uploadedAtIso: "2026-06-08T00:10:00.000Z",
         updatedAtIso: "2026-06-08T00:10:00.000Z"
       })
   );

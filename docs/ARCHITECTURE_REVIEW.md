@@ -4,7 +4,7 @@ Date: 2026-06-15
 
 Architecture health rating: amber.
 
-GRWM is clean enough to begin wardrobe onboarding foundation work, provided that onboarding continues to collect explicit user-provided preferences and does not upload images yet. GRWM is not ready for wardrobe upload until the release blockers below are addressed.
+GRWM is clean enough to begin wardrobe onboarding foundation work, provided that onboarding continues to collect explicit user-provided preferences and does not upload images yet. The wardrobe upload lifecycle foundation is now defined and helper-tested, but GRWM is still not ready for real wardrobe image upload UI until the release blockers below are addressed.
 
 ## What Is Solid
 
@@ -16,16 +16,20 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 - Deletion processing is explicit, idempotent, audited, emulator-tested, and scoped to the requesting user.
 - Firestore rules enforce user ownership for current user-owned collections and deny client-owned deletion lifecycle transitions.
 - Storage rules are private by user path and deny public access.
+- Wardrobe upload lifecycle now uses Firestore draft first, exact private Storage upload second, and trusted backend finalisation third.
+- Shared helpers now create upload drafts, build/validate required metadata, detect backend-owned wardrobe fields, create safe upload failure payloads, and block analysis requests without `wardrobePhotoAnalysis` consent.
+- Functions helpers now verify wardrobe Storage objects, mark existing uploads uploaded or failed, write safe audit entries, and keep AI analysis unstarted.
+- Orphan detection now reports missing records/files, stale `upload_pending` records, `upload_failed` records, and metadata mismatches without deleting anything.
 - Emulator rules and deletion trigger tests cover cross-user denial, public Storage denial, deletion tombstone retention, audit logs, Auth deletion, and unaffected-user protection.
 - Shared TypeScript contracts cover the foundation model set and now include consistent IDs/timestamps on style, avatar, and recommendation records.
 
 ## What Is Risky
 
 - Firestore rules still validate ownership more strongly than field shape for most user-owned collections.
-- Storage rules do not yet enforce content type, max file size, upload metadata, moderation state, or path-to-document consistency.
+- Storage rules enforce content type, max file size, upload metadata, and path-to-metadata consistency for upload paths. They still cannot verify bytes against MIME claims, run moderation/malware checks, or prove Firestore document existence before upload.
 - Admin access is still a placeholder local session. Real admin access requires Firebase Auth, custom claims or trusted role issuance, and owner bootstrap.
 - User-owned `users/{uid}` writes are currently client writable for the signed-in owner. That is acceptable for the foundation, but production should move sensitive lifecycle fields to trusted backend writes.
-- Wardrobe, AI, avatar, payments, shopping, and upload flows are intentionally not implemented. Their docs and placeholders should not be mistaken for production readiness.
+- Wardrobe upload lifecycle plumbing is implemented, but real wardrobe image upload UI is intentionally not implemented. AI, avatar, payments, shopping, and recommendation flows remain intentionally not implemented.
 - The existing untracked `functions/src/placeholders/userDataDeletion.ts` duplicates the active trigger name conceptually. It is not exported, but it should be removed or renamed by the owner before it becomes confusing.
 
 ## Must Be Fixed Before Wardrobe Upload
@@ -33,9 +37,10 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 - Rule-level Storage checks for allowed image MIME types, maximum file size, required owner metadata, required path ID metadata, and consent version metadata are implemented and emulator-tested.
 - Firestore field-level validation for `wardrobeItems`, including `userId`, `storagePath`, private visibility, timestamps, source, analysis status, and allowed enum values is implemented and emulator-tested.
 - Storage paths under `users/{uid}/wardrobe/{itemId}/original` now deny oversized files, disallowed content types, mismatched owner metadata, mismatched item metadata, unauthenticated writes, and cross-user writes.
-- Decide whether wardrobe upload creates the Firestore document first, Storage object first, or uses a trusted Function to coordinate both.
-- Confirm wardrobe photo analysis consent is checked at the future request point before any analysis job is queued.
-- Implement or operationally approve server-side retention and deletion behavior for failed or orphaned upload objects.
+- Keep the selected lifecycle: Firestore draft first, Storage object second, trusted Function finalisation third.
+- Add full Storage trigger emulator integration for `wardrobeUploadFinalisation`.
+- Operationally approve server-side retention and deletion behavior for failed or orphaned upload objects before enabling destructive cleanup.
+- Rerun installed-development-build mobile manual QA after upload-adjacent changes.
 
 ## What Can Wait
 
@@ -49,7 +54,8 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 
 ## Release Blockers
 
-- Real wardrobe upload lifecycle coordination is not finalized.
+- Full Storage trigger emulator coverage for wardrobe upload finalisation is not complete.
+- Real wardrobe image upload UI remains blocked until installed-development-build mobile QA is rerun after these upload-adjacent changes.
 - Firestore field validation is incomplete for sensitive non-wardrobe user-owned data.
 - Real admin authentication and role issuance are not implemented.
 - Production Firebase project configuration and trusted owner bootstrap are not verified.
@@ -70,7 +76,7 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 - The deletion lifecycle correctly keeps client writes to `requested` only and backend ownership of later states.
 - Audit logging avoids private Storage object names and raw sensitive styling data.
 - Admin escalation remains the main unresolved boundary because custom claims and trusted role assignment are not active.
-- Upload-specific rule controls are now in place, but real wardrobe images still need lifecycle coordination, consent checks at the request point, server-side orphan cleanup, and manual QA before upload UI.
+- Upload-specific rule controls and lifecycle helpers are now in place, but real wardrobe images still need full trigger integration coverage, non-destructive cleanup operational approval, and manual QA before upload UI.
 
 ## Test Gaps
 
@@ -78,7 +84,7 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 - Firestore field-level validation tests for user profile, consent, style profile, avatar profile, and recommendation payloads.
 - Firestore or Storage outage drills for the deletion processor.
 - End-to-end mobile rerun after the schema/doc review changes.
-- Future upload coordination tests across Auth, Firestore, Storage, and deletion cleanup.
+- Full trigger integration tests across Auth, Firestore, Storage, finalisation, and cleanup.
 
 ## Verification
 
@@ -86,6 +92,6 @@ The requested pnpm gate suite passed on 2026-06-15 using the project fallback pn
 
 ## Recommended Next Agent
 
-Recommended next agent: Wardrobe Upload Lifecycle Coordination Agent.
+Recommended next agent: Wardrobe Onboarding Foundation Agent.
 
-That agent should decide and test the Firestore/Storage upload lifecycle, wire consent checks at the future request point, and implement or operationally approve server-side orphan cleanup before any wardrobe upload UI is built.
+That agent should build non-image wardrobe onboarding foundations only: explicit user-provided style, fit, modesty, and context preference capture. Real wardrobe image upload UI should wait for a later Upload UI Readiness Agent after full Storage trigger emulator coverage, installed development-build QA, and retention/cleanup approval.

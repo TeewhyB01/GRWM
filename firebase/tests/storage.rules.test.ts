@@ -7,7 +7,8 @@ import {
 } from "@firebase/rules-unit-testing";
 import {
   MAX_WARDROBE_IMAGE_BYTES,
-  PRIVACY_CONSENT_VERSION
+  PRIVACY_CONSENT_VERSION,
+  storagePaths
 } from "@grwm/shared";
 
 import { storagePathBuilders } from "./helpers/paths.ts";
@@ -47,6 +48,7 @@ function wardrobeUploadMetadata(
       itemId,
       uploadCategory: "wardrobe-original",
       consentVersion: PRIVACY_CONSENT_VERSION,
+      storagePath: storagePaths.wardrobeOriginal(userId, itemId).path,
       ...overrides
     }
   };
@@ -196,6 +198,20 @@ test("wardrobe image upload with item metadata mismatch is denied", async () => 
       path,
       wardrobeUploadMetadata(testUserIds.userA, testDocumentIds.wardrobeItemA, {
         itemId: testDocumentIds.wardrobeItemB
+      })
+    )
+  );
+});
+
+test("wardrobe image upload with storage path metadata mismatch is denied", async () => {
+  const path = storagePathBuilders.wardrobeOriginal(testUserIds.userA, testDocumentIds.wardrobeItemA);
+
+  await assertFails(
+    putStorageObject(
+      testUserIds.userA,
+      path,
+      wardrobeUploadMetadata(testUserIds.userA, testDocumentIds.wardrobeItemA, {
+        storagePath: storagePathBuilders.wardrobeOriginal(testUserIds.userA, testDocumentIds.wardrobeItemB)
       })
     )
   );

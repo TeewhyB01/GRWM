@@ -43,13 +43,14 @@
 ## Phase 2: Wardrobe And Context
 
 - Wardrobe onboarding for explicit user-provided style, fit, modesty, and context preferences.
-- Wardrobe upload security boundary: Storage MIME/size checks, required upload metadata, `wardrobeItems` field validation, consent gates, orphan cleanup plan, and emulator tests. Rule-level boundary completed on 2026-06-15; upload lifecycle coordination and mobile QA remain before upload UI.
+- Wardrobe upload security boundary: Storage MIME/size checks, required upload metadata, `wardrobeItems` field validation, consent gates, orphan cleanup plan, and emulator tests. Rule-level boundary completed on 2026-06-15.
+- Wardrobe upload lifecycle coordination: Firestore draft first, exact private Storage upload second, trusted backend finalisation third, consent-gated future analysis request helper, and non-destructive orphan detection. Helper/rules coverage completed on 2026-06-15; full Storage trigger emulator coverage and mobile QA remain before upload UI.
 - User image upload to Firebase Storage after the upload boundary is green.
 - Wardrobe item management.
 - Weather context integration.
 - Occasion-based styling inputs.
 
-Phase 2 entry status after the 2026-06-15 architecture review: onboarding foundation can begin, but wardrobe upload must wait for the upload security boundary and tests in `docs/ARCHITECTURE_REVIEW.md`.
+Phase 2 entry status after the 2026-06-15 upload lifecycle coordination pass: onboarding foundation can begin, but real wardrobe image upload UI must wait for full trigger integration coverage, installed-development-build mobile QA, and explicit approval of non-destructive cleanup/retention operations.
 
 ## Phase 3: Intelligence
 
