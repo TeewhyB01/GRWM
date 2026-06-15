@@ -48,12 +48,15 @@
 - User deletion request creation ownership.
 - User deletion request status reads by owner.
 - Client denial for backend-owned deletion status updates.
+- Storage upload MIME type, max file size, required owner metadata, required path ID metadata, unauthenticated denial, cross-user denial, broad list denial, generated avatar client-write denial, and owner delete policy.
+- Firestore `wardrobeItems` required fields, owner consistency, immutable owner/path/source fields, allowed category/source/status values, private visibility, backend-owned analysis field denial, and valid non-AI user updates.
+- Shared upload policy constants, private path builders, invalid path IDs, consent gates, and wardrobe item schema validation.
 
 ## Firebase Emulator Tests Needed Next
 
 - Admin allow-path coverage through `adminUsers` role records.
-- Firestore field-level validation for sensitive data, especially `wardrobeItems` before upload.
-- Storage MIME type, size, owner metadata, item metadata, and moderation checks before wardrobe upload.
+- Firestore field-level validation for sensitive non-wardrobe collections.
+- Storage moderation/malware checks and byte-level content verification before production wardrobe upload.
 - Full Functions emulator trigger tests for future auth/privacy workflows beyond deletion.
 - Additional production-like deletion failure tests for Firestore or Storage outages. Current trigger integration forces an Auth deletion failure safely inside emulators.
 - Upload lifecycle tests for orphaned Storage files and deletion cleanup after wardrobe upload is designed.
@@ -80,7 +83,8 @@
 - The local EAS config validation command does not create a build artifact; the EAS CLI config command still requires an Expo account or `EXPO_TOKEN`.
 - EAS cloud simulator builds require Expo login or `EXPO_TOKEN`; local simulator builds require working Xcode simulator tooling.
 - Account/data deletion is requested by the mobile client and processed by the trusted backend `userDataDeletion` trigger. Full Functions emulator trigger integration exists and must stay green before production data collection.
-- Architecture review status on 2026-06-15 is amber. Wardrobe onboarding foundation work can proceed, but wardrobe upload is blocked until Storage upload constraints and `wardrobeItems` field validation are implemented and tested.
+- Architecture review status on 2026-06-15 remains amber. Wardrobe onboarding foundation work can proceed.
+- Upload-security rule constraints and `wardrobeItems` validation are now implemented and emulator-tested. Real wardrobe upload UI remains blocked until upload lifecycle coordination, consent wiring at the request point, server-side orphan cleanup, and manual mobile QA are complete.
 
 ## MVP Test Areas
 

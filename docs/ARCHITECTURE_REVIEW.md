@@ -30,13 +30,12 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 
 ## Must Be Fixed Before Wardrobe Upload
 
-- Add Storage rule checks for allowed image MIME types and maximum file size.
-- Define required upload metadata, including owner ID, wardrobe item ID, and consent version where appropriate.
-- Add Firestore field-level validation for `wardrobeItems`, including `userId`, `storagePath`, `visibility`, timestamps, and allowed enum values.
-- Add tests that Storage paths under `users/{uid}/wardrobe/{itemId}/original` cannot be written with oversized files, disallowed content types, or mismatched owner/item metadata.
+- Rule-level Storage checks for allowed image MIME types, maximum file size, required owner metadata, required path ID metadata, and consent version metadata are implemented and emulator-tested.
+- Firestore field-level validation for `wardrobeItems`, including `userId`, `storagePath`, private visibility, timestamps, source, analysis status, and allowed enum values is implemented and emulator-tested.
+- Storage paths under `users/{uid}/wardrobe/{itemId}/original` now deny oversized files, disallowed content types, mismatched owner metadata, mismatched item metadata, unauthenticated writes, and cross-user writes.
 - Decide whether wardrobe upload creates the Firestore document first, Storage object first, or uses a trusted Function to coordinate both.
-- Confirm wardrobe photo analysis consent is checked before any analysis job is queued.
-- Define retention and deletion behavior for failed or orphaned upload objects.
+- Confirm wardrobe photo analysis consent is checked at the future request point before any analysis job is queued.
+- Implement or operationally approve server-side retention and deletion behavior for failed or orphaned upload objects.
 
 ## What Can Wait
 
@@ -50,8 +49,8 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 
 ## Release Blockers
 
-- Storage upload constraints are incomplete for real wardrobe images.
-- Firestore field validation is incomplete for sensitive user-owned data.
+- Real wardrobe upload lifecycle coordination is not finalized.
+- Firestore field validation is incomplete for sensitive non-wardrobe user-owned data.
 - Real admin authentication and role issuance are not implemented.
 - Production Firebase project configuration and trusted owner bootstrap are not verified.
 - Mobile manual QA must be rerun after any auth, privacy, navigation, rules, or upload-boundary change.
@@ -71,23 +70,22 @@ GRWM is clean enough to begin wardrobe onboarding foundation work, provided that
 - The deletion lifecycle correctly keeps client writes to `requested` only and backend ownership of later states.
 - Audit logging avoids private Storage object names and raw sensitive styling data.
 - Admin escalation remains the main unresolved boundary because custom claims and trusted role assignment are not active.
-- Upload-specific controls are the main missing security boundary before wardrobe images are accepted.
+- Upload-specific rule controls are now in place, but real wardrobe images still need lifecycle coordination, consent checks at the request point, server-side orphan cleanup, and manual QA before upload UI.
 
 ## Test Gaps
 
 - Admin allow-path rules tests through `adminUsers` role documents.
-- Firestore field-level validation tests for user profile, consent, wardrobe item, style profile, avatar profile, and recommendation payloads.
-- Storage MIME type, size, and metadata tests.
+- Firestore field-level validation tests for user profile, consent, style profile, avatar profile, and recommendation payloads.
 - Firestore or Storage outage drills for the deletion processor.
 - End-to-end mobile rerun after the schema/doc review changes.
 - Future upload coordination tests across Auth, Firestore, Storage, and deletion cleanup.
 
 ## Verification
 
-The requested pnpm gate suite passed on 2026-06-15 using the project fallback pnpm binary and bundled Node runtime. The Firebase CLI emitted the known Java 21 future-requirement warning, and the Functions emulator emitted the known host Node 24 versus requested Node 20 warning; neither blocked the current gates.
+The requested pnpm gate suite passed on 2026-06-15 using the project fallback pnpm binary and bundled Node runtime. The Firebase CLI emitted the known Java 21 future-requirement warning; pnpm install also repeated the known ignored `re2` build-script warning. Neither blocked the current gates.
 
 ## Recommended Next Agent
 
-Recommended next agent: Firebase Storage Upload Security Agent.
+Recommended next agent: Wardrobe Upload Lifecycle Coordination Agent.
 
-That agent should harden Storage and `wardrobeItems` rules, define upload metadata, add emulator tests, and document the exact upload lifecycle before any wardrobe upload UI is built.
+That agent should decide and test the Firestore/Storage upload lifecycle, wire consent checks at the future request point, and implement or operationally approve server-side orphan cleanup before any wardrobe upload UI is built.

@@ -10,34 +10,121 @@ service firebase.storage {
       return signedIn() && request.auth.uid == userId;
     }
 
+    function isAllowedImageContentType() {
+      return request.resource.contentType in [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/heic",
+        "image/heif"
+      ];
+    }
+
+    function hasUploadConsentVersion() {
+      return request.resource.metadata.consentVersion is string
+        && request.resource.metadata.consentVersion.size() > 0;
+    }
+
+    function hasOwnerMetadata(userId, uploadCategory) {
+      return request.resource.metadata.ownerId == userId
+        && request.resource.metadata.userId == userId
+        && request.resource.metadata.uploadCategory == uploadCategory
+        && hasUploadConsentVersion();
+    }
+
+    function hasWardrobeMetadata(userId, itemId) {
+      return hasOwnerMetadata(userId, "wardrobe-original")
+        && request.resource.metadata.itemId == itemId;
+    }
+
+    function hasStylePhotoMetadata(userId, photoId) {
+      return hasOwnerMetadata(userId, "style-photo-original")
+        && request.resource.metadata.photoId == photoId;
+    }
+
+    function hasAvatarSourceMetadata(userId, photoId) {
+      return hasOwnerMetadata(userId, "avatar-source-original")
+        && request.resource.metadata.photoId == photoId;
+    }
+
+    function hasOutfitMetadata(userId, outfitId) {
+      return hasOwnerMetadata(userId, "outfit")
+        && request.resource.metadata.outfitId == outfitId;
+    }
+
+    function isWardrobeImageUpload(userId, itemId) {
+      return isOwner(userId)
+        && isAllowedImageContentType()
+        && request.resource.size <= 10485760
+        && hasWardrobeMetadata(userId, itemId);
+    }
+
+    function isStylePhotoUpload(userId, photoId) {
+      return isOwner(userId)
+        && isAllowedImageContentType()
+        && request.resource.size <= 10485760
+        && hasStylePhotoMetadata(userId, photoId);
+    }
+
+    function isAvatarSourceUpload(userId, photoId) {
+      return isOwner(userId)
+        && isAllowedImageContentType()
+        && request.resource.size <= 10485760
+        && hasAvatarSourceMetadata(userId, photoId);
+    }
+
+    function isOutfitUpload(userId, outfitId) {
+      return isOwner(userId)
+        && isAllowedImageContentType()
+        && request.resource.size <= 10485760
+        && hasOutfitMetadata(userId, outfitId);
+    }
+
     // Private wardrobe item originals.
     match /users/{userId}/wardrobe/{itemId}/original {
-      allow read, write: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isWardrobeImageUpload(userId, itemId);
+      allow update: if false;
+      allow delete: if isOwner(userId);
     }
 
     // Private style photos used only after explicit consent.
     match /users/{userId}/style-photos/{photoId}/original {
-      allow read, write: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isStylePhotoUpload(userId, photoId);
+      allow update: if false;
+      allow delete: if isOwner(userId);
     }
 
     // Private avatar source photos. Avatar processing is not implemented yet.
     match /users/{userId}/avatar/source/{photoId}/original {
-      allow read, write: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isAvatarSourceUpload(userId, photoId);
+      allow update: if false;
+      allow delete: if isOwner(userId);
     }
 
-    // Private generated avatar assets. Backend generation is not implemented yet.
+    // Private generated avatar assets are backend-owned until avatar generation exists.
     match /users/{userId}/avatar/generated/{generationId} {
-      allow read, write: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow list, create, update, delete: if false;
     }
 
     // Private outfit assets generated or saved for the authenticated user.
     match /users/{userId}/outfits/{outfitId} {
-      allow read, write: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOutfitUpload(userId, outfitId);
+      allow update: if false;
+      allow delete: if isOwner(userId);
     }
 
-    // Known limitation: MIME type, size, and moderation checks are not modeled yet.
-    // Next steps: add emulator rule tests, content-type checks, max file sizes,
-    // and Cloud Functions for moderation/deletion workflows.
+    // Storage rules validate request metadata but cannot confirm Firestore consent
+    // documents or wardrobeItems existence. Trusted server cleanup must reconcile
+    // orphaned Storage objects and Firestore records.
     match /{path=**} {
       allow read, write: if false;
     }

@@ -8,6 +8,12 @@ import { recordPrivacyConsentContract } from "./placeholders/recordPrivacyConsen
 import { createPlaceholderResponse, functionPlaceholders } from "./placeholders/registry.ts";
 import { requestUserDataDeletionContract } from "./placeholders/requestUserDataDeletion.ts";
 import { validateAdminRoleContract } from "./placeholders/validateAdminRole.ts";
+import {
+  detectWardrobeStorageOrphans,
+  expectedWardrobeOriginalPath,
+  isWardrobeOriginalStoragePath,
+  wardrobeOrphanCleanupPolicy
+} from "./storage/orphanCleanup.ts";
 
 test("@grwm/functions targets Firebase Cloud Functions", () => {
   assert.equal(functionsFoundation.runtime, "firebase-cloud-functions");
@@ -64,4 +70,41 @@ test("@grwm/functions documents auth and privacy placeholder contracts", () => {
 test("@grwm/functions defines environment-backed runtime config", () => {
   assert.ok(functionsEnvKeys.includes("FIREBASE_PROJECT_ID"));
   assert.equal(getFunctionsRuntimeConfig().region, "us-central1");
+});
+
+test("@grwm/functions scaffolds non-destructive wardrobe orphan detection", () => {
+  const existingPath = expectedWardrobeOriginalPath({
+    id: "item_1",
+    userId: "user_1"
+  });
+  const orphanPath = expectedWardrobeOriginalPath({
+    id: "item_orphan",
+    userId: "user_1"
+  });
+  const missingPath = expectedWardrobeOriginalPath({
+    id: "item_missing_file",
+    userId: "user_1"
+  });
+
+  assert.equal(isWardrobeOriginalStoragePath(existingPath), true);
+  assert.equal(isWardrobeOriginalStoragePath("users/user_1/public/item_1"), false);
+  assert.equal(wardrobeOrphanCleanupPolicy.destructiveCleanupEnabled, false);
+
+  assert.deepEqual(
+    detectWardrobeStorageOrphans({
+      storageObjects: [
+        { name: existingPath },
+        { name: orphanPath },
+        { name: "users/user_1/style-photos/photo_1/original" }
+      ],
+      wardrobeItems: [
+        { id: "item_1", userId: "user_1", storagePath: existingPath },
+        { id: "item_missing_file", userId: "user_1", storagePath: missingPath }
+      ]
+    }),
+    {
+      orphanedStorageObjectPaths: [orphanPath],
+      wardrobeItemIdsMissingStorageObjects: ["item_missing_file"]
+    }
+  );
 });

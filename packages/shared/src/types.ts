@@ -3,6 +3,8 @@ export type SubscriptionPlanId = "free" | "premium";
 export type AdminRole = "owner" | "admin" | "moderator" | "support" | "analyst";
 export type WardrobeCategory = "top" | "bottom" | "dress" | "outerwear" | "shoes" | "accessory" | "other";
 export type WardrobeVisibility = "private" | "shared-with-stylist";
+export type WardrobeItemSource = "manual" | "import" | "future_ai";
+export type WardrobeItemAnalysisStatus = "not_requested" | "pending" | "completed" | "failed";
 export type OutfitRecommendationStatus = "placeholder" | "draft" | "ready" | "archived";
 export type AvatarProfileStatus = "not-started" | "requested" | "processing" | "ready" | "failed";
 export type AuthProvider = "password";
@@ -78,11 +80,15 @@ export interface WardrobeItem {
   userId: string;
   name: string;
   category: WardrobeCategory;
+  primaryColour: string;
   colorTags: readonly string[];
   seasonTags: readonly string[];
   occasionTags: readonly string[];
   storagePath: string;
   visibility: WardrobeVisibility;
+  source: WardrobeItemSource;
+  analysisStatus: WardrobeItemAnalysisStatus;
+  analysisConsentVersion: string;
   createdAtIso: string;
   updatedAtIso: string;
 }

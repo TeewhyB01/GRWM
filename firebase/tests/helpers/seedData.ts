@@ -148,11 +148,15 @@ export function createSeedWardrobeItem(params: {
     userId: params.userId,
     name: "Local test jacket",
     category: "outerwear",
+    primaryColour: "navy",
     colorTags: ["navy"],
     seasonTags: ["spring"],
     occasionTags: ["work"],
     storagePath: storagePaths.wardrobeOriginal(params.userId, params.id).path,
     visibility: "private",
+    source: "manual",
+    analysisStatus: "not_requested",
+    analysisConsentVersion: "",
     createdAtIso: seedNowIso,
     updatedAtIso: seedNowIso
   };

@@ -43,7 +43,7 @@
 ## Phase 2: Wardrobe And Context
 
 - Wardrobe onboarding for explicit user-provided style, fit, modesty, and context preferences.
-- Wardrobe upload security boundary: Storage MIME/size checks, required upload metadata, `wardrobeItems` field validation, and emulator tests.
+- Wardrobe upload security boundary: Storage MIME/size checks, required upload metadata, `wardrobeItems` field validation, consent gates, orphan cleanup plan, and emulator tests. Rule-level boundary completed on 2026-06-15; upload lifecycle coordination and mobile QA remain before upload UI.
 - User image upload to Firebase Storage after the upload boundary is green.
 - Wardrobe item management.
 - Weather context integration.

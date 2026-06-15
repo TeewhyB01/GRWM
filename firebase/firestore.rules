@@ -41,6 +41,102 @@ service cloud.firestore {
       return readsOwnUserOwnedDocument() && request.resource.data.userId == resource.data.userId;
     }
 
+    function wardrobeItemStoragePath(userId, itemId) {
+      return "users/" + userId + "/wardrobe/" + itemId + "/original";
+    }
+
+    function isNonEmptyString(value) {
+      return value is string && value.size() > 0;
+    }
+
+    function isIsoString(value) {
+      return isNonEmptyString(value);
+    }
+
+    function isTagList(value) {
+      return value is list && value.size() <= 30;
+    }
+
+    function validWardrobeItemKeys() {
+      return request.resource.data.keys().hasOnly([
+          "id",
+          "userId",
+          "name",
+          "category",
+          "primaryColour",
+          "colorTags",
+          "seasonTags",
+          "occasionTags",
+          "storagePath",
+          "visibility",
+          "source",
+          "analysisStatus",
+          "analysisConsentVersion",
+          "createdAtIso",
+          "updatedAtIso"
+        ])
+        && request.resource.data.keys().hasAll([
+          "id",
+          "userId",
+          "name",
+          "category",
+          "primaryColour",
+          "colorTags",
+          "seasonTags",
+          "occasionTags",
+          "storagePath",
+          "visibility",
+          "source",
+          "analysisStatus",
+          "analysisConsentVersion",
+          "createdAtIso",
+          "updatedAtIso"
+        ]);
+    }
+
+    function validClientWardrobeItemShape(itemId) {
+      return validWardrobeItemKeys()
+        && request.resource.data.id == itemId
+        && request.resource.data.userId == request.auth.uid
+        && isNonEmptyString(request.resource.data.name)
+        && request.resource.data.category in [
+          "top",
+          "bottom",
+          "dress",
+          "outerwear",
+          "shoes",
+          "accessory",
+          "other"
+        ]
+        && isNonEmptyString(request.resource.data.primaryColour)
+        && isTagList(request.resource.data.colorTags)
+        && isTagList(request.resource.data.seasonTags)
+        && isTagList(request.resource.data.occasionTags)
+        && request.resource.data.storagePath == wardrobeItemStoragePath(request.auth.uid, itemId)
+        && request.resource.data.visibility == "private"
+        && request.resource.data.source in ["manual", "import"]
+        && request.resource.data.analysisStatus == "not_requested"
+        && request.resource.data.analysisConsentVersion == ""
+        && isIsoString(request.resource.data.createdAtIso)
+        && isIsoString(request.resource.data.updatedAtIso);
+    }
+
+    function createsOwnWardrobeItem(itemId) {
+      return signedIn() && validClientWardrobeItemShape(itemId);
+    }
+
+    function updatesOwnWardrobeItem(itemId) {
+      return readsOwnUserOwnedDocument()
+        && validClientWardrobeItemShape(itemId)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.storagePath == resource.data.storagePath
+        && request.resource.data.source == resource.data.source
+        && request.resource.data.analysisStatus == resource.data.analysisStatus
+        && request.resource.data.analysisConsentVersion == resource.data.analysisConsentVersion
+        && request.resource.data.createdAtIso == resource.data.createdAtIso;
+    }
+
     function deletionRequestHasExpectedClientFields() {
       return request.resource.data.keys().hasOnly([
           "id",
@@ -102,9 +198,9 @@ service cloud.firestore {
     }
 
     match /wardrobeItems/{itemId} {
-      allow create: if createsOwnUserOwnedDocument();
+      allow create: if createsOwnWardrobeItem(itemId);
       allow read, delete: if readsOwnUserOwnedDocument();
-      allow update: if updatesOwnUserOwnedDocument();
+      allow update: if updatesOwnWardrobeItem(itemId);
     }
 
     match /styleProfiles/{styleProfileId} {
@@ -152,9 +248,9 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Known limitation: these rules validate ownership and coarse admin roles only.
-    // Next steps: add emulator rule tests, field-level validation, custom claims,
-    // and stricter status transition rules for deletion and subscription records.
+    // Known limitation: most non-wardrobe collections still validate ownership and
+    // coarse admin roles only. Wardrobe upload-adjacent records are now field-bound
+    // before any wardrobe image upload UI exists.
     match /{document=**} {
       allow read, write: if false;
     }

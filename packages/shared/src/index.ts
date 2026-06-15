@@ -42,8 +42,10 @@ export type {
   UserDeletionRequest,
   UserDeletionRequestStatus,
   UserProfile,
+  WardrobeItemAnalysisStatus,
   WardrobeCategory,
   WardrobeItem,
+  WardrobeItemSource,
   WardrobeVisibility
 } from "./types.ts";
 
@@ -75,6 +77,43 @@ export {
 } from "./privacy.ts";
 
 export {
+  ALLOWED_AVATAR_SOURCE_CONTENT_TYPES,
+  ALLOWED_STYLE_PHOTO_CONTENT_TYPES,
+  ALLOWED_WARDROBE_IMAGE_CONTENT_TYPES,
+  BYTES_PER_MEBIBYTE,
+  MAX_AVATAR_GENERATED_IMAGE_BYTES,
+  MAX_AVATAR_SOURCE_IMAGE_BYTES,
+  MAX_OUTFIT_IMAGE_BYTES,
+  MAX_STYLE_PHOTO_IMAGE_BYTES,
+  MAX_WARDROBE_IMAGE_BYTES,
+  STORAGE_UPLOAD_CATEGORIES,
+  isAllowedAvatarSourceContentType,
+  isAllowedStylePhotoContentType,
+  isAllowedWardrobeImageContentType,
+  isStorageUploadCategory
+} from "./uploadPolicy.ts";
+
+export type {
+  AvatarSourceContentType,
+  StorageUploadCategory,
+  StylePhotoContentType,
+  WardrobeImageContentType
+} from "./uploadPolicy.ts";
+
+export {
+  canCreateAvatar,
+  canRequestWardrobePhotoAnalysis,
+  canUploadWardrobePhoto,
+  canUseLocationWeather
+} from "./consentGates.ts";
+
+export type {
+  ConsentGateInput
+} from "./consentGates.ts";
+
+export {
+  assertSafeStoragePathSegment,
+  isSafeStoragePathSegment,
   storagePaths
 } from "./storagePaths.ts";
 
@@ -87,8 +126,17 @@ export {
   adminAuditLogSchema,
   adminUserSchema,
   avatarProfileSchema,
+  CLIENT_WRITABLE_WARDROBE_ITEM_SOURCES,
+  CLIENT_WRITABLE_WARDROBE_VISIBILITIES,
   hasRequiredFields,
+  isClientWritableWardrobeItem,
+  isClientWritableWardrobeItemSource,
+  isClientWritableWardrobeVisibility,
   isSubscriptionPlanId,
+  isWardrobeCategory,
+  isWardrobeItemAnalysisStatus,
+  isWardrobeItemSource,
+  isWardrobeVisibility,
   outfitRecommendationSchema,
   privacyConsentSchema,
   styleProfileSchema,
@@ -97,6 +145,10 @@ export {
   userProfileSchema,
   userSchema,
   validationSchemas,
+  WARDROBE_CATEGORIES,
+  WARDROBE_ITEM_ANALYSIS_STATUSES,
+  WARDROBE_ITEM_SOURCES,
+  WARDROBE_VISIBILITIES,
   wardrobeItemSchema
 } from "./validation.ts";
 

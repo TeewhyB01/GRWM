@@ -241,12 +241,105 @@ test("admin client cannot update deletion request lifecycle status", async () =>
   );
 });
 
-test("user can read and write their own wardrobeItems", async () => {
+test("valid wardrobe item create succeeds", async () => {
   const db = firestoreFor(testUserIds.userA);
   const wardrobePath = firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id);
 
   await assertSucceeds(db.doc(wardrobePath).set(asDocumentData(sampleWardrobeItem)));
   await assertSucceeds(db.doc(wardrobePath).get());
+});
+
+test("wardrobe item create with userId mismatch is denied", async () => {
+  const mismatchWardrobeItem = createSeedWardrobeItem({
+    id: testDocumentIds.wardrobeItemA,
+    userId: testUserIds.userB
+  });
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(mismatchWardrobeItem.id))
+      .set(asDocumentData(mismatchWardrobeItem))
+  );
+});
+
+test("wardrobe item create without required fields is denied", async () => {
+  const missingPrimaryColour = { ...asDocumentData(sampleWardrobeItem) };
+
+  delete missingPrimaryColour.primaryColour;
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .set(missingPrimaryColour)
+  );
+});
+
+test("wardrobe item create with invalid analysisStatus is denied", async () => {
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .set({
+        ...asDocumentData(sampleWardrobeItem),
+        analysisStatus: "unsafe"
+      })
+  );
+});
+
+test("wardrobe item update cannot change owner userId", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id),
+      data: asDocumentData(sampleWardrobeItem)
+    }
+  ]);
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .update({
+        userId: testUserIds.userB,
+        updatedAtIso: "2026-06-08T00:10:00.000Z"
+      })
+  );
+});
+
+test("wardrobe item update cannot change backend-owned analysis fields", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id),
+      data: asDocumentData(sampleWardrobeItem)
+    }
+  ]);
+
+  await assertFails(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .update({
+        analysisStatus: "completed",
+        analysisConsentVersion: "2026-06-foundation",
+        updatedAtIso: "2026-06-08T00:10:00.000Z"
+      })
+  );
+});
+
+test("valid user-owned non-AI wardrobe item update succeeds", async () => {
+  await seedFirestoreDocuments(testEnv, [
+    {
+      path: firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id),
+      data: asDocumentData(sampleWardrobeItem)
+    }
+  ]);
+
+  await assertSucceeds(
+    firestoreFor(testUserIds.userA)
+      .doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id))
+      .update({
+        name: "Local test jacket updated",
+        primaryColour: "black",
+        colorTags: ["black"],
+        updatedAtIso: "2026-06-08T00:10:00.000Z"
+      })
+  );
 });
 
 test("user cannot read or write another user's wardrobeItems", async () => {
@@ -351,4 +444,6 @@ test("unauthenticated users are denied private Firestore data", async () => {
 
   await assertFails(db.doc(firestorePathBuilders.user(testUserIds.userA)).get());
   await assertFails(db.doc(firestorePathBuilders.userProfile(sampleUserProfile.id)).set(asDocumentData(sampleUserProfile)));
+  await assertFails(db.doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id)).get());
+  await assertFails(db.doc(firestorePathBuilders.wardrobeItem(sampleWardrobeItem.id)).set(asDocumentData(sampleWardrobeItem)));
 });

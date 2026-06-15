@@ -46,4 +46,6 @@ All placeholders must return or emit explicit not-implemented responses and must
 
 ## Next API Boundary
 
-Before wardrobe upload UI is built, define whether the client writes `wardrobeItems` directly under rules, requests a signed/upload session from a trusted Function, or uses a backend coordinator after Storage upload. The selected pattern must be documented and covered by emulator tests before real images are accepted.
+Before wardrobe upload UI is built, define whether the client writes `wardrobeItems` directly under rules, requests a signed/upload session from a trusted Function, or uses a backend coordinator after Storage upload. The rule-level path is now constrained by MIME type, size, metadata, and `wardrobeItems` validation, but the selected lifecycle pattern must still be documented and covered by end-to-end tests before real images are accepted.
+
+Future analysis APIs must read the current consent document and require `wardrobePhotoAnalysis` before queuing any wardrobe photo analysis. Private upload consent is not sufficient for AI analysis.

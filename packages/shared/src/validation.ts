@@ -9,8 +9,31 @@ import type {
   User,
   UserDeletionRequest,
   UserProfile,
+  WardrobeCategory,
   WardrobeItem
 } from "./types";
+import { storagePaths } from "./storagePaths.ts";
+
+export const WARDROBE_CATEGORIES = [
+  "top",
+  "bottom",
+  "dress",
+  "outerwear",
+  "shoes",
+  "accessory",
+  "other"
+] as const satisfies readonly WardrobeCategory[];
+
+export const WARDROBE_VISIBILITIES = ["private", "shared-with-stylist"] as const;
+export const CLIENT_WRITABLE_WARDROBE_VISIBILITIES = ["private"] as const;
+export const WARDROBE_ITEM_SOURCES = ["manual", "import", "future_ai"] as const;
+export const CLIENT_WRITABLE_WARDROBE_ITEM_SOURCES = ["manual", "import"] as const;
+export const WARDROBE_ITEM_ANALYSIS_STATUSES = [
+  "not_requested",
+  "pending",
+  "completed",
+  "failed"
+] as const;
 
 export interface FieldRule<T> {
   field: keyof T;
@@ -64,11 +87,15 @@ export const wardrobeItemSchema = [
   { field: "userId", required: true, kind: "string" },
   { field: "name", required: true, kind: "string" },
   { field: "category", required: true, kind: "string" },
+  { field: "primaryColour", required: true, kind: "string" },
   { field: "colorTags", required: true, kind: "string-array" },
   { field: "seasonTags", required: true, kind: "string-array" },
   { field: "occasionTags", required: true, kind: "string-array" },
   { field: "storagePath", required: true, kind: "string" },
   { field: "visibility", required: true, kind: "string" },
+  { field: "source", required: true, kind: "string" },
+  { field: "analysisStatus", required: true, kind: "string" },
+  { field: "analysisConsentVersion", required: true, kind: "string" },
   { field: "createdAtIso", required: true, kind: "string" },
   { field: "updatedAtIso", required: true, kind: "string" }
 ] satisfies ValidationSchema<WardrobeItem>;
@@ -188,4 +215,52 @@ export function hasRequiredFields<T extends object>(
 
 export function isSubscriptionPlanId(value: string): value is SubscriptionPlan["id"] {
   return value === "free" || value === "premium";
+}
+
+export function isWardrobeCategory(value: string): value is WardrobeItem["category"] {
+  return WARDROBE_CATEGORIES.includes(value as WardrobeItem["category"]);
+}
+
+export function isWardrobeVisibility(value: string): value is WardrobeItem["visibility"] {
+  return WARDROBE_VISIBILITIES.includes(value as WardrobeItem["visibility"]);
+}
+
+export function isClientWritableWardrobeVisibility(value: string): boolean {
+  return CLIENT_WRITABLE_WARDROBE_VISIBILITIES.includes(
+    value as (typeof CLIENT_WRITABLE_WARDROBE_VISIBILITIES)[number]
+  );
+}
+
+export function isWardrobeItemSource(value: string): value is WardrobeItem["source"] {
+  return WARDROBE_ITEM_SOURCES.includes(value as WardrobeItem["source"]);
+}
+
+export function isClientWritableWardrobeItemSource(value: string): boolean {
+  return CLIENT_WRITABLE_WARDROBE_ITEM_SOURCES.includes(
+    value as (typeof CLIENT_WRITABLE_WARDROBE_ITEM_SOURCES)[number]
+  );
+}
+
+export function isWardrobeItemAnalysisStatus(
+  value: string
+): value is WardrobeItem["analysisStatus"] {
+  return WARDROBE_ITEM_ANALYSIS_STATUSES.includes(value as WardrobeItem["analysisStatus"]);
+}
+
+export function isClientWritableWardrobeItem(value: WardrobeItem): boolean {
+  return (
+    hasRequiredFields(value, wardrobeItemSchema) &&
+    value.id.length > 0 &&
+    value.userId.length > 0 &&
+    value.name.length > 0 &&
+    isWardrobeCategory(value.category) &&
+    value.primaryColour.length > 0 &&
+    value.storagePath === storagePaths.wardrobeOriginal(value.userId, value.id).path &&
+    isClientWritableWardrobeVisibility(value.visibility) &&
+    isClientWritableWardrobeItemSource(value.source) &&
+    value.analysisStatus === "not_requested" &&
+    value.analysisConsentVersion === "" &&
+    value.createdAtIso.length > 0 &&
+    value.updatedAtIso.length > 0
+  );
 }
